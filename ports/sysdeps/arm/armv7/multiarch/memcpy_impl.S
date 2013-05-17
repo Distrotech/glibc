@@ -33,6 +33,7 @@
 #define NO_THUMB
 #endif
 #include <sysdep.h>
+#include <arm-features.h>
 
 	.syntax unified
 	/* This implementation requires ARM state.  */
@@ -72,6 +73,74 @@
 #define tmp1	r3
 #define dst	ip
 #define tmp2	r10
+
+/* Dispatch to one or more of the following instruction pairs to copy
+   words.  The pairs immediately follow the use of this macro; each pair
+   is preceded by ".p2align ARM_BX_ALIGN_LOG2".  MAX_BYTES is the
+   number of bytes that the full sequence copies.  LOG2_WORDS_PER_INSN
+   is 0 if each pair copies one word, 1 if two.  The register TMP1 holds
+   the total number of bytes to be copied by this dispatched sequence.
+   This macro clobbers TMP1.  */
+.macro dispatch max_bytes, log2_words_per_insn
+#ifndef ARM_ALWAYS_BX
+# if ARM_BX_ALIGN_LOG2 != 2
+#  error case not handled
+# endif
+	rsb	tmp1, tmp1, #((\max_bytes / 4 * INSN_SIZE) \
+			      - (PC_OFS >> \log2_words_per_insn) \
+			      + (INSN_SIZE >> \log2_words_per_insn))
+	add	pc, pc, tmp1, lsl #(1 - \log2_words_per_insn)
+#else
+# if ARM_BX_ALIGN_LOG2 < 3
+#  error case not handled
+# endif
+	rsb	tmp1, tmp1, #(\max_bytes / 4 * INSN_SIZE)
+0:	add	tmp1, pc, tmp1, lsl #(ARM_BX_ALIGN_LOG2 - 2)
+	bx	tmp1
+	.p2align ARM_BX_ALIGN_LOG2
+1:
+#endif
+.endm
+
+#ifndef ARM_ALWAYS_BX
+# if ARM_BX_ALIGN_LOG2 != 2
+#  error case not handled
+# endif
+	.macro dispatch_7_dword
+	rsb	tmp1, tmp1, #((7 * 8) - PC_OFS + INSN_SIZE)
+	add	pc, pc, tmp1
+	dispatch_step 7
+	dispatch_step 6
+	dispatch_step 5
+	dispatch_step 4
+	dispatch_step 3
+	dispatch_step 2
+	dispatch_step 1
+	.purgem dispatch_step
+	.endm
+	.macro dispatch_15_word
+	rsb	tmp1, tmp1, #((15 * 4) - PC_OFS/2 + INSN_SIZE/2)
+	add	pc, pc, tmp1, lsl #1
+	dispatch_step 15
+	dispatch_step 14
+	dispatch_step 13
+	dispatch_step 12
+	dispatch_step 11
+	dispatch_step 10
+	dispatch_step 9
+	dispatch_step 8
+	dispatch_step 7
+	dispatch_step 6
+	dispatch_step 5
+	dispatch_step 4
+	dispatch_step 3
+	dispatch_step 2
+	dispatch_step 1
+	.purgem dispatch_step
+	.endm
+#else
+# error unfinished
+#endif
 
 #ifndef USE_NEON
 /* For bulk copies using GP registers.  */
@@ -141,22 +210,13 @@ ENTRY(memcpy)
 .Ltail63unaligned:
 #ifdef USE_NEON
 	and	tmp1, count, #0x38
-	rsb	tmp1, tmp1, #(56 - PC_OFS + INSN_SIZE)
-	add	pc, pc, tmp1
-	vld1.8	{d0}, [src]!	/* 14 words to go.  */
+	.macro dispatch_step i
+	sfi_breg src, \
+	vld1.8	{d0}, [src]!
+	sfi_breg dst, \
 	vst1.8	{d0}, [dst]!
-	vld1.8	{d0}, [src]!	/* 12 words to go.  */
-	vst1.8	{d0}, [dst]!
-	vld1.8	{d0}, [src]!	/* 10 words to go.  */
-	vst1.8	{d0}, [dst]!
-	vld1.8	{d0}, [src]!	/* 8 words to go.  */
-	vst1.8	{d0}, [dst]!
-	vld1.8	{d0}, [src]!	/* 6 words to go.  */
-	vst1.8	{d0}, [dst]!
-	vld1.8	{d0}, [src]!	/* 4 words to go.  */
-	vst1.8	{d0}, [dst]!
-	vld1.8	{d0}, [src]!	/* 2 words to go.  */
-	vst1.8	{d0}, [dst]!
+	.endm
+	dispatch_7_dword
 
 	tst	count, #4
 	ldrne	tmp1, [src], #4
@@ -167,47 +227,13 @@ ENTRY(memcpy)
 	and	tmp1, count, #0x3c
 	add	dst, dst, tmp1
 	add	src, src, tmp1
-	rsb	tmp1, tmp1, #(60 - PC_OFS/2 + INSN_SIZE/2)
 	/* Jump directly into the sequence below at the correct offset.  */
-	add	pc, pc, tmp1, lsl #1
-
-	ldr	tmp1, [src, #-60]	/* 15 words to go.  */
-	str	tmp1, [dst, #-60]
-
-	ldr	tmp1, [src, #-56]	/* 14 words to go.  */
-	str	tmp1, [dst, #-56]
-	ldr	tmp1, [src, #-52]
-	str	tmp1, [dst, #-52]
-
-	ldr	tmp1, [src, #-48]	/* 12 words to go.  */
-	str	tmp1, [dst, #-48]
-	ldr	tmp1, [src, #-44]
-	str	tmp1, [dst, #-44]
-
-	ldr	tmp1, [src, #-40]	/* 10 words to go.  */
-	str	tmp1, [dst, #-40]
-	ldr	tmp1, [src, #-36]
-	str	tmp1, [dst, #-36]
-
-	ldr	tmp1, [src, #-32]	/* 8 words to go.  */
-	str	tmp1, [dst, #-32]
-	ldr	tmp1, [src, #-28]
-	str	tmp1, [dst, #-28]
-
-	ldr	tmp1, [src, #-24]	/* 6 words to go.  */
-	str	tmp1, [dst, #-24]
-	ldr	tmp1, [src, #-20]
-	str	tmp1, [dst, #-20]
-
-	ldr	tmp1, [src, #-16]	/* 4 words to go.  */
-	str	tmp1, [dst, #-16]
-	ldr	tmp1, [src, #-12]
-	str	tmp1, [dst, #-12]
-
-	ldr	tmp1, [src, #-8]	/* 2 words to go.  */
-	str	tmp1, [dst, #-8]
-	ldr	tmp1, [src, #-4]
-	str	tmp1, [dst, #-4]
+	.macro dispatch_step i
+	sfi_breg src, \
+	ldr	tmp1, [src, #-(\i * 4)]
+	str	tmp1, [dst, #-(\i * 4)]
+	.endm
+	dispatch_15_word
 #endif
 
 	lsls	count, count, #31
@@ -287,23 +313,13 @@ ENTRY(memcpy)
 	and	tmp1, tmp2, #0x38
 	add	dst, dst, tmp1
 	add	src, src, tmp1
-	rsb	tmp1, tmp1, #(56 - PC_OFS + INSN_SIZE)
-	add	pc, pc, tmp1
-
-	vldr	d0, [src, #-56]	/* 14 words to go.  */
-	vstr	d0, [dst, #-56]
-	vldr	d0, [src, #-48]	/* 12 words to go.  */
-	vstr	d0, [dst, #-48]
-	vldr	d0, [src, #-40]	/* 10 words to go.  */
-	vstr	d0, [dst, #-40]
-	vldr	d0, [src, #-32]	/* 8 words to go.  */
-	vstr	d0, [dst, #-32]
-	vldr	d0, [src, #-24]	/* 6 words to go.  */
-	vstr	d0, [dst, #-24]
-	vldr	d0, [src, #-16]	/* 4 words to go.  */
-	vstr	d0, [dst, #-16]
-	vldr	d0, [src, #-8]	/* 2 words to go.  */
-	vstr	d0, [dst, #-8]
+	.macro dispatch_step i
+	sfi_breg src, \
+	vldr	d0, [src, #-(\i * 8)]
+	sfi_breg dst, \
+	vstr	d0, [dst, #-(\i * 8)]
+	.endm
+	dispatch_7_dword
 #else
 	sub	src, src, #8
 	sub	dst, dst, #8
@@ -349,24 +365,15 @@ ENTRY(memcpy)
 	and	tmp1, tmp2, #0x38
 	add	dst, dst, tmp1
 	add	src, src, tmp1
-	rsb	tmp1, tmp1, #(56 - PC_OFS + INSN_SIZE)
-	add	pc, pc, tmp1
-	ldrd	A_l, A_h, [src, #-56]	/* 14 words to go.  */
-	strd	A_l, A_h, [dst, #-56]
-	ldrd	A_l, A_h, [src, #-48]	/* 12 words to go.  */
-	strd	A_l, A_h, [dst, #-48]
-	ldrd	A_l, A_h, [src, #-40]	/* 10 words to go.  */
-	strd	A_l, A_h, [dst, #-40]
-	ldrd	A_l, A_h, [src, #-32]	/* 8 words to go.  */
-	strd	A_l, A_h, [dst, #-32]
-	ldrd	A_l, A_h, [src, #-24]	/* 6 words to go.  */
-	strd	A_l, A_h, [dst, #-24]
-	ldrd	A_l, A_h, [src, #-16]	/* 4 words to go.  */
-	strd	A_l, A_h, [dst, #-16]
-	ldrd	A_l, A_h, [src, #-8]	/* 2 words to go.  */
-	strd	A_l, A_h, [dst, #-8]
-
+	.macro dispatch_step i
+	sfi_breg src, \
+	ldrd	A_l, A_h, [src, #-(\i * 8)]
+	sfi_breg dst, \
+	strd	A_l, A_h, [dst, #-(\i * 8)]
+	.endm
+	dispatch_7_dword
 #endif
+
 	tst	tmp2, #4
 	ldrne	tmp1, [src], #4
 	strne	tmp1, [dst], #4
