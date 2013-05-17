@@ -2662,6 +2662,42 @@ pointer @var{ap}.
 @c case of cancellation.  This doesn't make it unsafe, but cancelling it
 @c may leak memory.  The unguarded use of __printf_function_table is
 @c also of concern for all callers.
+@c _itoa ok
+@c   _udiv_qrnnd_preinv ok
+@c group_number ok
+@c _i18n_number_rewrite
+@c   __wctrans ok
+@c   __towctrans glocale
+@c   __wcrtomb ok? dup below
+@c   outdigit_value ok
+@c   outdigitwc_value ok
+@c outchar ok
+@c outstring ok
+@c PAD ok
+@c __printf_fp glocale memleak
+@c __printf_fphex glocale
+@c __readonly_area
+@c   [GNU/Linux] fopen, strtoul, free
+@c __strerror_r ok if no translation, check otherwise
+@c __btowc ? gconv-modules
+@c __wcrtomb ok (not using internal state) gconv-modules
+@c ARGCHECK
+@c UNBUFFERED_P (tested before taking the stream lock)
+@c buffered_vfprintf ok
+@c __find_spec(wc|mb)
+@c read_int
+@c __libc_use_alloca
+@c process_arg
+@c process_string_arg
+@c extend_alloca
+@c __parse_one_spec(wc|mb)
+@c *__printf_arginfo_table unguarded
+@c __printf_va_arg_table-> unguarded
+@c *__printf_function_table unguarded
+@c done_add
+@c printf_unknown
+@c   outchar
+@c   _itoa_word
 This is the equivalent of @code{fprintf} with the variable argument list
 specified directly as for @code{vprintf}.
 @end deftypefun

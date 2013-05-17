@@ -2443,6 +2443,32 @@ as well.
 @safety{@mtsafe{glocale}@assafe{glocale}@acsafe{}}
 @c Besides the unsafe-but-ruled-safe locale uses, this uses a lot of
 @c mpn, but it's all safe.
+@c
+@c round_and_return
+@c   get_rounding_mode ok
+@c   mpn_add_1 ok
+@c   mpn_rshift ok
+@c   MPN_ZERO ok
+@c   MPN2FLOAT -> mpn_construct_(float|double|long_double) ok
+@c str_to_mpn
+@c   mpn_mul_1 -> umul_ppmm ok
+@c   mpn_add_1 ok
+@c mpn_lshift_1 -> mpn_lshift ok
+@c STRTOF_INTERNAL
+@c   MPN_VAR ok
+@c   SET_MANTISSA ok
+@c   STRNCASECMP ok, wide and narrow
+@c   round_and_return ok
+@c   mpn_mul ok
+@c     mpn_addmul_1 ok
+@c     ... mpn_sub
+@c   mpn_lshift ok
+@c   udiv_qrnnd ok
+@c   count_leading_zeros ok
+@c   add_ssaaaa ok
+@c   sub_ddmmss ok
+@c   umul_ppmm ok
+@c   mpn_submul_1 ok
 The @code{strtod} (``string-to-double'') function converts the initial
 part of @var{string} to a floating-point number, which is returned as a
 value of type @code{double}.

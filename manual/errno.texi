@@ -1309,6 +1309,7 @@ The function @code{strerror} is declared in @file{string.h}.
 @comment string.h
 @comment GNU
 @deftypefun {char *} strerror_r (int @var{errnum}, char *@var{buf}, size_t @var{n})
+@c Does this attempt to translate the message?  Clearly safe otherwise.
 The @code{strerror_r} function works like @code{strerror} but instead of
 returning the error message in a statically allocated buffer shared by
 all threads in the process, it returns a private copy for the

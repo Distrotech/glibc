@@ -559,6 +559,8 @@ that is beyond the range @math{0} to @math{127}.
 @comment wchar.h
 @comment ISO
 @deftypefun wint_t btowc (int @var{c})
+@c Calls btowc_fct or __fct; reads from locale, and from the
+@c get_gconv_fcts result multiple times.
 The @code{btowc} function (``byte to wide character'') converts a valid
 single byte character @var{c} in the initial shift state into the wide
 character equivalent using the conversion rules from the currently
@@ -811,6 +813,50 @@ doing the work twice.
 @comment wchar.h
 @comment ISO
 @deftypefun size_t wcrtomb (char *restrict @var{s}, wchar_t @var{wc}, mbstate_t *restrict @var{ps})
+@safety{@mtunsafe{unguarded-internal-state, gconv-modules}@asunsafe{partial-changes}@acunsafe{partial-changes, lockleak, memleak}}
+@c wcrtomb uses a static, non-thread-local unguarded state variable when
+@c PS is NULL.  When a state is passed in, and it's not used
+@c concurrently in other threads, this function behaves safely as long
+@c as gconv modules don't bring MT safety issues of their own.
+@c Attempting to load gconv modules or to build conversion chains in
+@c signal handlers may encounter gconv databases or caches in a
+@c partially-updated state, and asynchronous cancellation may leave them
+@c in such states, besides leaking the lock that guards them.
+@c get_gconv_fcts ok
+@c    wcsmbs_load_conv ok
+@c      norm_add_slashes ok
+@c      wcsmbs_getfct ok
+@c        gconv_find_transform ok
+@c          gconv_read_conf (libc_once)
+@c          gconv_lookup_cache ok
+@c            find_module_idx ok
+@c            find_module ok
+@c              gconv_find_shlib (ok)
+@c              ->init_fct (assumed ok)
+@c            gconv_get_builtin_trans ok
+@c            gconv_release_step ok
+@c          do_lookup_alias ok
+@c          find_derivation ok
+@c            derivation_lookup ok
+@c            increment_counter ok
+@c              gconv_find_shlib ok
+@c              step->init_fct (assumed ok)
+@c            gen_steps ok
+@c              gconv_find_shlib ok
+@c                dlopen (presumed ok)
+@c                dlsym (presumed ok)
+@c              step->init_fct (assumed ok)
+@c              step->end_fct (assumed ok)
+@c              gconv_get_builtin_trans ok
+@c              gconv_release_step ok
+@c            add_derivation ok
+@c      gconv_close_transform ok
+@c        gconv_release_step ok
+@c          step->end_fct (assumed ok)
+@c          gconv_release_shlib ok
+@c            dlclose (presumed ok)
+@c        gconv_release_cache ok
+@c  ->tomb->__fct (assumed ok)
 The @code{wcrtomb} function (``wide character restartable to
 multibyte'') converts a single wide character into a multibyte string
 corresponding to that wide character.
