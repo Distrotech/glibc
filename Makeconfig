@@ -534,7 +534,7 @@ ifneq ($(have-cc-with-libunwind),yes)
 else
   libunwind = -lunwind
 endif
-libgcc_eh := -Wl,--as-needed -lgcc_s $(libunwind) -Wl,--no-as-needed
+libgcc_eh := -Wl,--as-needed -lgcc_eh $(libunwind) -Wl,--no-as-needed
 gnulib-arch =
 gnulib = -lgcc $(gnulib-arch)
 gnulib-tests := -lgcc $(libgcc_eh)
