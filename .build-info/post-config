@@ -1,0 +1,8 @@
+#!/bin/bash
+
+if [ ! -d misc/bits/ ];then
+  mkdir -p misc/bits/
+fi;
+touch misc/bits/syscall.d
+make -C ../misc objdir=$(pwd) misc/bits/syscall.h
+echo -n > misc/bits/syscall.d
