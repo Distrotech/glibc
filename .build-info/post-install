@@ -1,0 +1,80 @@
+#!/bin/bash
+
+NARCH=`uname -m`
+
+if [ "${NARCH}" == "${1}" ];then
+  make DESTDIR=${3} localedata/install-locales
+ else
+  if [ ! -d ${3}/usr/lib64 ];then
+    ln -s ${B_LIBDIRS} ${3}/usr/lib64
+  fi;
+  if [ ! -d ${3}/usr/${B_LIBDIRS}/locale ];then
+    mkdir -p ${3}/usr/${B_LIBDIRS}/locale
+  fi;
+  make DESTDIR=${3} LOCALEDEF=/usr/bin/localedef localedata/install-locales
+  if [ -h ${3}/usr/lib64 ];then
+    rm ${3}/usr/lib64
+  fi;
+fi;
+
+case ${1} in
+  x86_64)
+    if [ -d /build/x86_32 ];then
+      /usr/bin/rsync -avP ${3}/lib64 /build/x86_32/
+      /usr/bin/rsync -avP ${3}/usr/lib64 /build/x86_32/usr/
+    fi;
+    /usr/bin/rsync -avP ${3}/lib64 /
+    /usr/bin/rsync -avP ${3}/usr/lib64 /usr/
+  ;;
+  x86_32)
+    if [ -d /build/x86_64 ];then
+      /usr/bin/rsync -avP ${3}/libx32 /build/x86_64/
+      /usr/bin/rsync -avP ${3}/usr/libx32 /build/x86_64/usr/
+    fi;
+    /usr/bin/rsync -avP ${3}/libx32 /
+    /usr/bin/rsync -avP ${3}/usr/libx32 /usr/
+  ;;
+  i686)
+    if [ -d /build/x86_32 ];then
+      /usr/bin/rsync -avP ${3}/lib /build/x86_32/
+      /usr/bin/rsync -avP ${3}/usr/lib /build/x86_32/usr/
+    fi;
+    if [ -d /build/x86_64 ];then
+      /usr/bin/rsync -avP ${3}/lib /build/x86_64/
+      /usr/bin/rsync -avP ${3}/usr/lib /build/x86_64/usr/
+    fi;
+    /usr/bin/rsync -avP ${3}/lib /
+    /usr/bin/rsync -avP ${3}/usr/lib /usr/
+  ;;
+esac;
+
+
+#Install no longer installed headers 
+#We use tirpc / portablexdr now
+cd ${2}
+if [ ! -d ${3}/usr/include/rpc ];then
+  mkdir ${3}/usr/include/rpc
+fi;
+if [ ! -d ${3}/usr/include/rpcsvc ];then
+  mkdir ${3}/usr/include/rpcsvc
+fi;
+cp sunrpc/rpc/*.h ${3}/usr/include/rpc
+cp sunrpc/rpcsvc/*.h nis/rpcsvc/*.h ${3}/usr/include/rpcsvc
+
+#Setup ld.so.conf
+mkdir -p ${3}/etc/ld.so.conf.d
+echo "include /etc/ld.so.conf.d/*.conf" > ${3}/etc/ld.so.conf
+
+(cat <<EOF
+/lib64
+/usr/lib64 
+/lib32x
+/usr/lib32x 
+/lib
+/usr/lib 
+EOF
+) > ${3}/etc/ld.so.conf.d/glibc.conf
+
+if [ ! -e ${3}/usr/include/gnu/stubs-x32.h  ] && [ -e ${3}/usr/include/gnu/stubs-64.h ];then
+  ln -s stubs-64.h ${3}/usr/include/gnu/stubs-x32.h
+fi;
