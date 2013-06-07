@@ -82,7 +82,7 @@ endif
 include ../Rules
 
 ifeq (yes,$(have-selinux))
-LDLIBS-makedb		:= -lselinux
+LDLIBS-makedb		:= -lselinux -lsepol -lpcre
 endif
 
 # Depend on libc.so so a DT_NEEDED is generated in the shared objects.
