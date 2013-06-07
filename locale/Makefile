@@ -72,9 +72,14 @@ $(objpfx)localedef: $(localedef-aux:%=$(objpfx)%.o)
 $(objpfx)locale: $(locale-modules:%=$(objpfx)%.o)
 $(objpfx)localedef $(objpfx)locale: $(lib-modules:%=$(objpfx)%.o)
 
+ifneq (no,$(PERL))
 C-translit.h: C-translit.h.in gen-translit.pl
 	$(PERL) gen-translit.pl < $< > $@.tmp
 	mv -f $@.tmp $@
+else
+C-translit.h:
+	touch $@
+endif
 
 # The path to the compiled binary locale archive or compiled locales,
 # along with the parent path to the source locales and source
