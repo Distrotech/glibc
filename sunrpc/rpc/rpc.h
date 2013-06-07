@@ -68,7 +68,7 @@ __BEGIN_DECLS
 
 /* Global variables, protected for multi-threaded applications.  */
 extern fd_set *__rpc_thread_svc_fdset (void) __attribute__ ((__const__));
-#define svc_fdset (*__rpc_thread_svc_fdset ())
+/*#define svc_fdset (*__rpc_thread_svc_fdset ())*/
 
 extern struct rpc_createerr *__rpc_thread_createerr (void)
      __attribute__ ((__const__));
