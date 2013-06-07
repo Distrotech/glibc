@@ -164,7 +164,7 @@ $(cross-rpcgen-objs): $(objpfx)cross-%.o: %.c $(before-compile)
 		$(OUTPUT_OPTION) $(native-compile-mkdep-flags) -c
 
 $(objpfx)cross-rpcgen: $(cross-rpcgen-objs)
-	$(BUILD_CC) $^ $(BUILD_LDFLAGS) -o $@
+	$(BUILD_CC) $^ $(BUILD_LDFLAGS) -static -o $@
 
 # This makes sure -DNOT_IN_libc is passed for all these modules.
 cpp-srcs-left := $(rpcgen-objs:.o=.c)
