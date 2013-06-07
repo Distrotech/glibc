@@ -92,7 +92,7 @@ endif
 include ../Rules
 
 ifeq (yes,$(have-selinux))
-LDLIBS-makedb		:= -lselinux
+LDLIBS-makedb		:= -lselinux -lsepol -lpcre
 endif
 
 libnss-libc = $(common-objpfx)linkobj/libc.so
