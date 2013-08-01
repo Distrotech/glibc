@@ -1,3 +1,7 @@
+2013-08-01  Roland McGrath  <roland@hack.frob.com>
+
+	* io/lxstat64.c: Just call __xstat64, for parity with stub __lxstat.
+
 2013-07-30  David S. Miller  <davem@davemloft.net>
 
 	* po/fr.po: Update French translation from translation project.
