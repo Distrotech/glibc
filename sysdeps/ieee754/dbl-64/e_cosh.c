@@ -33,6 +33,7 @@
 
 #include <math.h>
 #include <math_private.h>
+#include <stap-probe.h>
 
 static const double one = 1.0, half = 0.5, huge = 1.0e300;
 
@@ -55,11 +56,13 @@ __ieee754_cosh (double x)
 	{
 	  t = __expm1 (fabs (x));
 	  w = one + t;
+	  LIBC_PROBE (cosh_probe, 2, 1, &x);
 	  if (ix < 0x3c800000)
 	    return w;                                   /* cosh(tiny) = 1 */
 	  return one + (t * t) / (w + w);
 	}
 
+	  LIBC_PROBE (cosh_probe, 2, 2, &x);
       /* |x| in [0.5*ln2,22], return (exp(|x|)+1/exp(|x|)/2; */
       t = __ieee754_exp (fabs (x));
       return half * t + half / t;
@@ -67,7 +70,10 @@ __ieee754_cosh (double x)
 
   /* |x| in [22, log(maxdouble)] return half*exp(|x|) */
   if (ix < 0x40862e42)
+  {
+	  LIBC_PROBE (cosh_probe, 2, 3, &x);
     return half * __ieee754_exp (fabs (x));
+    }
 
   /* |x| in [log(maxdouble), overflowthresold] */
   GET_LOW_WORD (lx, x);
@@ -75,6 +81,7 @@ __ieee754_cosh (double x)
     {
       w = __ieee754_exp (half * fabs (x));
       t = half * w;
+	  LIBC_PROBE (cosh_probe, 2, 4, &x);
       return t * w;
     }
 

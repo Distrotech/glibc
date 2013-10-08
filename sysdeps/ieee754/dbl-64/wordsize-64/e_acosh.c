@@ -26,6 +26,7 @@
 
 #include <math.h>
 #include <math_private.h>
+#include <stap-probe.h>
 
 static const double
 one	= 1.0,
@@ -46,17 +47,22 @@ __ieee754_acosh (double x)
 	    /* x is inf of NaN */
 	    return x + x;
 	  else
+	  {
+	    LIBC_PROBE (acosh_probe, 2, 1, &x);
 	    return __ieee754_log (x) + ln2;/* acosh(huge)=log(2x) */
+	    }
 	}
 
       /* 2**28 > x > 2 */
       double t = x * x;
+	    LIBC_PROBE (acosh_probe, 2, 2, &x);
       return __ieee754_log (2.0 * x - one / (x + __ieee754_sqrt (t - one)));
     }
   else if (__builtin_expect (hx > INT64_C (0x3ff0000000000000), 1))
     {
       /* 1<x<2 */
       double t = x - one;
+	    LIBC_PROBE (acosh_probe, 2, 3, &x);
       return __log1p (t + __ieee754_sqrt (2.0 * t + t * t));
     }
   else if (__builtin_expect (hx == INT64_C (0x3ff0000000000000), 1))

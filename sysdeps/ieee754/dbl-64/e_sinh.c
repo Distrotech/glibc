@@ -34,6 +34,7 @@ static char rcsid[] = "$NetBSD: e_sinh.c,v 1.7 1995/05/10 20:46:13 jtc Exp $";
 
 #include <math.h>
 #include <math_private.h>
+#include <stap-probe.h>
 
 static const double one = 1.0, shuge = 1.0e307;
 
@@ -63,6 +64,7 @@ __ieee754_sinh (double x)
 	  return x;
       /* sinh(tiny) = tiny with inexact */
       t = __expm1 (fabs (x));
+	  LIBC_PROBE (sinh_probe, 2, 1, &x);
       if (ix < 0x3ff00000)
 	return h * (2.0 * t - t * t / (t + one));
       return h * (t + t / (t + one));
@@ -70,12 +72,16 @@ __ieee754_sinh (double x)
 
   /* |x| in [22, log(maxdouble)] return 0.5*exp(|x|) */
   if (ix < 0x40862e42)
+  {
+	  LIBC_PROBE (sinh_probe, 2, 2, &x);
     return h * __ieee754_exp (fabs (x));
+    }
 
   /* |x| in [log(maxdouble), overflowthresold] */
   GET_LOW_WORD (lx, x);
   if (ix < 0x408633ce || ((ix == 0x408633ce) && (lx <= (u_int32_t) 0x8fb9f87d)))
     {
+	  LIBC_PROBE (sinh_probe, 2, 3, &x);
       w = __ieee754_exp (0.5 * fabs (x));
       t = h * w;
       return t * w;

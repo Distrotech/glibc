@@ -40,6 +40,7 @@ static char rcsid[] = "$NetBSD: s_tanh.c,v 1.7 1995/05/10 20:48:22 jtc Exp $";
 
 #include <math.h>
 #include <math_private.h>
+#include <stap-probe.h>
 
 static const double one = 1.0, two = 2.0, tiny = 1.0e-300;
 
@@ -73,11 +74,13 @@ __tanh (double x)
 	{
 	  t = __expm1 (two * fabs (x));
 	  z = one - two / (t + two);
+	  LIBC_PROBE (tanh_probe, 2, 1, &x);
 	}
       else
 	{
 	  t = __expm1 (-two * fabs (x));
 	  z = -t / (t + two);
+	  LIBC_PROBE (tanh_probe, 2, 2, &x);
 	}
       /* |x| > 22, return +-1 */
     }

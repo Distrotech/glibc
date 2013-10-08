@@ -97,7 +97,10 @@ atan (double x)
 	      yy *= x * v;
 
 	      if ((y = x + (yy - U1 * x)) == x + (yy + U1 * x))
+	      {
+	        LIBC_PROBE (atan_probe, 2, 1, &x);
 		return y;
+		}
 
 	      EMULV (x, x, v, vv, t1, t2, t3, t4, t5);	/* v+vv=x^2 */
 
@@ -119,7 +122,10 @@ atan (double x)
 		    t8);
 	      ADD2 (x, 0, s2, ss2, s1, ss1, t1, t2);
 	      if ((y = s1 + (ss1 - U5 * s1)) == s1 + (ss1 + U5 * s1))
+	      {
+	        LIBC_PROBE (atan_probe, 2, 2, &x);
 		return y;
+		}
 
 	      return atanMp (x, pr);
 	    }
@@ -151,7 +157,10 @@ atan (double x)
 		u2 = U24;
 	    }			/* 3/4 <= u <= 1  */
 	  if ((y = t1 + (yy - u2 * t1)) == t1 + (yy + u2 * t1))
+	  {
+	        LIBC_PROBE (atan_probe, 2, 3, &x);
 	    return __signArctan (x, y);
+	    }
 
 	  z = u - hij[i][0].d;
 
@@ -171,7 +180,10 @@ atan (double x)
 	  MUL2 (z, 0, s2, ss2, s1, ss1, t1, t2, t3, t4, t5, t6, t7, t8);
 	  ADD2 (hij[i][1].d, hij[i][2].d, s1, ss1, s2, ss2, t1, t2);
 	  if ((y = s2 + (ss2 - U6 * s2)) == s2 + (ss2 + U6 * s2))
+	  {
+	        LIBC_PROBE (atan_probe, 2, 4, &x);
 	    return __signArctan (x, y);
+	    }
 
 	  return atanMp (x, pr);
 	}
@@ -199,7 +211,10 @@ atan (double x)
 	  else
 	    u3 = U32;           /* w >= 1/2 */
 	  if ((y = t1 + (yy - u3)) == t1 + (yy + u3))
+	  {
+	        LIBC_PROBE (atan_probe, 2, 5, &x);
 	    return __signArctan (x, y);
+	    }
 
 	  DIV2 (1, 0, u, 0, w, ww, t1, t2, t3, t4, t5, t6, t7, t8, t9,
 		t10);
@@ -223,7 +238,10 @@ atan (double x)
 	  ADD2 (hij[i][1].d, hij[i][2].d, s1, ss1, s2, ss2, t1, t2);
 	  SUB2 (HPI, HPI1, s2, ss2, s1, ss1, t1, t2);
 	  if ((y = s1 + (ss1 - U7)) == s1 + (ss1 + U7))
+	  {
+	        LIBC_PROBE (atan_probe, 2, 6, &x);
 	    return __signArctan (x, y);
+	    }
 
 	  return atanMp (x, pr);
 	}
@@ -246,7 +264,10 @@ atan (double x)
 	      ESUB (HPI, w, t3, cor);
 	      yy = ((HPI1 + cor) - ww) - yy;
 	      if ((y = t3 + (yy - U4)) == t3 + (yy + U4))
+	      {
+	        LIBC_PROBE (atan_probe, 2, 7, &x);
 		return __signArctan (x, y);
+		}
 
 	      DIV2 (1, 0, u, 0, w, ww, t1, t2, t3, t4, t5, t6, t7, t8,
 		    t9, t10);
@@ -271,7 +292,10 @@ atan (double x)
 	      SUB2 (HPI, HPI1, s1, ss1, s2, ss2, t1, t2);
 
 	      if ((y = s2 + (ss2 - U8)) == s2 + (ss2 + U8))
+	      {
+	        LIBC_PROBE (atan_probe, 2, 8, &x);
 		return __signArctan (x, y);
+		}
 
 	      return atanMp (x, pr);
 	    }

@@ -303,7 +303,7 @@ __sin (double x)
       t = POLYNOMIAL (xx) * (xx * x);
       res = x + t;
       cor = (x - res) + t;
-      retval = (res == res + 1.07 * cor) ? res : slow (x);
+      if (res == res + 1.07 * cor) { LIBC_PROBE (sin_probe, 2, 1, &x); retval = res; } else retval = slow (x);
     }				/*  else  if (k < 0x3fd00000)    */
 /*---------------------------- 0.25<|x|< 0.855469---------------------- */
   else if (k < 0x3feb6000)
@@ -322,7 +322,7 @@ __sin (double x)
       cor = (ssn + s * ccs - sn * c) + cs * s;
       res = sn + cor;
       cor = (sn - res) + cor;
-      retval = (res == res + 1.096 * cor) ? res : slow1 (x);
+      if (res == res + 1.096 * cor) { LIBC_PROBE (sin_probe, 2, 2, &x); retval = res; } else retval = slow1 (x);
     }				/*   else  if (k < 0x3feb6000)    */
 
 /*----------------------- 0.855469  <|x|<2.426265  ----------------------*/
@@ -341,7 +341,7 @@ __sin (double x)
 	  y = (-hp1) - (y + (u.x - big));
 	}
       res = do_cos (u, y, &cor);
-      retval = (res == res + 1.020 * cor) ? ((m > 0) ? res : -res) : slow2 (x);
+      if (res == res + 1.020 * cor) { LIBC_PROBE (sin_probe, 2, 3, &x); retval = ((m > 0) ? res : -res); } else retval = slow2 (x);
     }				/*   else  if (k < 0x400368fd)    */
 
 /*-------------------------- 2.426265<|x|< 105414350 ----------------------*/
@@ -372,7 +372,7 @@ __sin (double x)
 	      /* Taylor series.  */
 	      res = TAYLOR_SIN (xx, a, da, cor);
 	      cor = (cor > 0) ? 1.02 * cor + eps : 1.02 * cor - eps;
-	      retval = (res == res + cor) ? res : sloww (a, da, x);
+	      if (res == res + cor) { LIBC_PROBE (sin_probe, 2, 4, &x); retval = res; } else retval = sloww (a, da, x);
 	    }
 	  else
 	    {
@@ -388,8 +388,7 @@ __sin (double x)
 	      y = a - (u.x - big);
 	      res = do_sin (u, y, da, &cor);
 	      cor = (cor > 0) ? 1.035 * cor + eps : 1.035 * cor - eps;
-	      retval = ((res == res + cor) ? ((m) ? res : -res)
-			: sloww1 (a, da, x, m));
+	      if (res == res + cor) { LIBC_PROBE (sin_probe, 2, 5, &x); retval = ((m) ? res : -res); } else retval = sloww1 (a, da, x, m);
 	    }
 	  break;
 
@@ -404,8 +403,7 @@ __sin (double x)
 	  y = a - (u.x - big) + da;
 	  res = do_cos (u, y, &cor);
 	  cor = (cor > 0) ? 1.025 * cor + eps : 1.025 * cor - eps;
-	  retval = ((res == res + cor) ? ((n & 2) ? -res : res)
-		    : sloww2 (a, da, x, n));
+	  if (res == res + cor) { LIBC_PROBE (sin_probe, 2, 6, &x); retval = ((n & 2) ? -res : res); } else retval = sloww2 (a, da, x, n);
 	  break;
 	}
     }				/*   else  if (k <  0x419921FB )    */
@@ -443,7 +441,7 @@ __sin (double x)
 	      /* Taylor series.  */
 	      res = TAYLOR_SIN (xx, a, da, cor);
 	      cor = (cor > 0) ? 1.02 * cor + eps : 1.02 * cor - eps;
-	      retval = (res == res + cor) ? res : bsloww (a, da, x, n);
+	      if (res == res + cor) { LIBC_PROBE (sin_probe, 2, 7, &x); retval = res; } else retval = bsloww (a, da, x, n);
 	    }
 	  else
 	    {
@@ -462,8 +460,7 @@ __sin (double x)
 	      y = a - (u.x - big);
 	      res = do_sin (u, y, db, &cor);
 	      cor = (cor > 0) ? 1.035 * cor + eps : 1.035 * cor - eps;
-	      retval = ((res == res + cor) ? ((m) ? res : -res)
-			: bsloww1 (a, da, x, n));
+	      if (res == res + cor) { LIBC_PROBE (sin_probe, 2, 8, &x); retval = ((m) ? res : -res); } else retval = bsloww1 (a, da, x, n);
 	    }
 	  break;
 
@@ -478,8 +475,7 @@ __sin (double x)
 	  y = a - (u.x - big) + da;
 	  res = do_cos (u, y, &cor);
 	  cor = (cor > 0) ? 1.025 * cor + eps : 1.025 * cor - eps;
-	  retval = ((res == res + cor) ? ((n & 2) ? -res : res)
-		    : bsloww2 (a, da, x, n));
+	  if (res == res + cor) { LIBC_PROBE (sin_probe, 2, 9, &x); retval = ((n & 2) ? -res : res); } else retval = bsloww2 (a, da, x, n);
 	  break;
 	}
     }				/*   else  if (k <  0x42F00000 )   */
@@ -532,7 +528,7 @@ __cos (double x)
       u.x = big + y;
       y = y - (u.x - big);
       res = do_cos (u, y, &cor);
-      retval = (res == res + 1.020 * cor) ? res : cslow2 (x);
+      if (res == res + 1.020 * cor) { LIBC_PROBE (cos_probe, 2, 1, &x); retval = res; } else retval = cslow2 (x);
     }				/*   else  if (k < 0x3feb6000)    */
 
   else if (k < 0x400368fd)
@@ -545,7 +541,7 @@ __cos (double x)
 	{
 	  res = TAYLOR_SIN (xx, a, da, cor);
 	  cor = (cor > 0) ? 1.02 * cor + 1.0e-31 : 1.02 * cor - 1.0e-31;
-	  retval = (res == res + cor) ? res : csloww (a, da, x);
+	  if (res == res + cor) { LIBC_PROBE (cos_probe, 2, 2, &x); retval = res; } else retval = csloww (a, da, x);
 	}
       else
 	{
@@ -563,8 +559,7 @@ __cos (double x)
 	  y = a - (u.x - big);
 	  res = do_sin (u, y, da, &cor);
 	  cor = (cor > 0) ? 1.035 * cor + 1.0e-31 : 1.035 * cor - 1.0e-31;
-	  retval = ((res == res + cor) ? ((m) ? res : -res)
-		    : csloww1 (a, da, x, m));
+	  if (res == res + cor) { LIBC_PROBE (cos_probe, 2, 3, &x); retval = ((m) ? res : -res); } else retval = csloww1 (a, da, x, m);
 	}
 
     }				/*   else  if (k < 0x400368fd)    */
@@ -596,7 +591,7 @@ __cos (double x)
 	    {
 	      res = TAYLOR_SIN (xx, a, da, cor);
 	      cor = (cor > 0) ? 1.02 * cor + eps : 1.02 * cor - eps;
-	      retval = (res == res + cor) ? res : csloww (a, da, x);
+	      if (res == res + cor) { LIBC_PROBE (cos_probe, 2, 4, &x); retval = res; } else retval = csloww (a, da, x);
 	    }
 	  else
 	    {
@@ -614,8 +609,7 @@ __cos (double x)
 	      y = a - (u.x - big);
 	      res = do_sin (u, y, da, &cor);
 	      cor = (cor > 0) ? 1.035 * cor + eps : 1.035 * cor - eps;
-	      retval = ((res == res + cor) ? ((m) ? res : -res)
-			: csloww1 (a, da, x, m));
+	      if (res == res + cor) { LIBC_PROBE (cos_probe, 2, 5, &x); retval = ((m) ? res : -res); } else retval = csloww1 (a, da, x, m);
 	    }
 	  break;
 
@@ -630,8 +624,7 @@ __cos (double x)
 	  y = a - (u.x - big) + da;
 	  res = do_cos (u, y, &cor);
 	  cor = (cor > 0) ? 1.025 * cor + eps : 1.025 * cor - eps;
-	  retval = ((res == res + cor) ? ((n) ? -res : res)
-		    : csloww2 (a, da, x, n));
+	  if (res == res + cor) { LIBC_PROBE (cos_probe, 2, 6, &x); retval = ((n) ? -res : res); } else retval = csloww2 (a, da, x, n);
 	  break;
 	}
     }				/*   else  if (k <  0x419921FB )    */
@@ -667,7 +660,7 @@ __cos (double x)
 	    {
 	      res = TAYLOR_SIN (xx, a, da, cor);
 	      cor = (cor > 0) ? 1.02 * cor + eps : 1.02 * cor - eps;
-	      retval = (res == res + cor) ? res : bsloww (a, da, x, n);
+	      if (res == res + cor) { LIBC_PROBE (cos_probe, 2, 7, &x); retval = res; } else retval = bsloww (a, da, x, n);
 	    }
 	  else
 	    {
@@ -686,8 +679,7 @@ __cos (double x)
 	      y = a - (u.x - big);
 	      res = do_sin (u, y, db, &cor);
 	      cor = (cor > 0) ? 1.035 * cor + eps : 1.035 * cor - eps;
-	      retval = ((res == res + cor) ? ((m) ? res : -res)
-			: bsloww1 (a, da, x, n));
+	      if (res == res + cor) { LIBC_PROBE (cos_probe, 2, 8, &x); retval = ((m) ? res : -res); } else retval = bsloww1 (a, da, x, n);
 	    }
 	  break;
 
@@ -702,8 +694,7 @@ __cos (double x)
 	  y = a - (u.x - big) + da;
 	  res = do_cos (u, y, &cor);
 	  cor = (cor > 0) ? 1.025 * cor + eps : 1.025 * cor - eps;
-	  retval = ((res == res + cor) ? ((n) ? -res : res)
-		    : bsloww2 (a, da, x, n));
+	  if (res == res + cor) { LIBC_PROBE (cos_probe, 2, 9, &x); retval = ((n) ? -res : res); } else retval = bsloww2 (a, da, x, n);
 	  break;
 	}
     }				/*   else  if (k <  0x42F00000 )    */
@@ -734,12 +725,18 @@ slow (double x)
   double res, cor, w[2];
   res = TAYLOR_SLOW (x, 0, cor);
   if (res == res + 1.0007 * cor)
-    return res;
+    {
+    LIBC_PROBE (sin_probe, 2, 10, &x);
+      return res;
+    }
   else
     {
       __dubsin (ABS (x), 0, w);
       if (w[0] == w[0] + 1.000000001 * w[1])
+        {
+	LIBC_PROBE (sin_probe, 2, 11, &x);
 	return (x > 0) ? w[0] : -w[0];
+	}
       else
 	return (x > 0) ? __mpsin (x, 0, false) : -__mpsin (-x, 0, false);
     }
@@ -761,12 +758,18 @@ slow1 (double x)
   y = y - (u.x - big);
   res = do_sin_slow (u, y, 0, 0, &cor);
   if (res == res + cor)
+  {
+  LIBC_PROBE (sin_probe, 2, 12, &x);
     return (x > 0) ? res : -res;
+    }
   else
     {
       __dubsin (ABS (x), 0, w);
       if (w[0] == w[0] + 1.000000005 * w[1])
+      {
+      LIBC_PROBE (sin_probe, 2, 13, &x);
 	return (x > 0) ? w[0] : -w[0];
+	}
       else
 	return (x > 0) ? __mpsin (x, 0, false) : -__mpsin (-x, 0, false);
     }
@@ -799,7 +802,8 @@ slow2 (double x)
     }
   res = do_cos_slow (u, y, del, 0, &cor);
   if (res == res + cor)
-    return (x > 0) ? res : -res;
+  { LIBC_PROBE (sin_probe, 2, 14, &x);
+    return (x > 0) ? res : -res; }
   else
     {
       y = ABS (x) - hp0;
@@ -807,7 +811,8 @@ slow2 (double x)
       y2 = (y - y1) - hp1;
       __docos (y1, y2, w);
       if (w[0] == w[0] + 1.000000005 * w[1])
-	return (x > 0) ? w[0] : -w[0];
+  { LIBC_PROBE (sin_probe, 2, 15, &x);
+	return (x > 0) ? w[0] : -w[0]; }
       else
 	return (x > 0) ? __mpsin (x, 0, false) : -__mpsin (-x, 0, false);
     }
@@ -835,7 +840,8 @@ sloww (double x, double dx, double orig)
     cor = 1.0005 * cor - ABS (orig) * 3.1e-30;
 
   if (res == res + cor)
-    return res;
+  { LIBC_PROBE (sin_probe, 2, 16, &orig);
+    return res;}
   else
     {
       (x > 0) ? __dubsin (x, dx, w) : __dubsin (-x, -dx, w);
@@ -845,7 +851,8 @@ sloww (double x, double dx, double orig)
 	cor = 1.000000001 * w[1] - ABS (orig) * 1.1e-30;
 
       if (w[0] == w[0] + cor)
-	return (x > 0) ? w[0] : -w[0];
+  { LIBC_PROBE (sin_probe, 2, 17, &orig);
+	return (x > 0) ? w[0] : -w[0]; }
       else
 	{
 	  t = (orig * hpinv + toint);
@@ -871,7 +878,8 @@ sloww (double x, double dx, double orig)
 	    cor = 1.000000001 * w[1] - ABS (orig) * 1.1e-40;
 
 	  if (w[0] == w[0] + cor)
-	    return (a > 0) ? w[0] : -w[0];
+  { LIBC_PROBE (sin_probe, 2, 18, &orig);
+	    return (a > 0) ? w[0] : -w[0]; }
 	  else
 	    return __mpsin (orig, 0, true);
 	}
@@ -897,7 +905,8 @@ sloww1 (double x, double dx, double orig, int m)
   res = do_sin_slow (u, y, dx, 3.1e-30 * ABS (orig), &cor);
 
   if (res == res + cor)
-    return (m > 0) ? res : -res;
+  { LIBC_PROBE (sin_probe, 2, 19, &orig);
+    return (m > 0) ? res : -res; }
   else
     {
       __dubsin (x, dx, w);
@@ -908,7 +917,8 @@ sloww1 (double x, double dx, double orig, int m)
 	cor = 1.000000005 * w[1] - 1.1e-30 * ABS (orig);
 
       if (w[0] == w[0] + cor)
-	return (m > 0) ? w[0] : -w[0];
+  { LIBC_PROBE (sin_probe, 2, 20, &orig);
+	return (m > 0) ? w[0] : -w[0]; }
       else
 	return __mpsin (orig, 0, true);
     }
@@ -933,7 +943,8 @@ sloww2 (double x, double dx, double orig, int n)
   res = do_cos_slow (u, y, dx, 3.1e-30 * ABS (orig), &cor);
 
   if (res == res + cor)
-    return (n & 2) ? -res : res;
+  { LIBC_PROBE (sin_probe, 2, 21, &orig);
+    return (n & 2) ? -res : res; }
   else
     {
       __docos (x, dx, w);
@@ -944,7 +955,8 @@ sloww2 (double x, double dx, double orig, int n)
 	cor = 1.000000005 * w[1] - 1.1e-30 * ABS (orig);
 
       if (w[0] == w[0] + cor)
-	return (n & 2) ? -w[0] : w[0];
+  { LIBC_PROBE (sin_probe, 2, 22, &orig);
+	return (n & 2) ? -w[0] : w[0]; }
       else
 	return __mpsin (orig, 0, true);
     }
@@ -967,7 +979,8 @@ bsloww (double x, double dx, double orig, int n)
   res = TAYLOR_SLOW (x, dx, cor);
   cor = (cor > 0) ? 1.0005 * cor + 1.1e-24 : 1.0005 * cor - 1.1e-24;
   if (res == res + cor)
-    return res;
+  { LIBC_PROBE (sincos_probe, 2, 1, &orig);
+    return res; }
   else
     {
       (x > 0) ? __dubsin (x, dx, w) : __dubsin (-x, -dx, w);
@@ -976,7 +989,8 @@ bsloww (double x, double dx, double orig, int n)
       else
 	cor = 1.000000001 * w[1] - 1.1e-24;
       if (w[0] == w[0] + cor)
-	return (x > 0) ? w[0] : -w[0];
+  { LIBC_PROBE (sincos_probe, 2, 2, &orig);
+	return (x > 0) ? w[0] : -w[0]; }
       else
 	return (n & 1) ? __mpcos (orig, 0, true) : __mpsin (orig, 0, true);
     }
@@ -1002,7 +1016,8 @@ bsloww1 (double x, double dx, double orig, int n)
   dx = (x > 0) ? dx : -dx;
   res = do_sin_slow (u, y, dx, 1.1e-24, &cor);
   if (res == res + cor)
-    return (x > 0) ? res : -res;
+  { LIBC_PROBE (sincos_probe, 2, 3, &orig);
+    return (x > 0) ? res : -res; }
   else
     {
       __dubsin (ABS (x), dx, w);
@@ -1013,7 +1028,8 @@ bsloww1 (double x, double dx, double orig, int n)
 	cor = 1.000000005 * w[1] - 1.1e-24;
 
       if (w[0] == w[0] + cor)
-	return (x > 0) ? w[0] : -w[0];
+  { LIBC_PROBE (sincos_probe, 2, 4, &orig);
+	return (x > 0) ? w[0] : -w[0]; }
       else
 	return (n & 1) ? __mpcos (orig, 0, true) : __mpsin (orig, 0, true);
     }
@@ -1039,7 +1055,8 @@ bsloww2 (double x, double dx, double orig, int n)
   dx = (x > 0) ? dx : -dx;
   res = do_cos_slow (u, y, dx, 1.1e-24, &cor);
   if (res == res + cor)
-    return (n & 2) ? -res : res;
+  { LIBC_PROBE (sincos_probe, 2, 5, &orig);
+    return (n & 2) ? -res : res; }
   else
     {
       __docos (ABS (x), dx, w);
@@ -1050,7 +1067,8 @@ bsloww2 (double x, double dx, double orig, int n)
 	cor = 1.000000005 * w[1] - 1.1e-24;
 
       if (w[0] == w[0] + cor)
-	return (n & 2) ? -w[0] : w[0];
+  { LIBC_PROBE (sincos_probe, 2, 6, &orig);
+	return (n & 2) ? -w[0] : w[0]; }
       else
 	return (n & 1) ? __mpsin (orig, 0, true) : __mpcos (orig, 0, true);
     }
@@ -1073,13 +1091,15 @@ cslow2 (double x)
   y = y - (u.x - big);
   res = do_cos_slow (u, y, 0, 0, &cor);
   if (res == res + cor)
-    return res;
+  { LIBC_PROBE (cos_probe, 2, 10, &x);
+    return res; }
   else
     {
       y = ABS (x);
       __docos (y, 0, w);
       if (w[0] == w[0] + 1.000000005 * w[1])
-	return w[0];
+  { LIBC_PROBE (cos_probe, 2, 11, &x);
+	return w[0]; }
       else
 	return __mpcos (x, 0, false);
     }
@@ -1110,7 +1130,8 @@ csloww (double x, double dx, double orig)
     cor = 1.0005 * cor - ABS (orig) * 3.1e-30;
 
   if (res == res + cor)
-    return res;
+  { LIBC_PROBE (cos_probe, 2, 12, &orig);
+    return res; }
   else
     {
       (x > 0) ? __dubsin (x, dx, w) : __dubsin (-x, -dx, w);
@@ -1121,7 +1142,8 @@ csloww (double x, double dx, double orig)
 	cor = 1.000000001 * w[1] - ABS (orig) * 1.1e-30;
 
       if (w[0] == w[0] + cor)
-	return (x > 0) ? w[0] : -w[0];
+  { LIBC_PROBE (cos_probe, 2, 13, &orig);
+	return (x > 0) ? w[0] : -w[0]; }
       else
 	{
 	  t = (orig * hpinv + toint);
@@ -1148,7 +1170,8 @@ csloww (double x, double dx, double orig)
 	    cor = 1.000000001 * w[1] - ABS (orig) * 1.1e-40;
 
 	  if (w[0] == w[0] + cor)
-	    return (a > 0) ? w[0] : -w[0];
+  { LIBC_PROBE (cos_probe, 2, 14, &orig);
+	    return (a > 0) ? w[0] : -w[0]; }
 	  else
 	    return __mpcos (orig, 0, true);
 	}
@@ -1174,7 +1197,8 @@ csloww1 (double x, double dx, double orig, int m)
   res = do_sin_slow (u, y, dx, 3.1e-30 * ABS (orig), &cor);
 
   if (res == res + cor)
-    return (m > 0) ? res : -res;
+  { LIBC_PROBE (cos_probe, 2, 15, &orig);
+    return (m > 0) ? res : -res; }
   else
     {
       __dubsin (x, dx, w);
@@ -1183,7 +1207,8 @@ csloww1 (double x, double dx, double orig, int m)
       else
 	cor = 1.000000005 * w[1] - 1.1e-30 * ABS (orig);
       if (w[0] == w[0] + cor)
-	return (m > 0) ? w[0] : -w[0];
+  { LIBC_PROBE (cos_probe, 2, 16, &orig);
+	return (m > 0) ? w[0] : -w[0]; }
       else
 	return __mpcos (orig, 0, true);
     }
@@ -1209,7 +1234,8 @@ csloww2 (double x, double dx, double orig, int n)
   res = do_cos_slow (u, y, dx, 3.1e-30 * ABS (orig), &cor);
 
   if (res == res + cor)
-    return (n) ? -res : res;
+  { LIBC_PROBE (cos_probe, 2, 17, &orig);
+    return (n) ? -res : res; }
   else
     {
       __docos (x, dx, w);
@@ -1218,7 +1244,8 @@ csloww2 (double x, double dx, double orig, int n)
       else
 	cor = 1.000000005 * w[1] - 1.1e-30 * ABS (orig);
       if (w[0] == w[0] + cor)
-	return (n) ? -w[0] : w[0];
+  { LIBC_PROBE (cos_probe, 2, 18, &orig);
+	return (n) ? -w[0] : w[0]; }
       else
 	return __mpcos (orig, 0, true);
     }

@@ -38,6 +38,7 @@
 #include <inttypes.h>
 #include <math.h>
 #include <math_private.h>
+#include <stap-probe.h>
 
 static const double huge = 1e300;
 
@@ -56,9 +57,13 @@ __ieee754_atanh (double x)
 
       t = xa + xa;
       t = 0.5 * __log1p (t + t * xa / (1.0 - xa));
+      LIBC_PROBE (atanh_probe, 2, 1, &x);
     }
   else if (__builtin_expect (isless (xa, 1.0), 1))
+  {
+    LIBC_PROBE (atanh_probe, 2, 2, &x);
     t = 0.5 * __log1p ((xa + xa) / (1.0 - xa));
+    }
   else
     {
       if (isgreater (xa, 1.0))

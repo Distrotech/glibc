@@ -42,6 +42,7 @@
 #include "upow.tbl"
 #include <math_private.h>
 #include <fenv.h>
+#include <stap-probe.h>
 
 #ifndef SECTION
 # define SECTION
@@ -65,6 +66,7 @@ __ieee754_pow (double x, double y)
   double z, a, aa, error, t, a1, a2, y1, y2;
   mynumber u, v;
   int k;
+  int retcode = -1;
   int4 qx, qy;
   v.x = y;
   u.x = x;
@@ -110,7 +112,16 @@ __ieee754_pow (double x, double y)
       a2 = (a - a1) + aa;
       error = error * ABS (y);
       t = __exp1 (a1, a2, 1.9e16 * error);	/* return -10 or 0 if wasn't computed exactly */
-      retval = (t > 0) ? t : power1 (x, y);
+      if (t > 0)
+        {
+	  retval = t;
+      retcode = 1;
+      LIBC_PROBE (pow_probe, 3, &x, &y, &retcode);
+	}
+      else
+        {
+	  retval = power1 (x, y);
+	}
 
       return retval;
     }
@@ -140,6 +151,8 @@ __ieee754_pow (double x, double y)
   /* if x<0 */
   if (u.i[HIGH_HALF] < 0)
     {
+      retcode = 2;
+      LIBC_PROBE (pow_probe, 3, &x, &y, &retcode);
       k = checkint (y);
       if (k == 0)
 	{
@@ -199,6 +212,7 @@ static double
 SECTION
 power1 (double x, double y)
 {
+  int retcode = 3;
   double z, a, aa, error, t, a1, a2, y1, y2;
   z = my_log2 (x, &aa, &error);
   t = y * CN;
@@ -213,7 +227,13 @@ power1 (double x, double y)
   a2 = (a - a1) + aa;
   error = error * ABS (y);
   t = __exp1 (a1, a2, 1.9e16 * error);
-  return (t >= 0) ? t : __slowpow (x, y, z);
+  if (t >= 0)
+    {
+      LIBC_PROBE (pow_probe, 3, &x, &y, &retcode);
+      return t;
+    }
+  else
+    return __slowpow (x, y, z);
 }
 
 /* Compute log(x) (x is left argument). The result is the returned double + the

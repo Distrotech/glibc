@@ -23,6 +23,7 @@
 
 #include <math.h>
 #include <math_private.h>
+#include <stap-probe.h>
 
 static const double
   one = 1.00000000000000000000e+00, /* 0x3FF00000, 0x00000000 */
@@ -46,6 +47,7 @@ __asinh (double x)
       if (ix >= 0x7ff00000)
 	return x + x;                           /* x is inf or NaN */
       w = __ieee754_log (fabs (x)) + ln2;
+      LIBC_PROBE (asinh_probe, 2, 1, &x);
     }
   else
     {
@@ -54,11 +56,13 @@ __asinh (double x)
 	{
 	  w = __ieee754_log (2.0 * xa + one / (__ieee754_sqrt (xa * xa + one) +
               xa));
+	  LIBC_PROBE (asinh_probe, 2, 2, &x);
 	}
       else                      /* 2.0 > |x| > 2**-28 */
 	{
 	  double t = xa * xa;
 	  w = __log1p (xa + t / (one + __ieee754_sqrt (one + t)));
+	  LIBC_PROBE (asinh_probe, 2, 3, &x);
 	}
     }
   return __copysign (w, x);
