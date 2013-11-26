@@ -11,7 +11,7 @@ if [ "${NARCH}" == "${1}" ];then
   if [ ! -d ${3}/usr/${B_LIBDIRS}/locale ];then
     mkdir -p ${3}/usr/${B_LIBDIRS}/locale
   fi;
-  make DESTDIR=${3} LOCALEDEF=/usr/bin/localedef localedata/install-locales
+  make DESTDIR=${3} LOCALEDEF=${3}/usr/bin/localedef localedata/install-locales
   if [ -h ${3}/usr/lib64 ];then
     rm ${3}/usr/lib64
   fi;
