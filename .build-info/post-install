@@ -1,20 +1,15 @@
 #!/bin/bash
 
-NARCH=`uname -m`
+if [ ! -d ${3}/usr/${B_LIBDIRS}/locale ];then
+  mkdir -p ${3}/usr/${B_LIBDIRS}/locale
+fi;
 
-if [ "${NARCH}" == "${1}" ];then
-  make DESTDIR=${3} localedata/install-locales
- else
-  if [ ! -d ${3}/usr/lib64 ];then
-    ln -s ${B_LIBDIRS} ${3}/usr/lib64
-  fi;
-  if [ ! -d ${3}/usr/${B_LIBDIRS}/locale ];then
-    mkdir -p ${3}/usr/${B_LIBDIRS}/locale
-  fi;
+if [ ${ARCHROOT}/${NARCH}/usr/bin/localedef ];then
+  make DESTDIR=${3} LOCALEDEF=${ARCHROOT}/${NARCH}/usr/bin/localedef localedata/install-locales
+ elif [ "${NARCH}" == "${1}" ];then
   make DESTDIR=${3} LOCALEDEF=${3}/usr/bin/localedef localedata/install-locales
-  if [ -h ${3}/usr/lib64 ];then
-    rm ${3}/usr/lib64
-  fi;
+ else
+  make DESTDIR=${3} localedata/install-locales
 fi;
 
 case ${1} in
@@ -23,16 +18,20 @@ case ${1} in
       /usr/bin/rsync -avP ${3}/lib64 /build/x86_32/
       /usr/bin/rsync -avP ${3}/usr/lib64 /build/x86_32/usr/
     fi;
-    /usr/bin/rsync -avP ${3}/lib64 /
-    /usr/bin/rsync -avP ${3}/usr/lib64 /usr/
+    if [ "${BOOTSTRAP_STATIC}" == "0" ];then
+      /usr/bin/rsync -avP ${3}/lib64 /
+      /usr/bin/rsync -avP ${3}/usr/lib64 /usr/
+    fi;
   ;;
   x86_32)
     if [ -d /build/x86_64 ];then
       /usr/bin/rsync -avP ${3}/libx32 /build/x86_64/
       /usr/bin/rsync -avP ${3}/usr/libx32 /build/x86_64/usr/
     fi;
-    /usr/bin/rsync -avP ${3}/libx32 /
-    /usr/bin/rsync -avP ${3}/usr/libx32 /usr/
+    if [ "${BOOTSTRAP_STATIC}" == "0" ];then
+      /usr/bin/rsync -avP ${3}/libx32 /
+      /usr/bin/rsync -avP ${3}/usr/libx32 /usr/
+    fi;
   ;;
   i686)
     if [ -d /build/x86_32 ];then
@@ -43,13 +42,15 @@ case ${1} in
       /usr/bin/rsync -avP ${3}/lib /build/x86_64/
       /usr/bin/rsync -avP ${3}/usr/lib /build/x86_64/usr/
     fi;
-    /usr/bin/rsync -avP ${3}/lib /
-    /usr/bin/rsync -avP ${3}/usr/lib /usr/
+    if [ "${BOOTSTRAP_STATIC}" == "0" ];then
+      /usr/bin/rsync -avP ${3}/lib /
+      /usr/bin/rsync -avP ${3}/usr/lib /usr/
+    fi;
   ;;
 esac;
 
 
-#Install no longer installed headers 
+#Install no longer installed headers
 #We use tirpc / portablexdr now
 cd ${2}
 if [ ! -d ${3}/usr/include/rpc ];then
@@ -67,16 +68,20 @@ echo "include /etc/ld.so.conf.d/*.conf" > ${3}/etc/ld.so.conf
 
 (cat <<EOF
 /lib64
-/usr/lib64 
+/usr/lib64
 /lib32x
-/usr/lib32x 
+/usr/lib32x
 /lib
-/usr/lib 
+/usr/lib
 EOF
 ) > ${3}/etc/ld.so.conf.d/glibc.conf
 
 if [ ! -e ${3}/usr/include/gnu/stubs-x32.h  ] && [ -e ${3}/usr/include/gnu/stubs-64.h ];then
   ln -s stubs-64.h ${3}/usr/include/gnu/stubs-x32.h
+fi;
+
+if [ ! -e ${3}/usr/include/gnu/stubs-32.h  ];then
+  touch ${3}/usr/include/gnu/stubs-32.h
 fi;
 
 if [ -e ${3}/etc/ld.so.cache ];then
