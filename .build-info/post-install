@@ -4,12 +4,21 @@ if [ ! -d ${3}/usr/${B_LIBDIRS}/locale ];then
   mkdir -p ${3}/usr/${B_LIBDIRS}/locale
 fi;
 
+
+if [ ! -e ${3}/usr/${NLIBDIR} ];then
+  ln -s ${B_LIBDIRS} ${3}/usr/${NLIBDIR}
+fi;
+
 if [ ${ARCHROOT}/${NARCH}/usr/bin/localedef ];then
   make DESTDIR=${3} LOCALEDEF=${ARCHROOT}/${NARCH}/usr/bin/localedef localedata/install-locales
  elif [ "${NARCH}" == "${1}" ];then
   make DESTDIR=${3} LOCALEDEF=${3}/usr/bin/localedef localedata/install-locales
  else
   make DESTDIR=${3} localedata/install-locales
+fi;
+
+if [ -h ${3}/usr/${NLIBDIR} ];then
+  rm ${3}/usr/${NLIBDIR}
 fi;
 
 case ${1} in
