@@ -1,24 +1,18 @@
 #!/bin/bash
 
-if [ ! -d ${3}/usr/${B_LIBDIRS}/locale ];then
-  mkdir -p ${3}/usr/${B_LIBDIRS}/locale
-fi;
-
-
-if [ ! -e ${3}/usr/${NLIBDIR} ];then
-  ln -s ${B_LIBDIRS} ${3}/usr/${NLIBDIR}
-fi;
-
-if [ ${ARCHROOT}/${NARCH}/usr/bin/localedef ];then
-  make DESTDIR=${3} LOCALEDEF=${ARCHROOT}/${NARCH}/usr/bin/localedef localedata/install-locales
- elif [ "${NARCH}" == "${1}" ];then
-  make DESTDIR=${3} LOCALEDEF=${3}/usr/bin/localedef localedata/install-locales
+if [ "${MLIBDIR}" ];then
+  C_LIBDIRS="${B_LIBDIRS}/${MLIBDIR}";
  else
-  make DESTDIR=${3} localedata/install-locales
+  C_LIBDIRS="${B_LIBDIRS}"
 fi;
-
-if [ -h ${3}/usr/${NLIBDIR} ];then
-  rm ${3}/usr/${NLIBDIR}
+ 
+if [ ! -e ${ARCHROOT}/${1}/usr/${C_LIBDIRS}/locale/locale-archive ];then
+  make DESTDIR=${3} localedata/install-locales
+ else
+  if [ ! -d ${3}/usr/${C_LIBDIRS}/locale ];then
+    mkdir ${3}/usr/${C_LIBDIRS}/locale
+  fi;
+  cp ${ARCHROOT}/${1}/usr/${C_LIBDIRS}/locale/locale-archive ${3}/usr/${C_LIBDIRS}/locale
 fi;
 
 case ${1} in
@@ -76,14 +70,10 @@ mkdir -p ${3}/etc/ld.so.conf.d
 echo "include /etc/ld.so.conf.d/*.conf" > ${3}/etc/ld.so.conf
 
 (cat <<EOF
-/lib64
-/usr/lib64
-/lib32x
-/usr/lib32x
-/lib
-/usr/lib
+/${B_LIBDIRS}
+/usr/${B_LIBDIRS}
 EOF
-) > ${3}/etc/ld.so.conf.d/glibc.conf
+) > ${3}/etc/ld.so.conf.d/glibc_${1}.conf
 
 if [ ! -e ${3}/usr/include/gnu/stubs-x32.h  ] && [ -e ${3}/usr/include/gnu/stubs-64.h ];then
   ln -s stubs-64.h ${3}/usr/include/gnu/stubs-x32.h
@@ -95,4 +85,12 @@ fi;
 
 if [ -e ${3}/etc/ld.so.cache ];then
   rm ${3}/etc/ld.so.cache
+fi;
+
+if [ "${MLIBDIR}" ];then
+  (cat <<EOF
+/${B_LIBDIRS}/${MLIBDIR}
+/usr/${B_LIBDIRS}/${MLIBDIR}
+EOF
+) > ${3}/etc/ld.so.conf.d/glibc_${1}_mlib.conf
 fi;
