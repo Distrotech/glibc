@@ -18,6 +18,7 @@
 
 #include <string.h>
 #include <stdint.h>
+#include <stdbool.h>
 #include <stdio.h>
 #include <time.h>
 #include <inttypes.h>
@@ -48,6 +49,10 @@ main (int argc, char **argv)
   unsigned long i, k;
   struct timespec runtime;
   timing_t start, end;
+  bool detailed = false;
+
+  if (argc == 2 && !strcmp (argv[1], "-d"))
+    detailed = true;
 
   startup();
 
@@ -59,6 +64,9 @@ main (int argc, char **argv)
 
   iters = 1000 * res;
 
+  if (detailed)
+    printf ("%s\n", FUNCNAME);
+
   for (int v = 0; v < NUM_VARIANTS; v++)
     {
       /* Run for approximately DURATION seconds.  */
@@ -67,6 +75,7 @@ main (int argc, char **argv)
 
       double d_total_i = 0;
       timing_t total = 0, max = 0, min = 0x7fffffffffffffff;
+      int64_t c = 0;
       while (1)
 	{
 	  for (i = 0; i < NUM_SAMPLES (v); i++)
@@ -86,9 +95,13 @@ main (int argc, char **argv)
 		min = cur;
 
 	      TIMING_ACCUM (total, cur);
+	      /* Accumulate timings for the value.  In the end we will divide
+	         by the total iterations.  */
+	      RESULT_ACCUM (cur, v, i, c * iters, (c + 1) * iters);
 
 	      d_total_i += iters;
 	    }
+	  c++;
 	  struct timespec curtime;
 
 	  memset (&curtime, 0, sizeof (curtime));
@@ -104,8 +117,17 @@ main (int argc, char **argv)
       d_total_s = total;
       d_iters = iters;
 
-      TIMING_PRINT_STATS (VARIANT (v), d_total_s, d_iters, d_total_i, max,
-			  min);
+      if (!detailed)
+	{
+	  TIMING_PRINT_STATS (VARIANT (v), d_total_s, d_iters, d_total_i, max,
+			      min);
+	}
+      else
+	{
+	  printf ("\t%s\n", VARIANT (v));
+	  for (int i = 0; i < NUM_SAMPLES (v); i++)
+	    printf ("\t\t%g\n", RESULT (v, i));
+	}
     }
 
   return 0;
