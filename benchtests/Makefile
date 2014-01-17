@@ -115,7 +115,8 @@ bench-set: $(binaries-benchset)
 	done
 
 bench-func: $(binaries-bench)
-	{ for run in $^; do \
+	{ ./machine-info.sh; \
+	for run in $^; do \
 	  echo "Running $${run}" >&2; \
 	  $(run-bench) $(DETAILED_OPT); \
 	done; } > $(objpfx)bench.out-tmp; \
