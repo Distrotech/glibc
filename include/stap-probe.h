@@ -1,5 +1,5 @@
 /* Macros for defining Systemtap <sys/sdt.h> static probe points.
-   Copyright (C) 2012-2013 Free Software Foundation, Inc.
+   Copyright (C) 2012-2014 Free Software Foundation, Inc.
    This file is part of the GNU C Library.
 
    The GNU C Library is free software; you can redistribute it and/or
@@ -61,13 +61,14 @@
 
 # ifndef __ASSEMBLER__
 /* Evaluate all the arguments and verify that N matches their number.  */
-#  define LIBC_PROBE(name, n, ...)					      \
-  do {									      \
-    _Bool __libc_probe_args[] = { 0, ## __VA_ARGS__ };			      \
-    _Bool __libc_probe_verify_n[(sizeof __libc_probe_args / sizeof (_Bool))   \
-                                == n + 1 ? 1 : -1];			      \
-    (void) __libc_probe_verify_n;					      \
-  } while (0)
+#define LIBC_PROBE(name, n, ...) STAP_PROBE##n (__VA_ARGS__)
+
+#define STAP_PROBE0()
+#define STAP_PROBE1(a1)
+#define STAP_PROBE2(a1, a2)
+#define STAP_PROBE3(a1, a2, a3)
+#define STAP_PROBE4(a1, a2, a3, a4)
+
 # else
 #  define LIBC_PROBE(name, n, ...)		/* Nothing.  */
 # endif

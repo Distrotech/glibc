@@ -1,4 +1,4 @@
-/* Copyright (C) 2009-2013 Free Software Foundation, Inc.
+/* Copyright (C) 2009-2014 Free Software Foundation, Inc.
    This file is part of the GNU C Library.
 
    The GNU C Library is free software; you can redistribute it and/or
@@ -15,8 +15,6 @@
    License along with the GNU C Library.  If not, see
    <http://www.gnu.org/licenses/>.  */
 
-/* ??? Needs more rearrangement for the LDM to handle thumb mode.  */
-#define NO_THUMB
 #include <sysdep.h>
 
 	.section .rodata.str1.1,"aMS",%progbits,1

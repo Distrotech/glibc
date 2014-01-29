@@ -1,5 +1,5 @@
 /* Convert between the kernel's `struct stat' format, and libc's.
-   Copyright (C) 1997-2013 Free Software Foundation, Inc.
+   Copyright (C) 1997-2014 Free Software Foundation, Inc.
    This file is part of the GNU C Library.
 
    The GNU C Library is free software; you can redistribute it and/or
@@ -74,10 +74,10 @@ __xstat_conv (int vers, struct kernel_stat *kbuf, void *ubuf)
 	buf->st_flags = kbuf->st_flags;
 	buf->st_gen = kbuf->st_gen;
 	buf->__pad3 = 0;
-	buf->__unused[0] = 0;
-	buf->__unused[1] = 0;
-	buf->__unused[2] = 0;
-	buf->__unused[3] = 0;
+	buf->__glibc_reserved[0] = 0;
+	buf->__glibc_reserved[1] = 0;
+	buf->__glibc_reserved[2] = 0;
+	buf->__glibc_reserved[3] = 0;
       }
       break;
 
@@ -105,9 +105,9 @@ __xstat_conv (int vers, struct kernel_stat *kbuf, void *ubuf)
 	buf->st_ctime = kbuf->st_ctime;
 	buf->st_ctimensec = 0;
 
-	buf->__unused[0] = 0;
-	buf->__unused[1] = 0;
-	buf->__unused[2] = 0;
+	buf->__glibc_reserved[0] = 0;
+	buf->__glibc_reserved[1] = 0;
+	buf->__glibc_reserved[2] = 0;
       }
       break;
 

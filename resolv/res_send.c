@@ -441,7 +441,7 @@ __libc_res_nsend(res_state statp, const u_char *buf, int buflen,
 				    malloc(sizeof (struct sockaddr_in6));
 			if (EXT(statp).nsaddrs[n] != NULL) {
 				memset (mempcpy(EXT(statp).nsaddrs[n],
-						&statp->nsaddr_list[n],
+						&statp->nsaddr_list[ns],
 						sizeof (struct sockaddr_in)),
 					'\0',
 					sizeof (struct sockaddr_in6)
@@ -875,7 +875,7 @@ send_vc(res_state statp,
 		}
 	}
 	/*
-	 * If the calling applicating has bailed out of
+	 * If the calling application has bailed out of
 	 * a previous call and failed to arrange to have
 	 * the circuit closed or the server has got
 	 * itself confused, then drop the packet and
@@ -1229,8 +1229,11 @@ send_dg(res_state statp,
 		    /* Yes, we test ANSCP here.  If we have two buffers
 		       both will be allocatable.  */
 		    && anscp
+#ifdef FIONREAD
 		    && (ioctl (pfd[0].fd, FIONREAD, thisresplenp) < 0
-			|| *thisanssizp < *thisresplenp)) {
+			|| *thisanssizp < *thisresplenp)
+#endif
+                    ) {
 			u_char *newp = malloc (MAXPACKET);
 			if (newp != NULL) {
 				*anssizp = MAXPACKET;

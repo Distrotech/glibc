@@ -1,5 +1,5 @@
 /* NEON/VFP/ARM version of memcpy optimized for Cortex-A15.
-   Copyright (C) 2013 Free Software Foundation, Inc.
+   Copyright (C) 2013-2014 Free Software Foundation, Inc.
    This file is part of the GNU C Library.
 
    The GNU C Library is free software; you can redistribute it and/or
@@ -24,7 +24,6 @@
     ARMv6 (ARMv7-a if using Neon)
     ARM state
     Unaligned accesses
-    LDRD/STRD support unaligned word accesses
 
  */
 
@@ -128,25 +127,26 @@
 	.purgem dispatch_step
 	.endm
 #else
-# if ARM_BX_ALIGN_LOG2 < 4
+# if ARM_BX_ALIGN_LOG2 < 3
 #  error case not handled
 # endif
 	.macro dispatch_helper steps, log2_bytes_per_step
-	.p2align ARM_BX_ALIGN_LOG2
 	/* TMP1 gets (max_bytes - bytes_to_copy), where max_bytes is
 	   (STEPS << LOG2_BYTES_PER_STEP).
-	   So this is (steps_to_skip << LOG2_BYTES_PER_STEP).  */
-	rsb	tmp1, tmp1, #(\steps << \log2_bytes_per_step)
-	/* Pad so that the add;bx pair immediately precedes an alignment
-	   boundary.  Hence, TMP1=0 will run all the steps.  */
-	.rept (1 << (ARM_BX_ALIGN_LOG2 - 2)) - (2 + ARM_BX_NINSNS)
-	nop
-	.endr
+	   So this is (steps_to_skip << LOG2_BYTES_PER_STEP).
+	   Then it needs further adjustment to compensate for the
+	   distance between the PC value taken below (0f + PC_OFS)
+	   and the first step's instructions (1f).  */
+	rsb	tmp1, tmp1, #((\steps << \log2_bytes_per_step) \
+			      + ((1f - PC_OFS - 0f) \
+				 >> (ARM_BX_ALIGN_LOG2 - \log2_bytes_per_step)))
 	/* Shifting down LOG2_BYTES_PER_STEP gives us the number of
 	   steps to skip, then shifting up ARM_BX_ALIGN_LOG2 gives us
 	   the (byte) distance to add to the PC.  */
-	add	tmp1, pc, tmp1, lsl #(ARM_BX_ALIGN_LOG2 - \log2_bytes_per_step)
+0:	add	tmp1, pc, tmp1, lsl #(ARM_BX_ALIGN_LOG2 - \log2_bytes_per_step)
 	bx	tmp1
+	.p2align ARM_BX_ALIGN_LOG2
+1:
 	.endm
 
 	.macro dispatch_7_dword
@@ -369,8 +369,8 @@ ENTRY(memcpy)
 	cfi_adjust_cfa_offset (FRAME_SIZE)
 	cfi_rel_offset (tmp2, 0)
 	cfi_remember_state
-	and	tmp2, src, #3
-	and	tmp1, dst, #3
+	and	tmp2, src, #7
+	and	tmp1, dst, #7
 	cmp	tmp1, tmp2
 	bne	.Lcpy_notaligned
 
@@ -381,9 +381,9 @@ ENTRY(memcpy)
 	vmov.f32	s0, s0
 #endif
 
-	/* SRC and DST have the same mutual 32-bit alignment, but we may
+	/* SRC and DST have the same mutual 64-bit alignment, but we may
 	   still need to pre-copy some bytes to get to natural alignment.
-	   We bring DST into full 64-bit alignment.  */
+	   We bring SRC and DST into full 64-bit alignment.  */
 	lsls	tmp2, dst, #29
 	beq	1f
 	rsbs	tmp2, tmp2, #0
@@ -515,7 +515,7 @@ ENTRY(memcpy)
 
 .Ltail63aligned:			/* Count in tmp2.  */
 	/* Copy up to 7 d-words of data.  Similar to Ltail63unaligned, but
-	   we know that the src and dest are 32-bit aligned so we can use
+	   we know that the src and dest are 64-bit aligned so we can use
 	   LDRD/STRD to improve efficiency.  */
 	/* TMP2 is now negative, but we don't care about that.  The bottom
 	   six bits still tell us how many bytes are left to copy.  */

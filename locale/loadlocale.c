@@ -1,5 +1,5 @@
 /* Functions to read locale data files.
-   Copyright (C) 1996-2013 Free Software Foundation, Inc.
+   Copyright (C) 1996-2014 Free Software Foundation, Inc.
    This file is part of the GNU C Library.
    Contributed by Ulrich Drepper <drepper@cygnus.com>, 1996.
 
@@ -148,7 +148,7 @@ _nl_intern_locale_data (int category, const void *data, size_t datasize)
 	newdata->values[cnt].string = newdata->filedata + idx;
       else
 	{
-	  if (idx % __alignof__ (u_int32_t) != 0)
+	  if (!LOCFILE_ALIGNED_P (idx))
 	    goto puntdata;
 	  newdata->values[cnt].word =
 	    *((const u_int32_t *) (newdata->filedata + idx));

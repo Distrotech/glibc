@@ -1,4 +1,4 @@
-/* Copyright (C) 1997-2013 Free Software Foundation, Inc.
+/* Copyright (C) 1997-2014 Free Software Foundation, Inc.
 
    This file is part of the GNU C Library.
 
@@ -77,6 +77,17 @@
 #ifndef L
 # define L(name)         .L##name
 #endif
+
+/* Load or store to/from a pc-relative EXPR into/from R, using T.  */
+#define LDST_PCREL(OP, R, T, EXPR)  \
+	adrp	T, EXPR;	    \
+	OP	R, [T, #:lo12:EXPR];\
+
+/* Load or store to/from a got-relative EXPR into/from R, using T.  */
+#define LDST_GLOBAL(OP, R, T, EXPR)     \
+	adrp	T, :got:EXPR;		\
+	ldr	T, [T, #:got_lo12:EXPR];\
+	OP	R, [T];
 
 /* Since C identifiers are not normally prefixed with an underscore
    on this system, the asm identifier `syscall_error' intrudes on the

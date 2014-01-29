@@ -1,4 +1,4 @@
-/* Copyright (C) 1991-2013 Free Software Foundation, Inc.
+/* Copyright (C) 1991-2014 Free Software Foundation, Inc.
    This file is part of the GNU C Library.
 
    The GNU C Library is free software; you can redistribute it and/or
@@ -927,7 +927,7 @@ extern int grantpt (int __fd) __THROW;
    Call after grantpt().  */
 extern int unlockpt (int __fd) __THROW;
 
-/* Return the pathname of the pseudo terminal slave assoicated with
+/* Return the pathname of the pseudo terminal slave associated with
    the master FD is open on, or NULL on errors.
    The returned storage is good until the next call to this function.  */
 extern char *ptsname (int __fd) __THROW __wur;

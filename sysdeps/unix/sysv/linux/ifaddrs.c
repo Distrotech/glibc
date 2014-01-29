@@ -1,5 +1,5 @@
 /* getifaddrs -- get names and addresses of all network interfaces
-   Copyright (C) 2003-2013 Free Software Foundation, Inc.
+   Copyright (C) 2003-2014 Free Software Foundation, Inc.
    This file is part of the GNU C Library.
 
    The GNU C Library is free software; you can redistribute it and/or
@@ -301,7 +301,7 @@ map_newlink (int index, struct ifaddrs_storage *ifas, int *map, int max)
 	return i;
     }
 
-  /* This means interfaces changed inbetween the reading of the
+  /* This means interfaces changed between the reading of the
      RTM_GETLINK and RTM_GETADDR information.  We have to repeat
      everything.  */
   return -1;

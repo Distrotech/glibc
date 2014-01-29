@@ -1,5 +1,5 @@
 /* Definitions for locale archive handling.
-   Copyright (C) 2002-2013 Free Software Foundation, Inc.
+   Copyright (C) 2002-2014 Free Software Foundation, Inc.
    This file is part of the GNU C Library.
 
    The GNU C Library is free software; you can redistribute it and/or
@@ -80,6 +80,8 @@ struct locrecent
 
 struct locarhandle
 {
+  /* Full path to the locale archive file.  */
+  const char *fname;
   int fd;
   void *addr;
   size_t mmaped;

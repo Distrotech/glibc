@@ -1,4 +1,4 @@
-# Copyright (C) 1991-2013 Free Software Foundation, Inc.
+# Copyright (C) 1991-2014 Free Software Foundation, Inc.
 # This file is part of the GNU C Library.
 
 # The GNU C Library is free software; you can redistribute it and/or
@@ -119,6 +119,7 @@ CFLAGS-tst-sprintf.c = -Wno-format
 tst-sprintf-ENV = LOCPATH=$(common-objpfx)localedata
 tst-sscanf-ENV = LOCPATH=$(common-objpfx)localedata
 tst-swprintf-ENV = LOCPATH=$(common-objpfx)localedata
+tst-swscanf-ENV = LOCPATH=$(common-objpfx)localedata
 test-vfprintf-ENV = LOCPATH=$(common-objpfx)localedata
 scanf13-ENV = LOCPATH=$(common-objpfx)localedata
 bug14-ENV = LOCPATH=$(common-objpfx)localedata

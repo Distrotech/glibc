@@ -1,4 +1,4 @@
-/* Copyright (C) 1992-2013 Free Software Foundation, Inc.
+/* Copyright (C) 1992-2014 Free Software Foundation, Inc.
    This file is part of the GNU C Library.
 
    The GNU C Library is free software; you can redistribute it and/or
@@ -83,8 +83,8 @@ struct stat
     __time_t st_ctime;			/* Time of last status change.  */
     unsigned long int st_ctimensec;	/* Nsecs of last status change.  */
 #endif
-    unsigned long int __unused4;
-    unsigned long int __unused5;
+    unsigned long int __glibc_reserved4;
+    unsigned long int __glibc_reserved5;
   };
 
 #ifdef __USE_LARGEFILE64
@@ -126,8 +126,8 @@ struct stat64
     __time_t st_ctime;			/* Time of last status change.  */
     unsigned long int st_ctimensec;	/* Nsecs of last status change.  */
 # endif
-    unsigned long int __unused4;
-    unsigned long int __unused5;
+    unsigned long int __glibc_reserved4;
+    unsigned long int __glibc_reserved5;
   };
 #endif
 

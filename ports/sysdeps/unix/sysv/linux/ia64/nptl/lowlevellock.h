@@ -1,4 +1,4 @@
-/* Copyright (C) 2003-2013 Free Software Foundation, Inc.
+/* Copyright (C) 2003-2014 Free Software Foundation, Inc.
    This file is part of the GNU C Library.
    Contributed by Jakub Jelinek <jakub@redhat.com>, 2003.
 
@@ -38,6 +38,8 @@
 #define FUTEX_TRYLOCK_PI	8
 #define FUTEX_WAIT_BITSET	9
 #define FUTEX_WAKE_BITSET	10
+#define FUTEX_WAIT_REQUEUE_PI	11
+#define FUTEX_CMP_REQUEUE_PI	12
 #define FUTEX_PRIVATE_FLAG	128
 #define FUTEX_CLOCK_REALTIME	256
 
@@ -89,6 +91,17 @@
    _r10 == -1 ? -_retval : _retval;					\
 })
 
+#define lll_futex_timed_wait_bitset(ftx, val, timespec, clockbit, private) \
+({									   \
+   int __op = FUTEX_WAIT_BITSET | (clockbit);				   \
+									   \
+   DO_INLINE_SYSCALL(futex, 4, (long) (ftx),				   \
+		     __lll_private_flag (__op, private),		   \
+		     (int) (val), (long) (timespec), NULL /* Unused.  */,  \
+		     FUTEX_BITSET_MATCH_ANY);				   \
+   _r10 == -1 ? -_retval : _retval;					   \
+})
+
 #define lll_futex_wake(ftx, nr, private)				\
 ({									\
    DO_INLINE_SYSCALL(futex, 3, (long) (ftx),				\
@@ -125,6 +138,29 @@ while (0)
 		     (int) (nr_wake), (int) (nr_wake2), (long) (ftx2),	     \
 		     FUTEX_OP_CLEAR_WAKE_IF_GT_ONE);			     \
    _r10 == -1;								     \
+})
+
+/* Priority Inheritance support.  */
+#define lll_futex_wait_requeue_pi(futexp, val, mutex, private) \
+  lll_futex_timed_wait_requeue_pi (futexp, val, NULL, 0, mutex, private)
+
+#define lll_futex_timed_wait_requeue_pi(futexp, val, timespec, clockbit,      \
+					mutex, private)			      \
+({									      \
+   int __op = FUTEX_WAIT_REQUEUE_PI | (clockbit);			      \
+									      \
+   DO_INLINE_SYSCALL(futex, 5, (long) (futexp),				      \
+		     __lll_private_flag (__op, private),		      \
+		     (val), (timespec), mutex); 			      \
+   _r10 == -1;								      \
+})
+
+#define lll_futex_cmp_requeue_pi(futexp, nr_wake, nr_move, mutex, val, priv)  \
+({									      \
+   DO_INLINE_SYSCALL(futex, 6, (long) (futexp),				      \
+		     __lll_private_flag (FUTEX_CMP_REQUEUE_PI, priv),	      \
+		    (nr_wake), (nr_move), (mutex), (val));		      \
+   _r10 == -1 ? -_retval : _retval;					      \
 })
 
 

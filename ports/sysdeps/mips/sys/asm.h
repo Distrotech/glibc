@@ -1,4 +1,4 @@
-/* Copyright (C) 1997-2013 Free Software Foundation, Inc.
+/* Copyright (C) 1997-2014 Free Software Foundation, Inc.
    This file is part of the GNU C Library.
    Contributed by Ralf Baechle <ralf@gnu.org>.
 
@@ -472,7 +472,7 @@ symbol		=	value
 # define MTC0	dmtc0
 #endif
 
-/* The MIPS archtectures do not have a uniform memory model.  Particular
+/* The MIPS architectures do not have a uniform memory model.  Particular
    platforms may provide additional guarantees - for instance, the R4000
    LL and SC instructions implicitly perform a SYNC, and the 4K promises
    strong ordering.

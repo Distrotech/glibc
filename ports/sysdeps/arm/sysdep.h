@@ -1,5 +1,5 @@
 /* Assembler macros for ARM.
-   Copyright (C) 1997-2013 Free Software Foundation, Inc.
+   Copyright (C) 1997-2014 Free Software Foundation, Inc.
    This file is part of the GNU C Library.
 
    The GNU C Library is free software; you can redistribute it and/or
@@ -170,6 +170,18 @@
 	.previous;					\
 99:	OP	R, [pc, T]
 # endif
+
+/* Load or store to/from a global EXPR into/from R, using T.  */
+# define LDST_GLOBAL(OP, R, T, EXPR)			\
+	ldr	T, 99f;					\
+	ldr	R, 100f;				\
+98:	add	T, T, pc;				\
+	ldr	T, [T, R];				\
+	.subsection 2;					\
+99:	.word	_GLOBAL_OFFSET_TABLE_ - 98b - PC_OFS;	\
+100:	.word	EXPR##(GOT);				\
+	.previous;					\
+	OP	R, [T]
 
 /* Cope with negative memory offsets, which thumb can't encode.
    Use NEGOFF_ADJ_BASE to (conditionally) alter the base register,

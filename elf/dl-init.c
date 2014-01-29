@@ -1,5 +1,5 @@
 /* Run initializers for newly loaded objects.
-   Copyright (C) 1995-2013 Free Software Foundation, Inc.
+   Copyright (C) 1995-2014 Free Software Foundation, Inc.
    This file is part of the GNU C Library.
 
    The GNU C Library is free software; you can redistribute it and/or
@@ -59,13 +59,7 @@ call_init (struct link_map *l, int argc, char **argv, char **env)
      - the others in the DT_INIT_ARRAY.
   */
   if (l->l_info[DT_INIT] != NULL)
-    {
-      init_t init = (init_t) DL_DT_INIT_ADDRESS
-	(l, l->l_addr + l->l_info[DT_INIT]->d_un.d_ptr);
-
-      /* Call the function.  */
-      init (argc, argv, env);
-    }
+    DL_CALL_DT_INIT(l, l->l_addr + l->l_info[DT_INIT]->d_un.d_ptr, argc, argv, env);
 
   /* Next see whether there is an array with initialization functions.  */
   ElfW(Dyn) *init_array = l->l_info[DT_INIT_ARRAY];

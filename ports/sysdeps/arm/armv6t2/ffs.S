@@ -1,5 +1,5 @@
 /* ffs -- find first set bit in an int, from least significant end.
-   Copyright (C) 2013 Free Software Foundation, Inc.
+   Copyright (C) 2013-2014 Free Software Foundation, Inc.
    This file is part of the GNU C Library.
 
    The GNU C Library is free software; you can redistribute it and/or
@@ -32,4 +32,5 @@ END (__ffs)
 
 weak_alias (__ffs, ffs)
 weak_alias (__ffs, ffsl)
+libc_hidden_def (__ffs)
 libc_hidden_builtin_def (ffs)

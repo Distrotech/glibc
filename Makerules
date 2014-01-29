@@ -1,4 +1,4 @@
-# Copyright (C) 1991-2013 Free Software Foundation, Inc.
+# Copyright (C) 1991-2014 Free Software Foundation, Inc.
 # This file is part of the GNU C Library.
 
 # The GNU C Library is free software; you can redistribute it and/or
@@ -93,7 +93,7 @@ before-compile := $(filter $(common-objpfx)mach% $(common-objpfx)hurd%,\
 			       $(before-compile))
 
 # Even before that, we need abi-versions.h which is generated right here.
-ifeq ($(versioning),yes)
+ifeq ($(build-shared),yes)
 ifndef avoid-generated
 before-compile := $(common-objpfx)abi-versions.h $(before-compile)
 $(common-objpfx)abi-versions.h: $(..)scripts/abi-versions.awk \
@@ -106,7 +106,7 @@ $(common-objpfx)%.latest: $(common-objpfx)abi-versions.h
 	    $(common-objpfx)abi-versions.h > $@T
 	mv -f $@T $@
 endif # avoid-generated
-endif # $(versioning) = yes
+endif # $(build-shared) = yes
 
 ifndef avoid-generated
 before-compile := $(common-objpfx)libc-abis.h $(before-compile)
@@ -283,7 +283,7 @@ endif
 
 # Generate version maps, but wait until sysdep-subdirs is known
 ifeq ($(sysd-sorted-done),t)
-ifeq ($(versioning),yes)
+ifeq ($(build-shared),yes)
 -include $(common-objpfx)sysd-versions
 $(addprefix $(common-objpfx),$(version-maps)): $(common-objpfx)sysd-versions
 common-generated += $(version-maps)
@@ -324,7 +324,7 @@ $(common-objpfx)sysd-versions: $(common-objpfx)Versions.all \
 	) > $@T
 	mv -f $@T $@
 endif # avoid-generated
-endif # $(versioning) = yes
+endif # $(build-shared) = yes
 endif # sysd-sorted-done
 
 # Generate .dT files as we compile.
@@ -400,9 +400,9 @@ elide-routines.og += $(shared-only-routines)
 
 ifeq (yes,$(build-shared))
 
-# Reference map file only when versioning is selected and a map file name
+# Reference map file only when shared libraries are built and a map file name
 # is given.
-ifeq ($(versioning),yes)
+ifeq ($(build-shared),yes)
 map-file = $(firstword $($(@F:.so=-map)) \
 		       $(addprefix $(common-objpfx), \
 				   $(filter $(@F:.so=.map),$(version-maps))))
@@ -565,17 +565,48 @@ generated += libc_pic.opts libc_pic.os.clean
 libc_pic_clean := .clean
 endif
 
-# Do not filter ld.so out of libc.so link.
-$(common-objpfx)libc.so: link-libc-deps = # empty
+# Build a possibly-modified version of libc_pic.a for use in building
+# linkobj/libc.so.
+ifeq (,$(filter sunrpc,$(subdirs)))
+$(common-objpfx)linkobj/libc_pic.a: $(common-objpfx)libc_pic.a
+	$(make-target-directory)
+	ln -f $< $@
+else
+$(common-objpfx)linkobj/libc_pic.a: $(common-objpfx)libc_pic.a \
+				    $(common-objpfx)sunrpc/librpc_compat_pic.a
+	$(make-target-directory)
+	(cd $(common-objpfx)linkobj; \
+	 $(AR) x ../libc_pic.a; \
+	 rm $$($(AR) t ../sunrpc/librpc_compat_pic.a | sed 's/^compat-//'); \
+	 $(AR) x ../sunrpc/librpc_compat_pic.a; \
+	 $(AR) cr libc_pic.a *.os; \
+	 rm *.os)
+endif # $(subdirs) contains sunrpc
 
-# Use our own special initializer and finalizer files for libc.so.
+# Clear link-libc-deps for the libc.so libraries so build-shlibs does not
+# filter ld.so out of the list of linked objects.
+$(common-objpfx)libc.so: link-libc-deps = # empty
+$(common-objpfx)linkobj/libc.so: link-libc-deps = # empty
+
+# Use our own special initializer and finalizer files for the libc.so
+# libraries.
 $(common-objpfx)libc.so: $(elfobjdir)/soinit.os \
 			 $(common-objpfx)libc_pic.os$(libc_pic_clean) \
 			 $(elfobjdir)/sofini.os \
-			 $(elfobjdir)/interp.os $(elfobjdir)/ld.so \
+			 $(elfobjdir)/interp.os \
+			 $(elfobjdir)/ld.so \
 			 $(shlib-lds)
 	$(build-shlib)
-ifeq ($(versioning),yes)
+
+$(common-objpfx)linkobj/libc.so: $(elfobjdir)/soinit.os \
+			 $(common-objpfx)linkobj/libc_pic.a \
+			 $(elfobjdir)/sofini.os \
+			 $(elfobjdir)/interp.os \
+			 $(elfobjdir)/ld.so \
+			 $(shlib-lds)
+	$(build-shlib)
+
+ifeq ($(build-shared),yes)
 $(common-objpfx)libc.so: $(common-objpfx)libc.map
 endif
 common-generated += libc.so libc_pic.os
@@ -1132,7 +1163,7 @@ endif
 CPPFLAGS-nonlib = -DNOT_IN_libc=1
 
 
-ifeq ($(versioning),yes)
+ifeq ($(build-shared),yes)
 # Generate normalized lists of symbols, versions, and data sizes.
 # This is handy for checking against existing library binaries.
 

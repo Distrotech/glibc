@@ -1,4 +1,4 @@
-/* Copyright (C) 2000-2013 Free Software Foundation, Inc.
+/* Copyright (C) 2000-2014 Free Software Foundation, Inc.
    This file is part of the GNU C Library.
 
    The GNU C Library is free software; you can redistribute it and/or
@@ -148,14 +148,15 @@ shm_open (const char *name, int oflag, mode_t mode)
   while (name[0] == '/')
     ++name;
 
-  if (name[0] == '\0')
+  namelen = strlen (name);
+
+  /* Validate the filename.  */
+  if (name[0] == '\0' || namelen > NAME_MAX || strchr (name, '/') != NULL)
     {
-      /* The name "/" is not supported.  */
       __set_errno (EINVAL);
       return -1;
     }
 
-  namelen = strlen (name);
   fname = (char *) alloca (mountpoint.dirlen + namelen + 1);
   __mempcpy (__mempcpy (fname, mountpoint.dir, mountpoint.dirlen),
 	     name, namelen + 1);
@@ -237,14 +238,15 @@ shm_unlink (const char *name)
   while (name[0] == '/')
     ++name;
 
-  if (name[0] == '\0')
+  namelen = strlen (name);
+
+  /* Validate the filename.  */
+  if (name[0] == '\0' || namelen > NAME_MAX || strchr (name, '/') != NULL)
     {
-      /* The name "/" is not supported.  */
       __set_errno (ENOENT);
       return -1;
     }
 
-  namelen = strlen (name);
   fname = (char *) alloca (mountpoint.dirlen + namelen + 1);
   __mempcpy (__mempcpy (fname, mountpoint.dir, mountpoint.dirlen),
 	     name, namelen + 1);

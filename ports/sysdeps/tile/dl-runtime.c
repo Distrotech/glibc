@@ -1,4 +1,4 @@
-/* Copyright (C) 2011-2013 Free Software Foundation, Inc.
+/* Copyright (C) 2011-2014 Free Software Foundation, Inc.
    This file is part of the GNU C Library.
    Contributed by Chris Metcalf <cmetcalf@tilera.com>, 2011.
 
@@ -127,8 +127,8 @@ _dl_after_load (struct link_map *l)
 }
 
 /* Support notifying the simulator about removed objects prior to munmap().  */
-void internal_function
-_dl_unmap (struct link_map *l)
+static void
+sim_dlclose (ElfW(Addr) map_start)
 {
   int shift;
 
@@ -144,9 +144,15 @@ _dl_unmap (struct link_map *l)
   DLPUTC ('0');
   DLPUTC ('x');
   for (shift = (int) sizeof (unsigned long) * 8 - 4; shift >= 0; shift -= 4)
-    DLPUTC ("0123456789abcdef"[(l->l_map_start >> shift) & 0xF]);
+    DLPUTC ("0123456789abcdef"[(map_start >> shift) & 0xF]);
   DLPUTC ('\0');
-#undef DLPUTC
 
+#undef DLPUTC
+}
+
+void internal_function
+_dl_unmap (struct link_map *l)
+{
+  sim_dlclose (l->l_map_start);
   __munmap ((void *) l->l_map_start, l->l_map_end - l->l_map_start);
 }

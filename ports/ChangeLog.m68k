@@ -1,3 +1,62 @@
+2014-01-27  Andreas Schwab  <schwab@linux-m68k.org>
+
+	* sysdeps/m68k/m680x0/fpu/libm-test-ulps: Regenerate.
+
+2013-12-10  Andreas Schwab  <schwab@linux-m68k.org>
+
+	* sysdeps/m68k/m680x0/fpu/s_nextafterl.c (__nextafterl): Use
+	math_force_eval.
+
+	* sysdeps/unix/sysv/linux/m68k/nptl/lowlevellock.h
+	(FUTEX_WAIT_REQEUE_PI, FUTEX_CMP_REQEUE_PI)
+	(lll_futex_wait_requeue_pi, lll_futex_timed_wait_requeue_pi)
+	(lll_futex_cmp_requeue_pi): Define.
+
+	* sysdeps/unix/sysv/linux/m68k/kernel-features.h
+	(__ASSUME_REQUEUE_PI, __ASSUME_SET_ROBUST_LIST): Undefine before
+	3.10.
+
+2013-11-28  Joseph Myers  <joseph@codesourcery.com>
+
+	* sysdeps/m68k/fpu/fegetround.c (fegetround): Use libm_hidden_def.
+
+2013-11-26  Ondřej Bílka  <neleai@seznam.cz>
+
+	* sysdeps/unix/sysv/linux/m68k/bits/stat.h: Use __glibc_reserved
+	instead of __unused.
+
+2013-10-30  Mike Frysinger  <vapier@gentoo.org>
+
+	* sysdeps/unix/sysv/linux/m68k/configure.in: Moved to ...
+	* sysdeps/unix/sysv/linux/m68k/configure.ac: ... here.
+	* sysdeps/unix/sysv/linux/m68k/configure: Regenerated.
+
+2013-10-08  Andreas Schwab  <schwab@suse.de>
+
+	* sysdeps/m68k/start.S [SHARED]: Use PIC.
+
+2013-09-20  Andreas Schwab  <schwab@linux-m68k.org>
+
+	* sysdeps/m68k/ffs.c (__ffs): Define as hidden.
+
+2013-09-04  Joseph Myers  <joseph@codesourcery.com>
+
+	* sysdeps/unix/sysv/linux/m68k/mmap64.c: New file.
+
+2013-08-21   Ondřej Bílka  <neleai@seznam.cz>
+
+	* sysdeps/m68k/m680x0/fpu/fraiseexcpt.c: Fix typos.
+
+2013-07-20  Andreas Schwab  <schwab@linux-m68k.org>
+
+	* sysdeps/unix/sysv/linux/m68k/dl-static.c: New file.
+	* sysdeps/unix/sysv/linux/m68k/ldsodefs.h: New file.
+	* sysdeps/unix/sysv/linux/m68k/Makefile (sysdep-dl-routines)
+	(sysdep_routines, sysdep-rtld-routines) [$(subdir) = elf]: Add
+	dl-static.
+	* sysdeps/unix/sysv/linux/m68k/Versions (ld: GLIBC_PRIVATE): Add
+	_dl_var_init.
+
 2013-07-03  Andreas Schwab  <schwab@linux-m68k.org>
 
 	* sysdeps/m68k/m680x0/fpu/libm-test-ulps: Update.

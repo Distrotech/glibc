@@ -1,5 +1,5 @@
 /* O_*, F_*, FD_* bit values for Linux.
-   Copyright (C) 1995-2013 Free Software Foundation, Inc.
+   Copyright (C) 1995-2014 Free Software Foundation, Inc.
    This file is part of the GNU C Library.
 
    The GNU C Library is free software; you can redistribute it and/or
@@ -130,7 +130,7 @@
 # define DN_CREATE	0x00000004	/* File created.  */
 # define DN_DELETE	0x00000008	/* File removed.  */
 # define DN_RENAME	0x00000010	/* File renamed.  */
-# define DN_ATTRIB	0x00000020	/* File changed attibutes.  */
+# define DN_ATTRIB	0x00000020	/* File changed attributes.  */
 # define DN_MULTISHOT	0x80000000	/* Don't remove notifier.  */
 #endif
 

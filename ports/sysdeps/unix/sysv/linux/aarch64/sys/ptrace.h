@@ -1,5 +1,5 @@
 /* `ptrace' debugger support interface.  Linux version.
-   Copyright (C) 1996-2013 Free Software Foundation, Inc.
+   Copyright (C) 1996-2014 Free Software Foundation, Inc.
 
    This file is part of the GNU C Library.
 
@@ -165,7 +165,7 @@ enum __ptrace_eventcodes
 };
 
 /* Arguments for PTRACE_PEEKSIGINFO.  */
-struct ptrace_peeksiginfo_args
+struct __ptrace_peeksiginfo_args
 {
   __uint64_t off;	/* From which siginfo to start.  */
   __uint32_t flags;	/* Flags for peeksiginfo.  */

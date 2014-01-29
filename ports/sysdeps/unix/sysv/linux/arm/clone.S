@@ -1,4 +1,4 @@
-/* Copyright (C) 1996-2013 Free Software Foundation, Inc.
+/* Copyright (C) 1996-2014 Free Software Foundation, Inc.
    This file is part of the GNU C Library.
    Contributed by Pat Beirne <patb@corelcomputer.com>
 
@@ -88,14 +88,8 @@ PSEUDO_END (__clone)
 #endif
 	@ pick the function arg and call address off the stack and execute
 	ldr	r0, [sp, #4]
-#if defined(__ARM_ARCH_4T__) && defined(__THUMB_INTERWORK__)
 	ldr 	ip, [sp], #8
-	mov	lr, pc
-	bx      ip
-#else
-	mov	lr, pc
-	ldr 	pc, [sp], #8
-#endif
+	BLX (ip)
 
 	@ and we are done, passing the return value through r0
 	b	PLTJMP(HIDDEN_JUMPTARGET(_exit))

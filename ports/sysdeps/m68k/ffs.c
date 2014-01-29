@@ -1,7 +1,7 @@
 /* ffs -- find first set bit in a word, counted from least significant end.
    For mc68020, mc68030, mc68040.
    This file is part of the GNU C Library.
-   Copyright (C) 1991-2013 Free Software Foundation, Inc.
+   Copyright (C) 1991-2014 Free Software Foundation, Inc.
    Contributed by Torbjorn Granlund (tege@sics.se).
 
    The GNU C Library is free software; you can redistribute it and/or
@@ -36,6 +36,7 @@ __ffs (x)
   return 32 - cnt;
 }
 weak_alias (__ffs, ffs)
+libc_hidden_def (__ffs)
 libc_hidden_builtin_def (ffs)
 #undef ffsl
 weak_alias (__ffs, ffsl)

@@ -1,5 +1,5 @@
 /* Look up a symbol in the loaded objects.
-   Copyright (C) 1995-2013 Free Software Foundation, Inc.
+   Copyright (C) 1995-2014 Free Software Foundation, Inc.
    This file is part of the GNU C Library.
 
    The GNU C Library is free software; you can redistribute it and/or
@@ -746,7 +746,7 @@ _dl_lookup_symbol_x (const char *undef_name, struct link_map *undef_map,
 	     contain the needed symbol.  This code is never reached
 	     for unversioned lookups.  */
 	  assert (version != NULL);
-	  const char *reference_name = undef_map ? undef_map->l_name : NULL;
+	  const char *reference_name = undef_map ? undef_map->l_name : "";
 
 	  /* XXX We cannot translate the message.  */
 	  _dl_signal_cerror (0, DSO_FILENAME (reference_name),

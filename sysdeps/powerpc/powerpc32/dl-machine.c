@@ -1,5 +1,5 @@
 /* Machine-dependent ELF dynamic relocation functions.  PowerPC version.
-   Copyright (C) 1995-2013 Free Software Foundation, Inc.
+   Copyright (C) 1995-2014 Free Software Foundation, Inc.
    This file is part of the GNU C Library.
 
    The GNU C Library is free software; you can redistribute it and/or
@@ -28,13 +28,6 @@
 /* The value __cache_line_size is defined in dl-sysdep.c and is initialised
    by _dl_sysdep_start via DL_PLATFORM_INIT.  */
 extern int __cache_line_size attribute_hidden;
-
-/* Because ld.so is now versioned, these functions can be in their own file;
-   no relocations need to be done to call them.
-   Of course, if ld.so is not versioned...  */
-#if defined SHARED && !(DO_VERSIONING - 0)
-#error This will not work with versioning turned off, sorry.
-#endif
 
 
 /* Stuff for the PLT.  */
@@ -423,6 +416,12 @@ __process_machine_rela (struct link_map *map,
 			Elf32_Addr const finaladdr,
 			int rinfo)
 {
+  union unaligned
+    {
+      uint16_t u2;
+      uint32_t u4;
+    } __attribute__((__packed__));
+
   switch (rinfo)
     {
     case R_PPC_NONE:
@@ -439,10 +438,7 @@ __process_machine_rela (struct link_map *map,
       return;
 
     case R_PPC_UADDR32:
-      ((char *) reloc_addr)[0] = finaladdr >> 24;
-      ((char *) reloc_addr)[1] = finaladdr >> 16;
-      ((char *) reloc_addr)[2] = finaladdr >> 8;
-      ((char *) reloc_addr)[3] = finaladdr;
+      ((union unaligned *) reloc_addr)->u4 = finaladdr;
       break;
 
     case R_PPC_ADDR24:
@@ -460,8 +456,7 @@ __process_machine_rela (struct link_map *map,
     case R_PPC_UADDR16:
       if (__builtin_expect (finaladdr > 0x7fff && finaladdr < 0xffff8000, 0))
 	_dl_reloc_overflow (map,  "R_PPC_UADDR16", reloc_addr, refsym);
-      ((char *) reloc_addr)[0] = finaladdr >> 8;
-      ((char *) reloc_addr)[1] = finaladdr;
+      ((union unaligned *) reloc_addr)->u2 = finaladdr;
       break;
 
     case R_PPC_ADDR16_LO:

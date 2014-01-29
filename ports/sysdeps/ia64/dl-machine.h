@@ -1,5 +1,5 @@
 /* Machine-dependent ELF dynamic relocation inline functions.  IA-64 version.
-   Copyright (C) 1995-2013 Free Software Foundation, Inc.
+   Copyright (C) 1995-2014 Free Software Foundation, Inc.
    This file is part of the GNU C Library.
 
    The GNU C Library is free software; you can redistribute it and/or
@@ -322,8 +322,12 @@ elf_machine_runtime_setup (struct link_map *l, int lazy, int profile)
 #define ELF_MACHINE_NO_REL 1
 
 /* Return the address of the entry point. */
-#define ELF_MACHINE_START_ADDRESS(map, start)	\
-  DL_STATIC_FUNCTION_ADDRESS (map, start)
+#define ELF_MACHINE_START_ADDRESS(map, start)			\
+({								\
+	ElfW(Addr) addr;					\
+	DL_DT_FUNCTION_ADDRESS(map, start, static, addr)	\
+	addr;							\
+})
 
 /* Fixup a PLT entry to bounce directly to the function at VALUE.  */
 static inline struct fdesc __attribute__ ((always_inline))

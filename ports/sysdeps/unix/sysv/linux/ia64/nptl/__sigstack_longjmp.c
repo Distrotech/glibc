@@ -1,4 +1,4 @@
-/* Copyright (C) 2004-2013 Free Software Foundation, Inc.
+/* Copyright (C) 2004-2014 Free Software Foundation, Inc.
    This file is part of the GNU C Library.
    Contributed by David Mosberger-Tang <davidm@hpl.hp.com>.
 
@@ -19,7 +19,7 @@
 /* The public __longjmp() implementation is limited to jumping within
    the same stack.  That is, in general it is not possible to use this
    __longjmp() implementation to cross from one stack to another.
-   In constrast, the __sigstack_longjmp() implemented here allows
+   In contrast, the __sigstack_longjmp() implemented here allows
    crossing from the alternate signal stack to the normal stack
    as a special case.  */
 

@@ -1,4 +1,4 @@
-/* Copyright (C) 1991-2013 Free Software Foundation, Inc.
+/* Copyright (C) 1991-2014 Free Software Foundation, Inc.
    This file is part of the GNU C Library.
 
    The GNU C Library is free software; you can redistribute it and/or
@@ -1757,7 +1757,7 @@ _IO_vfscanf_internal (_IO_FILE *s, const char *format, _IO_va_list argptr,
 		 we must recognize "(nil)" as well.  */
 	      if (__builtin_expect (wpsize == 0
 				    && (flags & READ_POINTER)
-				    && (width < 0 || width >= 0)
+				    && (width < 0 || width >= 5)
 				    && c == '('
 				    && TOLOWER (inchar ()) == L_('n')
 				    && TOLOWER (inchar ()) == L_('i')
@@ -1966,6 +1966,8 @@ _IO_vfscanf_internal (_IO_FILE *s, const char *format, _IO_va_list argptr,
 		  if (width > 0)
 		    --width;
 		}
+	      else
+		got_digit = 1;
 	    }
 
 	  while (1)
@@ -2185,7 +2187,7 @@ _IO_vfscanf_internal (_IO_FILE *s, const char *format, _IO_va_list argptr,
 		    }
 
 		  /* Start checking against localized digits, if
-		     convertion is done correctly. */
+		     conversion is done correctly. */
 		  while (1)
 		    {
 		      if (got_e && wp[wpsize - 1] == exp_char

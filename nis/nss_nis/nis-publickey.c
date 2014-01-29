@@ -1,4 +1,4 @@
-/* Copyright (C) 1996-2013 Free Software Foundation, Inc.
+/* Copyright (C) 1996-2014 Free Software Foundation, Inc.
    This file is part of the GNU C Library.
    Contributed by Thorsten Kukuk <kukuk@suse.de>, 1996.
 
@@ -25,7 +25,7 @@
 #include <rpcsvc/yp.h>
 #include <rpcsvc/ypclnt.h>
 #include <rpc/key_prot.h>
-extern int xdecrypt (char *, char *);
+#include <rpc/des_crypt.h>
 
 #include "nss-nis.h"
 

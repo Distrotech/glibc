@@ -1,5 +1,5 @@
 /* Map in a shared object's segments from the file.
-   Copyright (C) 1995-2013 Free Software Foundation, Inc.
+   Copyright (C) 1995-2014 Free Software Foundation, Inc.
    This file is part of the GNU C Library.
 
    The GNU C Library is free software; you can redistribute it and/or
@@ -314,7 +314,7 @@ _dl_dst_substitute (struct link_map *l, const char *name, char *result,
   const char *const start = name;
 
   /* Now fill the result path.  While copying over the string we keep
-     track of the start of the last path element.  When we come accross
+     track of the start of the last path element.  When we come across
      a DST we copy over the value or (if the value is not available)
      leave the entire path element out.  */
   char *wp = result;
@@ -480,14 +480,19 @@ static size_t max_dirnamelen;
 
 static struct r_search_path_elem **
 fillin_rpath (char *rpath, struct r_search_path_elem **result, const char *sep,
-	      int check_trusted, const char *what, const char *where)
+	      int check_trusted, const char *what, const char *where,
+	      struct link_map *l)
 {
   char *cp;
   size_t nelems = 0;
+  char *to_free;
 
   while ((cp = __strsep (&rpath, sep)) != NULL)
     {
       struct r_search_path_elem *dirp;
+
+      to_free = cp = expand_dynamic_string_token (l, cp, 1);
+
       size_t len = strlen (cp);
 
       /* `strsep' can pass an empty string.  This has to be
@@ -508,7 +513,10 @@ fillin_rpath (char *rpath, struct r_search_path_elem **result, const char *sep,
 
       /* Make sure we don't use untrusted directories if we run SUID.  */
       if (__builtin_expect (check_trusted, 0) && !is_trusted_path (cp, len))
-	continue;
+	{
+	  free (to_free);
+	  continue;
+	}
 
       /* See if this directory is already known.  */
       for (dirp = GL(dl_all_dirs); dirp != NULL; dirp = dirp->next)
@@ -569,6 +577,7 @@ fillin_rpath (char *rpath, struct r_search_path_elem **result, const char *sep,
 	  /* Put it in the result array.  */
 	  result[nelems++] = dirp;
 	}
+      free (to_free);
     }
 
   /* Terminate the array.  */
@@ -624,9 +633,8 @@ decompose_rpath (struct r_search_path_struct *sps,
       while (*inhp != '\0');
     }
 
-  /* Make a writable copy.  At the same time expand possible dynamic
-     string tokens.  */
-  copy = expand_dynamic_string_token (l, rpath, 1);
+  /* Make a writable copy.  */
+  copy = local_strdup (rpath);
   if (copy == NULL)
     {
       errstring = N_("cannot create RUNPATH/RPATH copy");
@@ -659,7 +667,7 @@ decompose_rpath (struct r_search_path_struct *sps,
       _dl_signal_error (ENOMEM, NULL, NULL, errstring);
     }
 
-  fillin_rpath (copy, result, ":", 0, what, where);
+  fillin_rpath (copy, result, ":", 0, what, where, l);
 
   /* Free the copied RPATH string.  `fillin_rpath' make own copies if
      necessary.  */
@@ -707,9 +715,7 @@ _dl_init_paths (const char *llp)
   const char *strp;
   struct r_search_path_elem *pelem, **aelem;
   size_t round_size;
-#ifdef SHARED
-  struct link_map *l;
-#endif
+  struct link_map __attribute__ ((unused)) *l = NULL;
   /* Initialize to please the compiler.  */
   const char *errstring = NULL;
 
@@ -864,7 +870,7 @@ _dl_init_paths (const char *llp)
 
       (void) fillin_rpath (llp_tmp, env_path_list.dirs, ":;",
 			   INTUSE(__libc_enable_secure), "LD_LIBRARY_PATH",
-			   NULL);
+			   NULL, l);
 
       if (env_path_list.dirs[0] == NULL)
 	{
@@ -1727,7 +1733,7 @@ open_verify (const char *name, struct filebuf *fbp, struct link_map *loader,
       unsigned int osversion;
       size_t maplength;
 
-      /* We successfully openened the file.  Now verify it is a file
+      /* We successfully opened the file.  Now verify it is a file
 	 we can use.  */
       __set_errno (0);
       fbp->len = 0;

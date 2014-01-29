@@ -1,6 +1,6 @@
 /* Set flags signalling availability of kernel features based on given
    kernel version number.
-   Copyright (C) 2008-2013 Free Software Foundation, Inc.
+   Copyright (C) 2008-2014 Free Software Foundation, Inc.
    This file is part of the GNU C Library.
 
    The GNU C Library is free software; you can redistribute it and/or
@@ -46,4 +46,10 @@
 #if __LINUX_KERNEL_VERSION < 0x030000
 # undef __ASSUME_PSELECT
 # undef __ASSUME_PPOLL
+#endif
+
+/* No support for PI futexes or robust mutexes before 3.10 for m68k.  */
+#if __LINUX_KERNEL_VERSION < 0x030a00
+# undef __ASSUME_REQUEUE_PI
+# undef __ASSUME_SET_ROBUST_LIST
 #endif

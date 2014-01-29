@@ -1,4 +1,4 @@
-/* Copyright (C) 2011-2013 Free Software Foundation, Inc.
+/* Copyright (C) 2011-2014 Free Software Foundation, Inc.
    This file is part of the GNU C Library.
    Contributed by Chris Metcalf <cmetcalf@tilera.com>, 2011.
 
@@ -154,7 +154,7 @@ enum __ptrace_eventcodes
 };
 
 /* Arguments for PTRACE_PEEKSIGINFO.  */
-struct ptrace_peeksiginfo_args
+struct __ptrace_peeksiginfo_args
 {
   __uint64_t off;	/* From which siginfo to start.  */
   __uint32_t flags;	/* Flags for peeksiginfo.  */
@@ -165,7 +165,7 @@ enum __ptrace_peeksiginfo_flags
 {
   /* Read signals from a shared (process wide) queue.  */
   PTRACE_PEEKSIGINFO_SHARED = (1 << 0)
-}
+};
 
 /* Perform process tracing functions.  REQUEST is one of the values
    above, and determines the action to be taken.

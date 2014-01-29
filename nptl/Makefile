@@ -1,4 +1,4 @@
-# Copyright (C) 2002-2013 Free Software Foundation, Inc.
+# Copyright (C) 2002-2014 Free Software Foundation, Inc.
 # This file is part of the GNU C Library.
 
 # The GNU C Library is free software; you can redistribute it and/or
@@ -278,6 +278,10 @@ gen-as-const-headers = pthread-errnos.sym
 
 LDFLAGS-pthread.so = -Wl,--enable-new-dtags,-z,nodelete,-z,initfirst
 
+# GCC-4.9 compiles 'sprintf(NULL, ...)' into UD2 on x86_64 without -fno-builtin
+CFLAGS-tst-cleanup2.c = -fno-builtin
+CFLAGS-tst-cleanupx2.c = -fno-builtin
+
 include ../Makeconfig
 
 ifeq ($(have-forced-unwind),yes)
@@ -289,7 +293,7 @@ tests += tst-cancelx2 tst-cancelx3 tst-cancelx4 tst-cancelx5 \
 	 tst-oncex3 tst-oncex4
 endif
 ifeq ($(build-shared),yes)
-tests += tst-atfork2 tst-tls3 tst-tls4 tst-tls5 tst-_res1 tst-fini1 \
+tests += tst-atfork2 tst-tls3 tst-tls4 tst-tls5 tst-tls7 tst-_res1 tst-fini1 \
 	 tst-stackguard1
 tests-nolibpthread += tst-fini1
 ifeq ($(have-z-execstack),yes)
@@ -300,7 +304,8 @@ endif
 modules-names = tst-atfork2mod tst-tls3mod tst-tls4moda tst-tls4modb \
 		tst-tls5mod tst-tls5moda tst-tls5modb tst-tls5modc \
 		tst-tls5modd tst-tls5mode tst-tls5modf \
-		tst-_res1mod1 tst-_res1mod2 tst-execstack-mod tst-fini1mod
+		tst-_res1mod1 tst-_res1mod2 tst-execstack-mod tst-fini1mod \
+		tst-tls7mod
 extra-test-objs += $(addsuffix .os,$(strip $(modules-names))) tst-cleanup4aux.o
 test-extras += $(modules-names) tst-cleanup4aux
 test-modules = $(addprefix $(objpfx),$(addsuffix .so,$(modules-names)))
@@ -314,6 +319,7 @@ tst-tls5modc.so-no-z-defs = yes
 tst-tls5modd.so-no-z-defs = yes
 tst-tls5mode.so-no-z-defs = yes
 tst-tls5modf.so-no-z-defs = yes
+tst-tls7mod.so-no-z-defs = yes
 
 ifeq ($(build-shared),yes)
 # Build all the modules even when not actually running test programs.
@@ -443,6 +449,11 @@ tst-cancel7-ARGS = --command "exec $(host-test-program-cmd)"
 tst-cancelx7-ARGS = $(tst-cancel7-ARGS)
 tst-umask1-ARGS = $(objpfx)tst-umask1.temp
 
+# In this test, we create a CLONE_VM "thread" that shares TLS storage
+# with the original thread. Both threads then race in ld.so with lazy PLT
+# resolution. Avoid this race by disabling lazy binding. BZ #11214.
+tst-getpid2-ENV = LD_BIND_NOW=1
+
 $(objpfx)tst-atfork2: $(libdl) $(shared-thread-library)
 LDFLAGS-tst-atfork2 = -rdynamic
 tst-atfork2-ENV = MALLOC_TRACE=$(objpfx)tst-atfork2.mtrace
@@ -470,6 +481,12 @@ $(objpfx)tst-tls4.out: $(objpfx)tst-tls4moda.so $(objpfx)tst-tls4modb.so
 $(objpfx)tst-tls5: $(objpfx)tst-tls5mod.so $(shared-thread-library)
 LDFLAGS-tst-tls5 = $(no-as-needed)
 LDFLAGS-tst-tls5mod.so = -Wl,-soname,tst-tls5mod.so
+
+# ensure free(malloc()) isn't optimized out
+CFLAGS-tst-tls7.c = -fno-builtin-malloc -fno-builtin-free
+$(objpfx)tst-tls7: $(libdl) $(shared-thread-library)
+$(objpfx)tst-tls7.out: $(objpfx)tst-tls7mod.so
+$(objpfx)tst-tls7mod.so: $(shared-thread-library)
 
 ifeq ($(build-shared),yes)
 ifeq ($(run-built-tests),yes)

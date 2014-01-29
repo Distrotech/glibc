@@ -1,4 +1,4 @@
-/* Copyright (C) 2005-2013 Free Software Foundation, Inc.
+/* Copyright (C) 2005-2014 Free Software Foundation, Inc.
 
    This file is part of the GNU C Library.
 
@@ -134,7 +134,7 @@ __local_syscall_error:						\
         str     x19, [sp,16];					\
 	neg	x19, x0;					\
 	bl	C_SYMBOL_NAME(__errno_location);		\
-	str	x19, [x0];					\
+	str	w19, [x0];					\
 	mov	x0, -1;						\
         ldr     x19, [sp,16];					\
         ldp     x29, x30, [sp], 32;				\
@@ -371,8 +371,44 @@ __local_syscall_error:						\
 
 #endif	/* __ASSEMBLER__ */
 
-/* Pointer mangling is not yet supported for AArch64.  */
-#define PTR_MANGLE(var) (void) (var)
-#define PTR_DEMANGLE(var) (void) (var)
+/* Pointer mangling is supported for AArch64.  */
+#if (defined NOT_IN_libc && defined IS_IN_rtld) || \
+  (!defined SHARED && (!defined NOT_IN_libc || defined IS_IN_libpthread))
+# ifdef __ASSEMBLER__
+#  define PTR_MANGLE(dst, src, guard, tmp)                                \
+  LDST_PCREL (ldr, guard, tmp, C_SYMBOL_NAME(__pointer_chk_guard_local)); \
+  PTR_MANGLE2 (dst, src, guard)
+/* Use PTR_MANGLE2 for efficiency if guard is already loaded.  */
+#  define PTR_MANGLE2(dst, src, guard)\
+  eor dst, src, guard
+#  define PTR_DEMANGLE(dst, src, guard, tmp)\
+  PTR_MANGLE (dst, src, guard, tmp)
+#  define PTR_DEMANGLE2(dst, src, guard)\
+  PTR_MANGLE2 (dst, src, guard)
+# else
+extern uintptr_t __pointer_chk_guard_local attribute_relro attribute_hidden;
+#  define PTR_MANGLE(var) \
+  (var) = (__typeof (var)) ((uintptr_t) (var) ^ __pointer_chk_guard_local)
+#  define PTR_DEMANGLE(var)     PTR_MANGLE (var)
+# endif
+#else
+# ifdef __ASSEMBLER__
+#  define PTR_MANGLE(dst, src, guard, tmp)                             \
+  LDST_GLOBAL (ldr, guard, tmp, C_SYMBOL_NAME(__pointer_chk_guard));   \
+  PTR_MANGLE2 (dst, src, guard)
+/* Use PTR_MANGLE2 for efficiency if guard is already loaded.  */
+#  define PTR_MANGLE2(dst, src, guard)\
+  eor dst, src, guard
+#  define PTR_DEMANGLE(dst, src, guard, tmp)\
+  PTR_MANGLE (dst, src, guard, tmp)
+#  define PTR_DEMANGLE2(dst, src, guard)\
+  PTR_MANGLE2 (dst, src, guard)
+# else
+extern uintptr_t __pointer_chk_guard attribute_relro;
+#  define PTR_MANGLE(var) \
+  (var) = (__typeof (var)) ((uintptr_t) (var) ^ __pointer_chk_guard)
+#  define PTR_DEMANGLE(var) PTR_MANGLE (var)
+# endif
+#endif
 
 #endif /* linux/aarch64/sysdep.h */

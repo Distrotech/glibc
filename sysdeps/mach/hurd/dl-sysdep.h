@@ -1,5 +1,5 @@
 /* System-specific settings for dynamic linker code.  Hurd version.
-   Copyright (C) 2002-2013 Free Software Foundation, Inc.
+   Copyright (C) 2002-2014 Free Software Foundation, Inc.
    This file is part of the GNU C Library.
 
    The GNU C Library is free software; you can redistribute it and/or
@@ -29,3 +29,10 @@
 # define DL_ARGV_NOT_RELRO 1
 # define LIBC_STACK_END_NOT_RELRO 1
 #endif
+
+#include <signal.h>
+inline void _dl_mask_all_signals (sigset_t *) internal_function;
+inline void _dl_mask_all_signals (sigset_t *) { }
+
+inline void _dl_unmask_all_signals (sigset_t *) internal_function;
+inline void _dl_unmask_all_signals (sigset_t *) { }

@@ -786,7 +786,7 @@ mbslen (const char *s)
 This function simply calls @code{mbrlen} for each multibyte character
 in the string and counts the number of function calls.  Please note that
 we here use @code{MB_LEN_MAX} as the size argument in the @code{mbrlen}
-call.  This is acceptable since a) this value is larger then the length of
+call.  This is acceptable since a) this value is larger than the length of
 the longest multibyte character sequence and b) we know that the string
 @var{s} ends with a NUL byte, which cannot be part of any other multibyte
 character sequence but the one representing the NUL wide character.
@@ -956,7 +956,7 @@ extensions that can help in some important situations.
 @comment ISO
 @deftypefun size_t mbsrtowcs (wchar_t *restrict @var{dst}, const char **restrict @var{src}, size_t @var{len}, mbstate_t *restrict @var{ps})
 The @code{mbsrtowcs} function (``multibyte string restartable to wide
-character string'') converts an NUL-terminated multibyte character
+character string'') converts a NUL-terminated multibyte character
 string at @code{*@var{src}} into an equivalent wide character string,
 including the NUL wide character at the end.  The conversion is started
 using the state information from the object pointed to by @var{ps} or
@@ -2485,7 +2485,7 @@ destination character sets, respectively.  If the characters all have the
 same size, the minimum and maximum values are the same.
 
 @item __stateful
-This element must be initialized to an nonzero value if the source
+This element must be initialized to a nonzero value if the source
 character set is stateful.  Otherwise it must be zero.
 @end table
 

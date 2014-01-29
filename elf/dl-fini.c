@@ -1,5 +1,5 @@
 /* Call the termination functions of loaded shared objects.
-   Copyright (C) 1995-2013 Free Software Foundation, Inc.
+   Copyright (C) 1995-2014 Free Software Foundation, Inc.
    This file is part of the GNU C Library.
 
    The GNU C Library is free software; you can redistribute it and/or
@@ -254,7 +254,7 @@ _dl_fini (void)
 
 		  /* Next try the old-style destructor.  */
 		  if (l->l_info[DT_FINI] != NULL)
-		    ((fini_t) DL_DT_FINI_ADDRESS (l, l->l_addr + l->l_info[DT_FINI]->d_un.d_ptr)) ();
+		     DL_CALL_DT_FINI(l, l->l_addr + l->l_info[DT_FINI]->d_un.d_ptr);
 		}
 
 #ifdef SHARED

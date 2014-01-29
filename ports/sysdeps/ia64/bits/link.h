@@ -1,4 +1,4 @@
-/* Copyright (C) 2005-2013 Free Software Foundation, Inc.
+/* Copyright (C) 2005-2014 Free Software Foundation, Inc.
    This file is part of the GNU C Library.
 
    The GNU C Library is free software; you can redistribute it and/or
@@ -46,17 +46,17 @@ typedef struct La_ia64_retval
 __BEGIN_DECLS
 
 extern Elf64_Addr la_ia64_gnu_pltenter (Elf64_Sym *__sym, unsigned int __ndx,
-				       uintptr_t *__refcook,
-				       uintptr_t *__defcook,
-				       La_ia64_regs *__regs,
-				       unsigned int *__flags,
-				       const char *__symname,
-				       long int *__framesizep);
-extern unsigned int la_ia64_gnu_pltexit (Elf64_Sym *__sym, unsigned int __ndx,
 					uintptr_t *__refcook,
 					uintptr_t *__defcook,
-					const La_ia64_regs *__inregs,
-					La_ia64_retval *__outregs,
-					const char *__symname);
+					La_ia64_regs *__regs,
+					unsigned int *__flags,
+					const char *__symname,
+					long int *__framesizep);
+extern unsigned int la_ia64_gnu_pltexit (Elf64_Sym *__sym, unsigned int __ndx,
+					 uintptr_t *__refcook,
+					 uintptr_t *__defcook,
+					 const La_ia64_regs *__inregs,
+					 La_ia64_retval *__outregs,
+					 const char *__symname);
 
 __END_DECLS

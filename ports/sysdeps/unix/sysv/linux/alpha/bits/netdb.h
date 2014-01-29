@@ -1,4 +1,4 @@
-/* Copyright (C) 1996-2013 Free Software Foundation, Inc.
+/* Copyright (C) 1996-2014 Free Software Foundation, Inc.
    This file is part of the GNU C Library.
 
    The GNU C Library is free software; you can redistribute it and/or
@@ -29,6 +29,6 @@ struct netent
   char **n_aliases;		/* Alias list.  */
   int n_addrtype;		/* Net address type.  */
   /* XXX We should probably use uint32_t for the field and ensure
-     compatiblity by adding appropriate padding.  */
+     compatibility by adding appropriate padding.  */
   unsigned long	int n_net;	/* Network number.  */
 };

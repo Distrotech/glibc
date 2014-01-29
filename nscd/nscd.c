@@ -1,4 +1,4 @@
-/* Copyright (c) 1998-2013 Free Software Foundation, Inc.
+/* Copyright (c) 1998-2014 Free Software Foundation, Inc.
    This file is part of the GNU C Library.
    Contributed by Thorsten Kukuk <kukuk@suse.de>, 1998.
 
@@ -442,19 +442,38 @@ parse_opt (int key, char *arg, struct argp_state *state)
 static char *
 more_help (int key, const char *text, void *input)
 {
-  char *tp = NULL;
+  char *tables, *tp = NULL;
+
   switch (key)
     {
     case ARGP_KEY_HELP_EXTRA:
+      {
+	dbtype cnt;
+
+	tables = xmalloc (sizeof (dbnames) + 1);
+	for (cnt = 0; cnt < lastdb; cnt++)
+	  {
+	    strcat (tables, dbnames[cnt]);
+	    strcat (tables, " ");
+	  }
+      }
+
       /* We print some extra information.  */
       if (asprintf (&tp, gettext ("\
+Supported tables:\n\
+%s\n\
+\n\
 For bug reporting instructions, please see:\n\
-%s.\n"), REPORT_BUGS_TO) < 0)
-	return NULL;
+%s.\n\
+"), tables, REPORT_BUGS_TO) < 0)
+	tp = NULL;
+      free (tables);
       return tp;
+
     default:
       break;
     }
+
   return (char *) text;
 }
 
@@ -467,7 +486,7 @@ print_version (FILE *stream, struct argp_state *state)
 Copyright (C) %s Free Software Foundation, Inc.\n\
 This is free software; see the source for copying conditions.  There is NO\n\
 warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.\n\
-"), "2013");
+"), "2014");
   fprintf (stream, gettext ("Written by %s.\n"),
 	   "Thorsten Kukuk and Ulrich Drepper");
 }

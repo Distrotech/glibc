@@ -1,5 +1,5 @@
 /* Machine-dependent ELF dynamic relocation inline functions.  ARM version.
-   Copyright (C) 1995-2013 Free Software Foundation, Inc.
+   Copyright (C) 1995-2014 Free Software Foundation, Inc.
    This file is part of the GNU C Library.
 
    The GNU C Library is free software; you can redistribute it and/or
@@ -503,7 +503,7 @@ elf_machine_rel (struct link_map *map, const Elf32_Rel *reloc,
 	  break;
 	case R_ARM_IRELATIVE:
 	  value = map->l_addr + *reloc_addr;
-	  value = ((Elf32_Addr (*) (void)) value) ();
+	  value = ((Elf32_Addr (*) (int)) value) (GLRO(dl_hwcap));
 	  *reloc_addr = value;
 	  break;
 #endif

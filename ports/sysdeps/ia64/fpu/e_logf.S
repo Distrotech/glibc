@@ -159,7 +159,7 @@
 //
 // 3. How we define is input argument such that |x-1| < 1/256 or not.
 //
-//    To do it we analyze biased exponent and significand of input argment.
+//    To do it we analyze biased exponent and significand of input argument.
 //
 //      a) First we test is biased exponent equal to 0xFFFE or 0xFFFF (i.e.
 //         we test is 0.5 <= x < 2). This comparison can be performed using
@@ -838,7 +838,7 @@ GLOBAL_IEEE754_ENTRY(log10f)
 { .mib
       setf.exp      FR_A2 = GR_05 // create A2
       sub           GR_de = GR_Exp,GR_05 // biased_exponent_of_x - 0xFFFE
-                                         // needed to comparion with 0.5 and 2.0
+                                         // needed for comparison with 0.5 and 2.0
       br.cond.sptk  logf_log10f_common
 };;
 GLOBAL_IEEE754_END(log10f)
@@ -873,7 +873,7 @@ GLOBAL_IEEE754_ENTRY(logf)
       setf.d        FR_A3 = GR_A3 // create A3
       fcmp.eq.s1    p13,p14 = f0,f0 // p13 - true for logf
       sub           GR_de = GR_Exp,GR_05 // biased_exponent_of_x - 0xFFFE
-                                         // needed to comparion with 0.5 and 2.0
+                                         // needed for comparison with 0.5 and 2.0
 }
 { .mlx
       setf.exp      FR_A2 = GR_05 // create A2

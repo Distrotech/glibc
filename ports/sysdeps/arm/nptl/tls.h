@@ -1,5 +1,5 @@
 /* Definition for thread-local data handling.  NPTL/ARM version.
-   Copyright (C) 2005-2013 Free Software Foundation, Inc.
+   Copyright (C) 2005-2014 Free Software Foundation, Inc.
    This file is part of the GNU C Library.
 
    The GNU C Library is free software; you can redistribute it and/or
@@ -118,10 +118,6 @@ typedef struct
   descr->member = (value)
 #define THREAD_SETMEM_NC(descr, member, idx, value) \
   descr->member[idx] = (value)
-
-/* Initializing the thread pointer will generate a SIGILL if the syscall
-   is not available.  */
-#define TLS_INIT_TP_EXPENSIVE 1
 
 /* Get and set the global scope generation counter in struct pthread.  */
 #define THREAD_GSCOPE_FLAG_UNUSED 0

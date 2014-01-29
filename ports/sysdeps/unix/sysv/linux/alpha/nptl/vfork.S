@@ -1,4 +1,4 @@
-/* Copyright (C) 2004-2013 Free Software Foundation, Inc.
+/* Copyright (C) 2004-2014 Free Software Foundation, Inc.
    This file is part of the GNU C Library.
 
    The GNU C Library is free software; you can redistribute it and/or
@@ -26,7 +26,7 @@
 	mov	v0, a1;							\
 	/* If the cached value is initialized (nonzero), then write	\
 	   back its negation, or INT_MIN, to indicate that the pid	\
-	   value is uninitialized in the the child, and in the window	\
+	   value is uninitialized in the child, and in the window	\
 	   between here and the point at which we restore the value.  */ \
 	ldah	t0, -0x8000;						\
 	negl	a2, t1;							\

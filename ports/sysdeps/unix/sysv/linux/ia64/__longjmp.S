@@ -1,4 +1,4 @@
-/* Copyright (C) 1999-2013 Free Software Foundation, Inc.
+/* Copyright (C) 1999-2014 Free Software Foundation, Inc.
    Contributed by David Mosberger-Tang <davidm@hpl.hp.com>.
 
    The GNU C Library is free software; you can redistribute it and/or
@@ -42,9 +42,10 @@
 
 LEAF(__longjmp)
 #ifdef CHECK_RSP
-	alloc r8=ar.pfs,2,1,1,0
+	alloc r8=ar.pfs,2,1,3,0
+	CHECK_RSP
 #else
-	alloc r8=ar.pfs,2,1,0,0
+	alloc r8=ar.pfs,2,0,0,0
 #endif
 	mov r27=ar.rsc
 	add r2=0x98,in0		// r2 <- &jmpbuf.orig_jmp_buf_addr
@@ -79,15 +80,12 @@ LEAF(__longjmp)
 	mov r26=ar.rnat
 	mov ar.unat=r25		// setup ar.unat (NaT bits for r1, r4-r7, and r12)
 	;;
-#ifdef CHECK_RSP
-	CHECK_RSP (r28)
-#endif
-	ld8.fill.nta gp=[r3],16		// r1 (gp)
+	ld8.fill.nta gp=[r3],32		// r1 (gp)
 	dep r11=-1,r23,3,6	// r11 <- ia64_rse_rnat_addr(jmpbuf.ar_bsp)
 	mov sp=r28		// r12 (sp)
 	;;
 	ld8.nta r16=[r2],16		// caller's unat
-	ld8.nta r17=[r3],16		// fpsr
+//	ld8.nta r17=[r3],16		// fpsr
 	;;
 	ld8.fill.nta r4=[r2],16	// r4
 	ld8.fill.nta r5=[r3],16		// r5 (gp)
@@ -97,7 +95,7 @@ LEAF(__longjmp)
 	ld8.fill.nta r7=[r3],16		// r7
 	;;
 	mov ar.unat=r16			// restore caller's unat
-	mov ar.fpsr=r17			// restore fpsr
+//	mov ar.fpsr=r17			// restore fpsr
 	;;
 	ld8.nta r16=[r2],16		// b0
 	ld8.nta r17=[r3],16		// b1

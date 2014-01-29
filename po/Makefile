@@ -1,4 +1,4 @@
-# Copyright (C) 1996-2013 Free Software Foundation, Inc.
+# Copyright (C) 1996-2014 Free Software Foundation, Inc.
 # This file is part of the GNU C Library.
 
 # The GNU C Library is free software; you can redistribute it and/or
@@ -50,7 +50,7 @@ install-others = $(LINGUAS:%=$(mo-installed))
 include ../Rules
 
 # Generate the translation template from all the source files.
-libc.pot: header.pot libc.pot.files
+libc.pot: pot.header libc.pot.files
 	@rm -f $@.new
 	set `date -R`; disp="$$6"; \
 	sed -e 's/VERSION/$(version)/' \

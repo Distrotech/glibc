@@ -1,4 +1,4 @@
-/* Copyright (C) 1996-2013 Free Software Foundation, Inc.
+/* Copyright (C) 1996-2014 Free Software Foundation, Inc.
 
    This file is part of the GNU C Library.
 
@@ -63,6 +63,7 @@ ENTRY(__clone)
 	mov	x8, #SYS_ify(clone)
 	/* X0:flags, x1:newsp, x2:parenttidptr, x3:newtls, x4:childtid.  */
 	svc	0x0
+	cfi_endproc
 	cmp	x0, #0
 	beq	2f
 	blt	3f
@@ -72,6 +73,9 @@ ENTRY(__clone)
 	b	syscall_error
 
 2:
+	cfi_startproc
+	cfi_undefined (x30)
+	mov	x29, 0
 #ifdef RESET_PID
 	tbnz	x5, #CLONE_THREAD_BIT, 3f
 	mov	x0, #-1
@@ -93,7 +97,8 @@ ENTRY(__clone)
 
 	/* We are done, pass the return value through x0.  */
 	b	HIDDEN_JUMPTARGET(_exit)
-
+	cfi_endproc
+	cfi_startproc
 PSEUDO_END (__clone)
 
 weak_alias (__clone, clone)

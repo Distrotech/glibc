@@ -1,5 +1,5 @@
 /* FPU control word bits.  Mips version.
-   Copyright (C) 1996-2013 Free Software Foundation, Inc.
+   Copyright (C) 1996-2014 Free Software Foundation, Inc.
    This file is part of the GNU C Library.
    Contributed by Olaf Flebbe and Ralf Baechle.
 
@@ -28,7 +28,10 @@
  *           causing unimplemented operation exception.  This bit is only
  *           available for MIPS III and newer.
  * 23     -> Condition bit
- * 22-18  -> reserved (read as 0, write with 0)
+ * 22-21  -> reserved for architecture implementers
+ * 20     -> reserved (read as 0, write with 0)
+ * 19     -> IEEE 754-2008 non-arithmetic ABS.fmt and NEG.fmt enable
+ * 18     -> IEEE 754-2008 recommended NaN encoding enable
  * 17     -> cause bit for unimplemented operation
  * 16     -> cause bit for invalid exception
  * 15     -> cause bit for division by zero exception
@@ -68,32 +71,45 @@ extern fpu_control_t __fpu_control;
 
 #else /* __mips_soft_float */
 
-/* masking of interrupts */
+/* Masks for interrupts.  */
 #define _FPU_MASK_V     0x0800  /* Invalid operation */
 #define _FPU_MASK_Z     0x0400  /* Division by zero  */
 #define _FPU_MASK_O     0x0200  /* Overflow          */
 #define _FPU_MASK_U     0x0100  /* Underflow         */
 #define _FPU_MASK_I     0x0080  /* Inexact operation */
 
-/* flush denormalized numbers to zero */
+/* Flush denormalized numbers to zero.  */
 #define _FPU_FLUSH_TZ   0x1000000
 
-/* rounding control */
+/* IEEE 754-2008 compliance control.  */
+#define _FPU_ABS2008    0x80000
+#define _FPU_NAN2008    0x40000
+
+/* Rounding control.  */
 #define _FPU_RC_NEAREST 0x0     /* RECOMMENDED */
 #define _FPU_RC_ZERO    0x1
 #define _FPU_RC_UP      0x2
 #define _FPU_RC_DOWN    0x3
+/* Mask for rounding control.  */
+#define _FPU_RC_MASK	0x3
 
-#define _FPU_RESERVED 0xfebc0000  /* Reserved bits in cw */
+#define _FPU_RESERVED 0xfe840000  /* Reserved bits in cw, incl NAN2008.  */
 
 
 /* The fdlibm code requires strict IEEE double precision arithmetic,
    and no interrupts for exceptions, rounding to nearest.  */
+#ifdef __mips_nan2008
+# define _FPU_DEFAULT 0x00040000
+#else
+# define _FPU_DEFAULT 0x00000000
+#endif
 
-#define _FPU_DEFAULT  0x00000000
-
-/* IEEE:  same as above, but exceptions */
-#define _FPU_IEEE     0x00000F80
+/* IEEE: same as above, but exceptions.  */
+#ifdef __mips_nan2008
+# define _FPU_IEEE    0x00040F80
+#else
+# define _FPU_IEEE    0x00000F80
+#endif
 
 /* Type of the control word.  */
 typedef unsigned int fpu_control_t __attribute__ ((__mode__ (__SI__)));

@@ -267,7 +267,7 @@ Locks}.
 @deftypefun {FILE *} fopen64 (const char *@var{filename}, const char *@var{opentype})
 This function is similar to @code{fopen} but the stream it returns a
 pointer for is opened using @code{open64}.  Therefore this stream can be
-used even on files larger then @math{2^31} bytes on 32 bit machines.
+used even on files larger than @math{2^31} bytes on 32 bit machines.
 
 Please note that the return type is still @code{FILE *}.  There is no
 special @code{FILE} type for the LFS interface.
@@ -1670,7 +1670,7 @@ limit can be retrieved by the following constant.
 
 @defvr Macro NL_ARGMAX
 The value of @code{NL_ARGMAX} is the maximum value allowed for the
-specification of an positional parameter in a @code{printf} call.  The
+specification of a positional parameter in a @code{printf} call.  The
 actual value in effect at runtime can be retrieved by using
 @code{sysconf} using the @code{_SC_NL_ARGMAX} parameter @pxref{Sysconf
 Definition}.
@@ -2330,7 +2330,7 @@ Note that the corresponding narrow stream function takes fewer
 parameters.  @code{swprintf} in fact corresponds to the @code{snprintf}
 function.  Since the @code{sprintf} function can be dangerous and should
 be avoided the @w{ISO C} committee refused to make the same mistake
-again and decided to not define an function exactly corresponding to
+again and decided to not define a function exactly corresponding to
 @code{sprintf}.
 @end deftypefun
 
@@ -3672,7 +3672,7 @@ of the width or precision by @code{MB_CUR_MAX}.
 To read in characters that belong to an arbitrary set of your choice,
 use the @samp{%[} conversion.  You specify the set between the @samp{[}
 character and a following @samp{]} character, using the same syntax used
-in regular expressions.  As special cases:
+in regular expressions for explicit sets of characters.  As special cases:
 
 @itemize @bullet
 @item
@@ -3691,6 +3691,10 @@ the characters listed.
 
 The @samp{%[} conversion does not skip over initial whitespace
 characters.
+
+Note that the @dfn{character class} syntax available in character sets
+that appear inside regular expressions (such as @samp{[:alpha:]}) is
+@emph{not} available in the @samp{%[} conversion.
 
 Here are some examples of @samp{%[} conversions and what they mean:
 

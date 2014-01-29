@@ -1,5 +1,5 @@
 /* `ptrace' debugger support interface.  Linux/ia64 version.
-   Copyright (C) 2001-2013 Free Software Foundation, Inc.
+   Copyright (C) 2001-2014 Free Software Foundation, Inc.
    This file is part of the GNU C Library.
 
    The GNU C Library is free software; you can redistribute it and/or
@@ -144,7 +144,7 @@ enum __ptrace_flags
 };
 
 /* pt_all_user_regs is used for PTRACE_GETREGS/PTRACE_SETREGS.  */
-struct pt_all_user_regs
+struct __pt_all_user_regs
   {
     unsigned long nat;
     unsigned long cr_iip;
@@ -155,7 +155,7 @@ struct pt_all_user_regs
     unsigned long gr[32];
     unsigned long br[8];
     unsigned long ar[128];
-    struct ia64_fpreg fr[128];
+    struct __ia64_fpreg fr[128];
   };
 
 /* Options set using PTRACE_SETOPTIONS.  */
@@ -185,7 +185,7 @@ enum __ptrace_eventcodes
 };
 
 /* Arguments for PTRACE_PEEKSIGINFO.  */
-struct ptrace_peeksiginfo_args
+struct __ptrace_peeksiginfo_args
 {
   __uint64_t off;	/* From which siginfo to start.  */
   __uint32_t flags;	/* Flags for peeksiginfo.  */

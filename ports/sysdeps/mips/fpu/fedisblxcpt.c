@@ -1,5 +1,5 @@
 /* Disable floating-point exceptions.
-   Copyright (C) 2000-2013 Free Software Foundation, Inc.
+   Copyright (C) 2000-2014 Free Software Foundation, Inc.
    This file is part of the GNU C Library.
    Contributed by Andreas Jaeger <aj@suse.de>, 2000.
 
@@ -34,7 +34,6 @@ fedisableexcept (int excepts)
   excepts &= FE_ALL_EXCEPT;
 
   new_exc &= ~(excepts << ENABLE_SHIFT);
-  new_exc &= ~_FPU_RESERVED;
   _FPU_SETCW (new_exc);
 
   return old_exc;

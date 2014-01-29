@@ -1,5 +1,5 @@
 /* Definition for thread-local data handling.  nptl/i386 version.
-   Copyright (C) 2002-2013 Free Software Foundation, Inc.
+   Copyright (C) 2002-2014 Free Software Foundation, Inc.
    This file is part of the GNU C Library.
 
    The GNU C Library is free software; you can redistribute it and/or
@@ -56,7 +56,7 @@ typedef struct
 #ifndef __ASSUME_PRIVATE_FUTEX
   int private_futex;
 #else
-  int __unused1;
+  int __glibc_reserved1;
 #endif
   /* Reservation of some values for the TM ABI.  */
   void *__private_tm[4];

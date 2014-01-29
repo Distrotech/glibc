@@ -1,3 +1,154 @@
+2014-01-23  Stefan Liebler  <stli@linux.vnet.ibm.com>
+
+	* tst-tls7.c: Adjust testcase timeout
+
+2014-01-18  H.J. Lu  <hongjiu.lu@intel.com>
+
+	[BZ #14782]
+	* tst-cancel-wrappers.sh: Remove system.
+
+2014-01-11  Paul Pluzhnikov  <ppluzhnikov@google.com>
+
+	* tst-tls7.c (action): New function.
+	(do_test): Call it.
+	* tst-tls7mod.c (action): Move sem_post to caller.
+
+2014-01-03  Andrew Hunter  <ahh@google.com>
+
+	* nptl/Makefile (tst-tls7): New test.
+	* nptl/tst-tls7.c: New file.
+	* nptl/tst-tls7mod.c: New file.
+	* nptl/allocatestack.c (init_one_static_tls): Use atomic barrier.
+
+2013-12-12  Adhemerval Zanella  <azanella@linux.vnet.ibm.com>
+
+	* sysdeps/powerpc/tls.h (struct tcbhead_t): Add DSO and TAR fields.
+	* nptl/sysdeps/powerpc/tcb-offsets.sym: Likewise.
+
+2013-12-09  Carlos O'Donell  <carlos@redhat.com>
+
+	* sysdeps/unix/sysv/linux/tst-setgetname.c: New file.
+	* sysdeps/unix/sysv/linux/Makefile (tests): Add tst-setgetname.
+
+2013-12-09  Andreas Schwab  <schwab@suse.de>
+
+	[BZ #15843]
+	* sysdeps/unix/sysv/linux/i386/i486/pthread_cond_timedwait.S
+	(__pthread_cond_timedwait): Remove wrong cfi_adjust_cfa_offset
+	before __condvar_tw_cleanup2 label.
+
+2013-12-04  Ulrich Weigand  <Ulrich.Weigand@de.ibm.com>
+
+	* sysdeps/unix/sysv/linux/powerpc/powerpc64/sysdep-cancel.h
+	(CANCEL_FRAMESIZE, CANCEL_PARM_SAVE): New macros to save parameters
+	into our own stack frame instead of the caller's.
+	(PSEUDO): Use them.  Use symbolic stack frame offsets.
+	(DOCARGS_1, UNDOCARGS_1): Use CANCEL_PARM_SAVE.
+	(DOCARGS_2, UNDOCARGS_2): Likewise.
+	(DOCARGS_3, UNDOCARGS_3): Likewise.
+	(DOCARGS_4, UNDOCARGS_4): Likewise.
+	(DOCARGS_5, UNDOCARGS_5): Likewise.
+	(DOCARGS_6, UNDOCARGS_6): Likewise.
+
+2013-11-26  Ondřej Bílka  <neleai@seznam.cz>
+
+	* sysdeps/i386/tls.h: Use __glibc_reserved instead __unused.
+	* sysdeps/x86_64/tls.h: Likewise.
+
+2013-11-25  Paul Pluzhnikov  <ppluzhnikov@google.com>
+
+	[BZ #11214]
+	* Makefile (tst-getpid2-ENV): New variable.
+
+2013-11-20  Paul Pluzhnikov  <ppluzhnikov@google.com>
+
+	* Makefile (tst-cleanup2, tst-cleanupx2): Add -fno-builtin
+
+2013-10-30  Mike Frysinger  <vapier@gentoo.org>
+
+	* sysdeps/pthread/configure.in: Moved to ...
+	* sysdeps/pthread/configure.ac: ... here.
+	* sysdeps/x86_64/configure.in: Moved to ...
+	* sysdeps/x86_64/configure.ac: ... here.
+	* sysdeps/pthread/configure: Regenerated.
+	* sysdeps/x86_64/configure: Likewise.
+
+2013-10-04  Maciej W. Rozycki  <macro@codesourcery.com>
+
+	* tst-mutex8.c (check_type) [ENABLE_PI]: Handle ENOTSUP failure
+	from pthread_mutex_init.
+
+2013-10-01  Siddhesh Poyarekar  <siddhesh@redhat.com>
+
+	[BZ #15988]
+	* pthread_cond_broadcast.c (__pthread_cond_broadcast)
+	[lll_futex_cmp_requeue_pi && __ASSUME_REQUEUE_PI]: Use
+	USE_REQUEUE_PI.
+	* pthread_cond_signal.c (__pthread_cond_signal)
+	[lll_futex_cmd_requeue_pi && __ASSUME_REQUEUE_PI]: Likewise.
+
+2013-09-27  Siddhesh Poyarekar  <siddhesh@redhat.com>
+
+	* sysdeps/pthread/bits/libc-lock.h [_LIBC && (!NOT_IN_libc ||
+	IS_IN_libpthread)] (__libc_lock_fini_recursive): Use the mutex
+	member of the argument.
+	(__libc_lock_trylock_recursive): Likewise.
+	(__libc_lock_unlock_recursive): Likewise.
+
+2013-09-04  Joseph Myers  <joseph@codesourcery.com>
+
+	* sysdeps/unix/sysv/linux/x86_64/cancellation.S
+	[SHARED && DO_VERSIONING && !NO_HIDDEN]: Change conditional to
+	[SHARED && !NO_HIDDEN].
+
+2013-09-03  Siddhesh Poyarekar  <siddhesh@redhat.com>
+
+	[BZ #15921]
+	* tst-cleanup2.c (do_test): New volatile variable RET to
+	return success.
+
+2013-08-30   Ondřej Bílka  <neleai@seznam.cz>
+
+	* sysdeps/pthread/pthread.h: Fix typos.
+	* sysdeps/unix/sysv/linux/internaltypes.h: Likewise.
+	* tst-cancel4.c: Likewise.
+
+2013-08-21   Ondřej Bílka  <neleai@seznam.cz>
+
+	* pthread_getschedparam.c: Fix typos.
+	* sysdeps/unix/sysv/linux/register-atfork.c: Likewise.
+
+2013-07-23  David S. Miller  <davem@davemloft.net>
+
+	* tst-cancel4.c (WRITE_BUFFER_SIZE): Adjust comment.
+
+2013-07-22  David S. Miller  <davem@davemloft.net>
+
+	* tst-cancel4.c (WRITE_BUFFER_SIZE): Increase to 16384.
+
+2013-07-19  Dominik Vogt  <vogt@de.ibm.com>
+
+	* pthread_mutex_lock.c: Fix whitespace.
+	* pthread_mutex_trylock.c: Likewise.
+	* sysdeps/unix/sysv/linux/x86/bits/pthreadtypes.h: Likewise.
+	* sysdeps/unix/sysv/linux/x86/elision-conf.c: Likewise.
+	* sysdeps/unix/sysv/linux/x86/elision-conf.h: Likewise.
+	* sysdeps/unix/sysv/linux/x86/elision-lock.c: Likewise.
+	* sysdeps/unix/sysv/linux/x86/elision-timed.c: Likewise.
+	* sysdeps/unix/sysv/linux/x86/elision-trylock.c: Likewise.
+	* sysdeps/unix/sysv/linux/x86/force-elision.h: Likewise.
+	* sysdeps/unix/sysv/linux/x86/hle.h: Likewise.
+	* sysdeps/unix/sysv/linux/x86/pthread_mutex_cond_lock.c: Likewise.
+	* sysdeps/unix/sysv/linux/x86/pthread_mutex_lock.c: Likewise.
+	* sysdeps/unix/sysv/linux/x86/pthread_mutex_timedlock.c: Likewise.
+	* sysdeps/unix/sysv/linux/x86/pthread_mutex_trylock.c: Likewise.
+
+	* sysdeps/unix/sysv/linux/x86/elision-conf.c:
+	Remove __rwlock_rtm_enabled and __rwlock_rtm_read_retries.
+	(elision_init): Don't set __rwlock_rtm_enabled.
+	* sysdeps/unix/sysv/linux/x86/elision-conf.h:
+	Remove __rwlock_rtm_enabled.
+
 2013-07-03  H.J. Lu  <hongjiu.lu@intel.com>
 
 	* sysdeps/unix/sysv/linux/x86/init-arch.c: New file.

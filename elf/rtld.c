@@ -1,5 +1,5 @@
 /* Run time dynamic linker.
-   Copyright (C) 1995-2013 Free Software Foundation, Inc.
+   Copyright (C) 1995-2014 Free Software Foundation, Inc.
    This file is part of the GNU C Library.
 
    The GNU C Library is free software; you can redistribute it and/or
@@ -814,8 +814,8 @@ do_preload (char *fname, struct link_map *main_map, const char *where)
   if (__builtin_expect (err_str != NULL, 0))
     {
       _dl_error_printf ("\
-ERROR: ld.so: object '%s' from %s cannot be preloaded: ignored.\n",
-			fname, where);
+ERROR: ld.so: object '%s' from %s cannot be preloaded (%s): ignored.\n",
+			fname, where, err_str);
       /* No need to call free, this is still before
 	 the libc's malloc is used.  */
     }
@@ -1113,6 +1113,9 @@ of this helper program; chances are you did not intend to run this program.\n\
 	    break;
 	  case AT_ENTRY:
 	    av->a_un.a_val = *user_entry;
+	    break;
+	  case AT_EXECFN:
+	    av->a_un.a_val = (uintptr_t) _dl_argv[0];
 	    break;
 	  }
 #endif
@@ -2212,10 +2215,6 @@ ERROR: ld.so: object '%s' cannot be loaded as audit interface: %s; ignored.\n",
 	/* We must prepare the profiling.  */
 	_dl_start_profile ();
     }
-
-#ifndef NONTLS_INIT_TP
-# define NONTLS_INIT_TP do { } while (0)
-#endif
 
   if (!was_tls_init_tp_called && GL(dl_tls_max_dtv_idx) > 0)
     ++GL(dl_tls_generation);

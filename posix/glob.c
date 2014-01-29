@@ -1,4 +1,4 @@
-/* Copyright (C) 1991-2013 Free Software Foundation, Inc.
+/* Copyright (C) 1991-2014 Free Software Foundation, Inc.
    This file is part of the GNU C Library.
 
    The GNU C Library is free software; you can redistribute it and/or
@@ -193,7 +193,7 @@
 # define GET_LOGIN_NAME_MAX()	(-1)
 #endif
 
-static const char *next_brace_sub (const char *begin, int flags) __THROW;
+static const char *next_brace_sub (const char *begin, int flags) __THROWNL;
 
 #endif /* !defined _LIBC || !defined GLOB_ONLY_P */
 
@@ -208,8 +208,8 @@ extern int __glob_pattern_type (const char *pattern, int quote)
     attribute_hidden;
 
 #if !defined _LIBC || !defined GLOB_ONLY_P
-static int prefix_array (const char *prefix, char **array, size_t n) __THROW;
-static int collated_compare (const void *, const void *) __THROW;
+static int prefix_array (const char *prefix, char **array, size_t n) __THROWNL;
+static int collated_compare (const void *, const void *) __THROWNL;
 
 
 /* Find the end of the sub-pattern in a brace expression.  */
@@ -275,6 +275,11 @@ glob (pattern, flags, errfunc, pglob)
       __set_errno (EINVAL);
       return -1;
     }
+
+  /* POSIX requires all slashes to be matched.  This means that with
+     a trailing slash we must match only directories.  */
+  if (pattern[0] && pattern[strlen (pattern) - 1] == '/')
+    flags |= GLOB_ONLYDIR;
 
   if (!(flags & GLOB_DOOFFS))
     /* Have to do this so `globfree' knows where to start freeing.  It

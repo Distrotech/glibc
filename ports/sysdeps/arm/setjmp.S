@@ -1,5 +1,5 @@
 /* setjmp for ARM.
-   Copyright (C) 1997-2013 Free Software Foundation, Inc.
+   Copyright (C) 1997-2014 Free Software Foundation, Inc.
    This file is part of the GNU C Library.
 
    The GNU C Library is free software; you can redistribute it and/or
@@ -16,19 +16,30 @@
    License along with the GNU C Library.  If not, see
    <http://www.gnu.org/licenses/>.  */
 
-/* ??? Needs more rearrangement for the STM to handle thumb mode.  */
-#define NO_THUMB
 #include <sysdep.h>
 #include <bits/setjmp.h>
 #include <rtld-global-offsets.h>
 #include <arm-features.h>
 
 ENTRY (__sigsetjmp)
+#ifdef PTR_MANGLE
+	PTR_MANGLE_LOAD (a3, ip)
+#endif
 	mov	ip, r0
 
 	/* Save registers */
 	sfi_breg ip, \
 	stmia	\B!, JMP_BUF_REGLIST
+#ifdef PTR_MANGLE
+	mov	a4, sp
+	PTR_MANGLE2 (a4, a4, a3)
+	str	a4, [ip], #4
+	PTR_MANGLE2 (a4, lr, a3)
+	str	a4, [ip], #4
+#else
+	str	sp, [ip], #4
+	str	lr, [ip], #4
+#endif
 
 #if !defined ARM_ASSUME_NO_IWMMXT || defined __SOFTFP__
 # define NEED_HWCAP 1

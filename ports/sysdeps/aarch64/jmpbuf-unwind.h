@@ -1,4 +1,4 @@
-/* Copyright (C) 2005-2013 Free Software Foundation, Inc.
+/* Copyright (C) 2005-2014 Free Software Foundation, Inc.
 
    This file is part of the GNU C Library.
 
@@ -28,16 +28,6 @@
 
 #define _JMPBUF_CFA_UNWINDS_ADJ(jmpbuf, context, adj) \
   _JMPBUF_UNWINDS_ADJ (jmpbuf, (void *) _Unwind_GetCFA (context), adj)
-
-static inline uintptr_t __attribute__ ((unused))
-_jmpbuf_sp (__jmp_buf jmpbuf)
-{
-  uintptr_t sp = jmpbuf[JB_SP];
-#ifdef PTR_DEMANGLE
-  PTR_DEMANGLE (sp);
-#endif
-  return sp;
-}
 
 #define _JMPBUF_UNWINDS_ADJ(_jmpbuf, _address, _adj) \
   ((uintptr_t) (_address) - (_adj) < _jmpbuf_sp (_jmpbuf) - (_adj))

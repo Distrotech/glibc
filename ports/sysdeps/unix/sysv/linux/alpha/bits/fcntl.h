@@ -1,5 +1,5 @@
 /* O_*, F_*, FD_* bit values for Linux.
-   Copyright (C) 1995-2013 Free Software Foundation, Inc.
+   Copyright (C) 1995-2014 Free Software Foundation, Inc.
    This file is part of the GNU C Library.
 
    The GNU C Library is free software; you can redistribute it and/or
@@ -36,6 +36,7 @@
 #define __O_DIRECT	02000000 /* Direct disk access.  */
 #define __O_NOATIME	04000000 /* Do not set atime.  */
 #define __O_PATH	040000000 /* Resolve pathname but do not open file.  */
+#define __O_TMPFILE	0100100000 /* Atomically create nameless file.  */
 
 /* Not necessary, files are always with 64bit off_t.  */
 #define __O_LARGEFILE	0

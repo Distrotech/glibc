@@ -1,5 +1,5 @@
 /* Floating point output for `printf'.
-   Copyright (C) 1995-2013 Free Software Foundation, Inc.
+   Copyright (C) 1995-2014 Free Software Foundation, Inc.
 
    This file is part of the GNU C Library.
    Written by Ulrich Drepper <drepper@gnu.ai.mit.edu>, 1995.
@@ -332,8 +332,7 @@ ___printf_fp (FILE *fp,
       int res;
       if (__isnanl (fpnum.ldbl))
 	{
-	  union ieee854_long_double u = { .d = fpnum.ldbl };
-	  is_neg = u.ieee.negative != 0;
+	  is_neg = signbit (fpnum.ldbl);
 	  if (isupper (info->spec))
 	    {
 	      special = "NAN";

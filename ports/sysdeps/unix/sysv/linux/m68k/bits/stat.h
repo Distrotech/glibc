@@ -1,4 +1,4 @@
-/* Copyright (C) 1992-2013 Free Software Foundation, Inc.
+/* Copyright (C) 1992-2014 Free Software Foundation, Inc.
    This file is part of the GNU C Library.
 
    The GNU C Library is free software; you can redistribute it and/or
@@ -84,8 +84,8 @@ struct stat
     unsigned long int st_ctimensec;	/* Nsecs of last status change.  */
 #endif
 #ifndef __USE_FILE_OFFSET64
-    unsigned long int __unused4;
-    unsigned long int __unused5;
+    unsigned long int __glibc_reserved4;
+    unsigned long int __glibc_reserved5;
 #else
     __ino64_t st_ino;			/* File serial number.	*/
 #endif

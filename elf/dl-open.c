@@ -1,5 +1,5 @@
 /* Load a shared object at runtime, relocate it, and run its initializer.
-   Copyright (C) 1996-2013 Free Software Foundation, Inc.
+   Copyright (C) 1996-2014 Free Software Foundation, Inc.
    This file is part of the GNU C Library.
 
    The GNU C Library is free software; you can redistribute it and/or
@@ -158,7 +158,7 @@ add_to_global (struct link_map *new)
   return 0;
 }
 
-/* Search link maps in all namespaces for the DSO that containes the object at
+/* Search link maps in all namespaces for the DSO that contains the object at
    address ADDR.  Returns the pointer to the link map of the matching DSO, or
    NULL if a match is not found.  */
 struct link_map *
@@ -396,7 +396,7 @@ dl_open_worker (void *a)
 	  /* If this here is the shared object which we want to profile
 	     make sure the profile is started.  We can find out whether
 	     this is necessary or not by observing the `_dl_profile_map'
-	     variable.  If it was NULL but is not NULL afterwars we must
+	     variable.  If it was NULL but is not NULL afterwards we must
 	     start the profiling.  */
 	  struct link_map *old_profile_map = GL(dl_profile_map);
 
@@ -548,7 +548,10 @@ cannot load any more object with static TLS"));
 	     generation of the DSO we are allocating data for.  */
 	  _dl_update_slotinfo (imap->l_tls_modid);
 #endif
-
+	  /* We do this iteration under a signal mask in dl-reloc; why not
+	     here?  Because these symbols are new and dlopen hasn't
+	     returned yet.  So we can't possibly be racing with a TLS
+	     access to them from another thread.  */
 	  GL(dl_init_static_tls) (imap);
 	  assert (imap->l_need_tls_init == 0);
 	}

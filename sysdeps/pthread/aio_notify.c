@@ -1,5 +1,5 @@
 /* Notify initiator of AIO request.
-   Copyright (C) 1997-2013 Free Software Foundation, Inc.
+   Copyright (C) 1997-2014 Free Software Foundation, Inc.
    This file is part of the GNU C Library.
    Contributed by Ulrich Drepper <drepper@cygnus.com>, 1997.
 
@@ -157,7 +157,7 @@ __aio_notify (struct requestlist *req)
 #endif
 	}
       else
-	/* This is part of a asynchronous `lio_listio' operation.  If
+	/* This is part of an asynchronous `lio_listio' operation.  If
 	   this request is the last one, send the signal.  */
 	if (--*waitlist->counterp == 0)
 	  {

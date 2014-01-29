@@ -1,5 +1,5 @@
 /* Implement fmaf using soft-fp.
-   Copyright (C) 2013 Free Software Foundation, Inc.
+   Copyright (C) 2013-2014 Free Software Foundation, Inc.
    This file is part of the GNU C Library.
 
    The GNU C Library is free software; you can redistribute it and/or
@@ -33,15 +33,18 @@ float
 __fmaf (float a, float b, float c)
 {
   FP_DECL_EX;
-  FP_DECL_S(A); FP_DECL_S(B); FP_DECL_S(C); FP_DECL_S(R);
+  FP_DECL_S (A);
+  FP_DECL_S (B);
+  FP_DECL_S (C);
+  FP_DECL_S (R);
   float r;
 
   FP_INIT_ROUNDMODE;
-  FP_UNPACK_S(A, a);
-  FP_UNPACK_S(B, b);
-  FP_UNPACK_S(C, c);
-  FP_FMA_S(R, A, B, C);
-  FP_PACK_S(r, R);
+  FP_UNPACK_S (A, a);
+  FP_UNPACK_S (B, b);
+  FP_UNPACK_S (C, c);
+  FP_FMA_S (R, A, B, C);
+  FP_PACK_S (r, R);
   FP_HANDLE_EXCEPTIONS;
 
   return r;

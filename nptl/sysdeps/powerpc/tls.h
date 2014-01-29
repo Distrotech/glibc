@@ -1,5 +1,5 @@
 /* Definition for thread-local data handling.  NPTL/PowerPC version.
-   Copyright (C) 2003-2013 Free Software Foundation, Inc.
+   Copyright (C) 2003-2014 Free Software Foundation, Inc.
    This file is part of the GNU C Library.
 
    The GNU C Library is free software; you can redistribute it and/or
@@ -61,6 +61,13 @@ typedef union dtv
    are private.  */
 typedef struct
 {
+  /* Reservation for Dynamic System Optimizer ABI.  */
+  uintptr_t dso_slot2;
+  uintptr_t dso_slot1;
+  /* Reservation for tar register (ISA 2.07).  */
+  uintptr_t tar_save;
+  /* GCC split stack support.  */
+  void *__private_ss;
   /* Reservation for the Event-Based Branching ABI.  */
   uintptr_t ebb_handler;
   uintptr_t ebb_ctx_pointer;

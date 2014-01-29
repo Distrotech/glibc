@@ -1,4 +1,4 @@
-/* Copyright (C) 2000-2013 Free Software Foundation, Inc.
+/* Copyright (C) 2000-2014 Free Software Foundation, Inc.
    This file is part of the GNU C Library.
 	Contribute by David Mosberger-Tang <davidm@hpl.hp.com>
 
@@ -42,8 +42,8 @@ struct msqid_ds
   unsigned long int msg_qbytes;	/* max number of bytes allowed on queue */
   __pid_t msg_lspid;		/* pid of last msgsnd() */
   __pid_t msg_lrpid;		/* pid of last msgrcv() */
-  unsigned long int __unused1;
-  unsigned long int __unused2;
+  unsigned long int __glibc_reserved1;
+  unsigned long int __glibc_reserved2;
 };
 
 #ifdef __USE_MISC

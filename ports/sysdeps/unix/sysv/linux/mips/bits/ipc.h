@@ -1,4 +1,4 @@
-/* Copyright (C) 1995-2013 Free Software Foundation, Inc.
+/* Copyright (C) 1995-2014 Free Software Foundation, Inc.
    This file is part of the GNU C Library.
 
    The GNU C Library is free software; you can redistribute it and/or
@@ -49,6 +49,6 @@ struct ipc_perm
     unsigned int mode;			/* Read/write permission.  */
     unsigned short int __seq;		/* Sequence number.  */
     unsigned short int __pad1;
-    unsigned long int __unused1;
-    unsigned long int __unused2;
+    unsigned long int __glibc_reserved1;
+    unsigned long int __glibc_reserved2;
 };

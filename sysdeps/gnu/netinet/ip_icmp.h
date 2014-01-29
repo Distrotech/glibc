@@ -1,4 +1,4 @@
-/* Copyright (C) 1991-2013 Free Software Foundation, Inc.
+/* Copyright (C) 1991-2014 Free Software Foundation, Inc.
    This file is part of the GNU C Library.
 
    The GNU C Library is free software; you can redistribute it and/or
@@ -38,7 +38,7 @@ struct icmphdr
     u_int32_t	gateway;	/* gateway address */
     struct
     {
-      u_int16_t	__unused;
+      u_int16_t	__glibc_reserved;
       u_int16_t	mtu;
     } frag;			/* path mtu discovery */
   } un;

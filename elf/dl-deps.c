@@ -1,5 +1,5 @@
 /* Load the dependencies of a mapped object.
-   Copyright (C) 1996-2013 Free Software Foundation, Inc.
+   Copyright (C) 1996-2014 Free Software Foundation, Inc.
    This file is part of the GNU C Library.
 
    The GNU C Library is free software; you can redistribute it and/or
@@ -595,7 +595,6 @@ Filters not supported with LD_TRACE_PRELINKING"));
 	if (list[i]->l_reserved)
 	  {
 	    /* Need to allocate new array of relocation dependencies.  */
-	    struct link_map_reldeps *l_reldeps;
 	    l_reldeps = malloc (sizeof (*l_reldeps)
 				+ map->l_reldepsmax
 				  * sizeof (struct link_map *));

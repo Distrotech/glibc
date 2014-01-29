@@ -1,5 +1,5 @@
 /* Raise given exceptions.
-   Copyright (C) 2000-2013 Free Software Foundation, Inc.
+   Copyright (C) 2000-2014 Free Software Foundation, Inc.
    This file is part of the GNU C Library.
    Contributed by Alexandre Oliva <aoliva@redhat.com>
    based on corresponding file in the M68K port.
@@ -35,7 +35,7 @@ __feraiseexcept (int excepts)
   /* First: invalid exception.  */
   if (excepts & FE_INVALID)
     {
-      /* One example of a invalid operation is 0 * Infinity.  */
+      /* One example of an invalid operation is 0 * Infinity.  */
       float x = HUGE_VALF, y = 0.0f;
       __asm__ __volatile__ ("fmul %1,%0" : "+f" (x) : "f" (y));
     }

@@ -1,6 +1,6 @@
 /* Round to long long int long double floating-point values.
    IBM extended format long double version.
-   Copyright (C) 2006-2013 Free Software Foundation, Inc.
+   Copyright (C) 2006-2014 Free Software Foundation, Inc.
    This file is part of the GNU C Library.
 
    The GNU C Library is free software; you can redistribute it and/or
@@ -43,7 +43,7 @@ __llrintl (long double x)
 #endif
     )
     {
-      save_round = fegetround ();
+      save_round = __fegetround ();
 
       if (__builtin_expect ((xh == -(double) (-__LONG_LONG_MAX__ - 1)), 0))
 	{

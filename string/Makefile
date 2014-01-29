@@ -1,4 +1,4 @@
-# Copyright (C) 1991-2013 Free Software Foundation, Inc.
+# Copyright (C) 1991-2014 Free Software Foundation, Inc.
 # This file is part of the GNU C Library.
 
 # The GNU C Library is free software; you can redistribute it and/or
@@ -45,7 +45,7 @@ strop-tests	:= memchr memcmp memcpy memmove mempcpy memset memccpy	\
 		   stpcpy stpncpy strcat strchr strcmp strcpy strcspn	\
 		   strlen strncmp strncpy strpbrk strrchr strspn memmem	\
 		   strstr strcasestr strnlen strcasecmp strncasecmp	\
-		   strncat rawmemchr strchrnul bcopy bzero
+		   strncat rawmemchr strchrnul bcopy bzero memrchr
 tests		:= tester inl-tester noinl-tester testcopy test-ffs	\
 		   tst-strlen stratcliff tst-svc tst-inlcall		\
 		   bug-strncat1 bug-strspn1 bug-strpbrk1 tst-bswap	\
@@ -54,8 +54,7 @@ tests		:= tester inl-tester noinl-tester testcopy test-ffs	\
 		   bug-envz1 tst-strxfrm2 tst-endian tst-svc2		\
 		   tst-strtok_r
 
-tests-ifunc := $(strop-tests:%=test-%-ifunc)
-tests += $(tests-ifunc)
+xtests = tst-strcoll-overflow
 
 include ../Rules
 
@@ -65,6 +64,8 @@ noinl-tester-ENV = LANGUAGE=C
 tst-strxfrm-ENV = LOCPATH=$(common-objpfx)localedata
 tst-strxfrm2-ENV = LOCPATH=$(common-objpfx)localedata
 bug-strcoll1-ENV = LOCPATH=$(common-objpfx)localedata
+test-strcasecmp-ENV = LOCPATH=$(common-objpfx)localedata
+test-strncasecmp-ENV = LOCPATH=$(common-objpfx)localedata
 CFLAGS-inl-tester.c = -fno-builtin
 CFLAGS-noinl-tester.c = -fno-builtin
 CFLAGS-tst-strlen.c = -fno-builtin

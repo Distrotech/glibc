@@ -1,5 +1,5 @@
 /* Code to load locale data from the locale archive file.
-   Copyright (C) 2002-2013 Free Software Foundation, Inc.
+   Copyright (C) 2002-2014 Free Software Foundation, Inc.
    This file is part of the GNU C Library.
 
    The GNU C Library is free software; you can redistribute it and/or
@@ -273,6 +273,10 @@ _nl_load_locale_from_archive (int category, const char **namep)
   head = headmap.ptr;
   namehashtab = (struct namehashent *) ((char *) head
 					+ head->namehash_offset);
+
+  /* Avoid division by 0 if the file is corrupted.  */
+  if (__glibc_unlikely (head->namehash_size == 0))
+    goto close_and_out;
 
   idx = hval % head->namehash_size;
   incr = 1 + hval % (head->namehash_size - 2);

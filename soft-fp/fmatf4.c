@@ -1,5 +1,5 @@
 /* Implement fmal using soft-fp.
-   Copyright (C) 2013 Free Software Foundation, Inc.
+   Copyright (C) 2013-2014 Free Software Foundation, Inc.
    This file is part of the GNU C Library.
 
    The GNU C Library is free software; you can redistribute it and/or
@@ -33,15 +33,18 @@ long double
 __fmal (long double a, long double b, long double c)
 {
   FP_DECL_EX;
-  FP_DECL_Q(A); FP_DECL_Q(B); FP_DECL_Q(C); FP_DECL_Q(R);
+  FP_DECL_Q (A);
+  FP_DECL_Q (B);
+  FP_DECL_Q (C);
+  FP_DECL_Q (R);
   long double r;
 
   FP_INIT_ROUNDMODE;
-  FP_UNPACK_Q(A, a);
-  FP_UNPACK_Q(B, b);
-  FP_UNPACK_Q(C, c);
-  FP_FMA_Q(R, A, B, C);
-  FP_PACK_Q(r, R);
+  FP_UNPACK_Q (A, a);
+  FP_UNPACK_Q (B, b);
+  FP_UNPACK_Q (C, c);
+  FP_FMA_Q (R, A, B, C);
+  FP_PACK_Q (r, R);
   FP_HANDLE_EXCEPTIONS;
 
   return r;

@@ -1,4 +1,4 @@
-/* Copyright (C) 2011-2013 Free Software Foundation, Inc.
+/* Copyright (C) 2011-2014 Free Software Foundation, Inc.
    This file is part of the GNU C Library.
    Contributed by Chris Metcalf <cmetcalf@tilera.com>, 2011.
 
@@ -45,7 +45,7 @@
 #define JB_PC   25  /* normally LR, r55 */
 #define JB_ICS  26  /* interrupt critical section bit */
 
-/* We save space for some extra state to accomodate future changes.  */
+/* We save space for some extra state to accommodate future changes.  */
 #define JB_LEN  32  /* number of words */
 
 #define JB_SIZE (JB_LEN * REGSIZE)

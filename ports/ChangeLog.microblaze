@@ -1,3 +1,18 @@
+2013-11-28  Joseph Myers  <joseph@codesourcery.com>
+
+	* sysdeps/microblaze/fegetround.c (fegetround): Use
+	libm_hidden_def.
+
+2013-11-26  Ondřej Bílka  <neleai@seznam.cz>
+	* sysdeps/unix/sysv/linux/microblaze/bits/stat.h: Use __glibc_reserved instead __unused.
+	* sysdeps/unix/sysv/linux/microblaze/kernel_stat.h: Likewise.
+
+2013-10-30  Mike Frysinger  <vapier@gentoo.org>
+
+	* sysdeps/unix/sysv/linux/microblaze/configure.in: Moved to ...
+	* sysdeps/unix/sysv/linux/microblaze/configure.ac: ... here.
+	* sysdeps/unix/sysv/linux/microblaze/configure: Regenerated.
+
 2013-06-15  Siddhesh Poyarekar  <siddhesh@redhat.com>
 
 	* sysdeps/unix/sysv/linux/microblaze/nptl/libpthread.abilist:

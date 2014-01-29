@@ -1,4 +1,4 @@
-/* Copyright (C) 1996-2013 Free Software Foundation, Inc.
+/* Copyright (C) 1996-2014 Free Software Foundation, Inc.
    This file is part of the GNU C Library.
 
    The GNU C Library is free software; you can redistribute it and/or
@@ -92,7 +92,7 @@ struct stat
     __ST_TIME(a);		/* Time of last access.  */
     __ST_TIME(m);		/* Time of last modification.  */
     __ST_TIME(c);		/* Time of last status change.  */
-    long __unused[3];
+    long __glibc_reserved[3];
   };
 
 #ifdef __USE_LARGEFILE64
@@ -113,7 +113,7 @@ struct stat64
     __ST_TIME(a);		/* Time of last access.  */
     __ST_TIME(m);		/* Time of last modification.  */
     __ST_TIME(c);		/* Time of last status change.  */
-    long __unused[3];
+    long __glibc_reserved[3];
   };
 #endif
 

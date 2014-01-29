@@ -1,5 +1,5 @@
 /* Definitions for thread-local data handling.  Hurd/i386 version.
-   Copyright (C) 2003-2013 Free Software Foundation, Inc.
+   Copyright (C) 2003-2014 Free Software Foundation, Inc.
    This file is part of the GNU C Library.
 
    The GNU C Library is free software; you can redistribute it and/or
@@ -118,7 +118,6 @@ _hurd_tls_init (tcbhead_t *tcb, int secondcall)
    operation can cause a failure 'errno' must not be touched.  */
 # define TLS_INIT_TP(descr, secondcall) \
     _hurd_tls_init ((tcbhead_t *) (descr), (secondcall))
-# define TLS_INIT_TP_EXPENSIVE 1
 
 /* Return the TCB address of the current thread.  */
 # define THREAD_SELF							      \

@@ -1,4 +1,4 @@
-/* Copyright (C) 1999-2013 Free Software Foundation, Inc.
+/* Copyright (C) 1999-2014 Free Software Foundation, Inc.
    Contributed by David Mosberger-Tang <davidm@hpl.hp.com>.
 
    The GNU C Library is free software; you can redistribute it and/or
@@ -25,22 +25,22 @@
 	0x000	stack pointer (r12)	; unchangeable (see _JMPBUF_UNWINDS)
 	0x008	r1 (gp)
 	0x010	caller's unat
-	0x018	fpsr
-	0x020	r4
-	0x028	r5
-	0x030	r6
-	0x038	r7
-	0x040	rp (b0)
-	0x048	b1
-	0x050	b2
-	0x058	b3
-	0x060	b4
-	0x068	b5
-	0x070	ar.pfs
-	0x078	ar.lc
-	0x080	pr
-	0x088	ar.bsp			; unchangeable (see __longjmp.S)
-	0x090	ar.unat
+	0x018	fpsr			; disabled per the C standard; BZ 16379
+  	0x020	r4
+  	0x028	r5
+  	0x030	r6
+  	0x038	r7
+  	0x040	rp (b0)
+  	0x048	b1
+  	0x050	b2
+  	0x058	b3
+  	0x060	b4
+  	0x068	b5
+  	0x070	ar.pfs
+  	0x078	ar.lc
+  	0x080	pr
+  	0x088	ar.bsp			; unchangeable (see __longjmp.S)
+  	0x090	ar.unat
 	0x098	&__jmp_buf	; address of the jmpbuf (needed to locate NaT bits in unat)
 	0x0a0	 f2
 	0x0b0	 f3
@@ -71,13 +71,13 @@
 LEAF(setjmp)
 	alloc r8=ar.pfs,2,0,0,0
 	mov in1=1
-	br.cond.sptk.many _GI___sigsetjmp
+	br.cond.sptk.many HIDDEN_JUMPTARGET(__sigsetjmp)
 END(setjmp)
 
 LEAF(_setjmp)
 	alloc r8=ar.pfs,2,0,0,0
 	mov in1=0
-	br.cond.sptk.many _GI___sigsetjmp
+	br.cond.sptk.many HIDDEN_JUMPTARGET(__sigsetjmp)
 END(_setjmp)
 libc_hidden_def (_setjmp)
 
@@ -89,15 +89,15 @@ ENTRY(__sigsetjmp)
 	.save ar.unat, loc2
 	mov loc2=ar.unat
 	;;
-	mov r17=ar.fpsr
+//	mov r17=ar.fpsr
 	mov r2=in0
 	add r3=8,in0
 	;;
 .mem.offset 8,0;	st8.spill.nta [r2]=sp,16	// r12 (sp)
-.mem.offset 0,0;	st8.spill.nta [r3]=gp,16	// r1 (gp)
+.mem.offset 0,0;	st8.spill.nta [r3]=gp,32	// r1 (gp)
 	;;
 	st8.nta [r2]=loc2,16		// save caller's unat
-	st8.nta [r3]=r17,16		// save fpsr
+//	st8.nta [r3]=r17,16		// save fpsr
 	add r8=0xa0,in0
 	;;
 .mem.offset 8,0;	st8.spill.nta [r2]=r4,16	// r4
@@ -191,7 +191,8 @@ ENTRY(__sigsetjmp)
 	mov r8=0
 	ret
 END(__sigsetjmp)
-strong_alias(__sigsetjmp, _GI___sigsetjmp)
+libc_hidden_def (__sigsetjmp)
+rtld_hidden_def (__sigsetjmp)
 
 weak_extern(_setjmp)
 weak_extern(setjmp)

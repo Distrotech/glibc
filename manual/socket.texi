@@ -1290,37 +1290,42 @@ pointer and the size of the buffer in the @var{buf} and @var{buflen}
 parameters.
 
 A pointer to the buffer, in which the result is stored, is available in
-@code{*@var{result}} after the function call successfully returned.  If
-an error occurs or if no entry is found, the pointer @code{*@var{result}}
-is a null pointer.  Success is signalled by a zero return value.  If the
-function failed the return value is an error number.  In addition to the
-errors defined for @code{gethostbyname} it can also be @code{ERANGE}.
-In this case the call should be repeated with a larger buffer.
-Additional error information is not stored in the global variable
-@code{h_errno} but instead in the object pointed to by @var{h_errnop}.
+@code{*@var{result}} after the function call successfully returned. The
+buffer passed as the @var{buf} parameter can be freed only once the caller
+has finished with the result hostent struct, or has copied it including all
+the other memory that it points to. If an error occurs or if no entry is
+found, the pointer @code{*@var{result}} is a null pointer. Success is
+signalled by a zero return value.  If the function failed the return value
+is an error number.  In addition to the errors defined for
+@code{gethostbyname} it can also be @code{ERANGE}. In this case the call
+should be repeated with a larger buffer. Additional error information is
+not stored in the global variable @code{h_errno} but instead in the object
+pointed to by @var{h_errnop}.
 
 Here's a small example:
 @smallexample
 struct hostent *
 gethostname (char *host)
 @{
-  struct hostent hostbuf, *hp;
+  struct hostent *hostbuf, *hp;
   size_t hstbuflen;
   char *tmphstbuf;
   int res;
   int herr;
 
+  hostbuf = malloc (sizeof (struct hostent));
   hstbuflen = 1024;
-  /* Allocate buffer, remember to free it to avoid memory leakage.  */
   tmphstbuf = malloc (hstbuflen);
 
-  while ((res = gethostbyname_r (host, &hostbuf, tmphstbuf, hstbuflen,
+  while ((res = gethostbyname_r (host, hostbuf, tmphstbuf, hstbuflen,
                                  &hp, &herr)) == ERANGE)
     @{
       /* Enlarge the buffer.  */
       hstbuflen *= 2;
       tmphstbuf = realloc (tmphstbuf, hstbuflen);
     @}
+
+  free (tmphstbuf);
   /*  Check for errors.  */
   if (res || hp == NULL)
     return NULL;

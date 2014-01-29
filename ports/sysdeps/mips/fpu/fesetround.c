@@ -1,5 +1,5 @@
 /* Set current rounding direction.
-   Copyright (C) 1998-2013 Free Software Foundation, Inc.
+   Copyright (C) 1998-2014 Free Software Foundation, Inc.
    This file is part of the GNU C Library.
    Contributed by Andreas Jaeger <aj@arthur.rhein-neckar.de>, 1998.
 
@@ -25,7 +25,7 @@ fesetround (int round)
 {
   fpu_control_t cw;
 
-  if ((round & ~0x3) != 0)
+  if ((round & ~_FPU_RC_MASK) != 0)
     /* ROUND is no valid rounding mode.  */
     return 1;
 
@@ -33,7 +33,7 @@ fesetround (int round)
   _FPU_GETCW (cw);
 
   /* Set rounding bits.  */
-  cw &= ~0x3;
+  cw &= ~_FPU_RC_MASK;
   cw |= round;
   /* Set new state.  */
   _FPU_SETCW (cw);

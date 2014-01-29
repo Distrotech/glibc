@@ -1,4 +1,4 @@
-# Copyright (C) 1991-2013 Free Software Foundation, Inc.
+# Copyright (C) 1991-2014 Free Software Foundation, Inc.
 # This file is part of the GNU C Library.
 
 # The GNU C Library is free software; you can redistribute it and/or
@@ -38,9 +38,9 @@ chmod a-w$(patsubst %,$(comma)a+x,$(filter .,$(@D))) $@.new
 mv -f $@.new $@
 endef
 
-configure: configure.in aclocal.m4; $(autoconf-it)
-%/configure: %/configure.in aclocal.m4; $(autoconf-it)
-%/preconfigure: %/preconfigure.in aclocal.m4; $(autoconf-it)
+configure: configure.ac aclocal.m4; $(autoconf-it)
+%/configure: %/configure.ac aclocal.m4; $(autoconf-it)
+%/preconfigure: %/preconfigure.ac aclocal.m4; $(autoconf-it)
 
 endif # $(AUTOCONF) = no
 
@@ -123,31 +123,8 @@ lib-noranlib: subdir_lib
 
 ifeq (yes,$(build-shared))
 # Build the shared object from the PIC object library.
-lib: $(common-objpfx)libc.so
-
-lib: $(common-objpfx)linkobj/libc.so
-
-# Do not filter ld.so out of libc.so link.
-$(common-objpfx)linkobj/libc.so: link-libc-deps = # empty
-
-$(common-objpfx)linkobj/libc.so: $(elfobjdir)/soinit.os \
-				 $(common-objpfx)linkobj/libc_pic.a \
-				 $(elfobjdir)/sofini.os \
-				 $(elfobjdir)/interp.os \
-				 $(elfobjdir)/ld.so \
-				 $(shlib-lds)
-	$(build-shlib)
-
-$(common-objpfx)linkobj/libc_pic.a: $(common-objpfx)libc_pic.a \
-				    $(common-objpfx)sunrpc/librpc_compat_pic.a
-	$(..)./scripts/mkinstalldirs $(common-objpfx)linkobj
-	(cd $(common-objpfx)linkobj; \
-	 $(AR) x ../libc_pic.a; \
-	 rm $$($(AR) t ../sunrpc/librpc_compat_pic.a | sed 's/^compat-//'); \
-	 $(AR) x ../sunrpc/librpc_compat_pic.a; \
-	 $(AR) cr libc_pic.a *.os; \
-	 rm *.os)
-endif
+lib: $(common-objpfx)libc.so $(common-objpfx)linkobj/libc.so
+endif # $(build-shared)
 
 
 # This is a handy script for running any dynamically linked program against
@@ -400,11 +377,16 @@ dist: dist-prepare
 	fi
 endif
 
-INSTALL: manual/install.texi manual/macros.texi \
-	 $(common-objpfx)manual/pkgvers.texi
+INSTALL: manual/install-plain.texi manual/macros.texi \
+	 $(common-objpfx)manual/pkgvers.texi manual/install.texi
 	makeinfo --no-validate --plaintext --no-number-sections \
-		 -I$(common-objpfx)manual $< -o $@
-	-chmod a-w $@
+		 -I$(common-objpfx)manual $< -o $@-tmp
+	$(AWK) 'NF == 0 { ++n; next } \
+		NF != 0 { while (n-- > 0) print ""; n = 0; print }' \
+	  < $@-tmp > $@-tmp2
+	rm -f $@-tmp
+	-chmod a-w $@-tmp2
+	mv -f $@-tmp2 $@
 $(common-objpfx)manual/%: FORCE
 	$(MAKE) $(PARALLELMFLAGS) -C manual $@
 FORCE:

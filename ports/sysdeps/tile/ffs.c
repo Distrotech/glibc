@@ -1,4 +1,4 @@
-/* Copyright (C) 2011-2013 Free Software Foundation, Inc.
+/* Copyright (C) 2011-2014 Free Software Foundation, Inc.
    This file is part of the GNU C Library.
    Contributed by Chris Metcalf <cmetcalf@tilera.com>, 2011.
 
@@ -27,6 +27,7 @@ __ffs (int x)
   return __builtin_ffs (x);
 }
 weak_alias (__ffs, ffs)
+libc_hidden_def (__ffs)
 libc_hidden_builtin_def (ffs)
 
 #undef ffsll
