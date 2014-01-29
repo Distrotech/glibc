@@ -64,6 +64,7 @@ if [ ! -d ${3}/usr/include/rpcsvc ];then
 fi;
 cp sunrpc/rpc/*.h ${3}/usr/include/rpc
 cp sunrpc/rpcsvc/*.h nis/rpcsvc/*.h ${3}/usr/include/rpcsvc
+rm -f ${3}/usr/include/rpcsvc/rquota.h
 
 #Setup ld.so.conf
 mkdir -p ${3}/etc/ld.so.conf.d
