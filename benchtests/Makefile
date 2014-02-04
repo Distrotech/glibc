@@ -114,13 +114,23 @@ bench-set: $(binaries-benchset)
 	  $(run-bench) > $${run}.out; \
 	done
 
+# Build and execute the benchmark functions.  This target generates JSON
+# formatted bench.out.  Each of the programs produce independent JSON output,
+# so one could even execute them individually and process it using any JSON
+# capable language or tool.
 bench-func: $(binaries-bench)
 	{ echo "{"; \
+	echo "  \"machine\":"; \
 	./machine-info.sh; \
+	echo "  ,\"functions\": {"; \
 	for run in $^; do \
+	  if ! [ "x$${run}" = "x$<" ]; then \
+	    echo ","; \
+	  fi; \
 	  echo "Running $${run}" >&2; \
 	  $(run-bench) $(DETAILED_OPT); \
 	done; \
+	echo "  }"; \
 	echo "}"; } > $(objpfx)bench.out-tmp; \
 	if [ -f $(objpfx)bench.out ]; then \
 	  mv -f $(objpfx)bench.out $(objpfx)bench.out.old; \

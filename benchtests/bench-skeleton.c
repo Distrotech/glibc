@@ -64,11 +64,13 @@ main (int argc, char **argv)
 
   iters = 1000 * res;
 
-  if (detailed)
-    printf ("%s\n", FUNCNAME);
+  /* Begin function.  */
+  printf ("\"%s\": {\n", FUNCNAME);
+  printf ("\"timing-type\": \"%s\"\n", TIMING_TYPE);
 
   for (int v = 0; v < NUM_VARIANTS; v++)
     {
+      putc (',', stdout);
       /* Run for approximately DURATION seconds.  */
       clock_gettime (CLOCK_MONOTONIC_RAW, &runtime);
       runtime.tv_sec += DURATION;
@@ -117,18 +119,27 @@ main (int argc, char **argv)
       d_total_s = total;
       d_iters = iters;
 
-      if (!detailed)
+      printf ("\"%s\": {\n", VARIANT (v));
+      printf ("\"duration\": %g, \"iterations\": %g, "
+	      "\"max\": %g, \"min\": %g\n",
+	      d_total_s, d_total_i, max / d_iters, min / d_iters);
+
+      if (detailed)
 	{
-	  TIMING_PRINT_STATS (VARIANT (v), d_total_s, d_iters, d_total_i, max,
-			      min);
-	}
-      else
-	{
-	  printf ("\t%s\n", VARIANT (v));
+	  printf (",\n\"timings\": [");
 	  for (int i = 0; i < NUM_SAMPLES (v); i++)
-	    printf ("\t\t%g\n", RESULT (v, i));
+	    {
+	      if (i > 0)
+		putc (',', stdout);
+	      printf ("%g", RESULT (v, i));
+	    }
+	  puts ("]");
 	}
+      puts ("}");
     }
+
+  /* End function.  */
+  puts ("}");
 
   return 0;
 }
