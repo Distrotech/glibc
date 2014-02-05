@@ -1,0 +1,57 @@
+{
+  "title": "benchmark",
+  "type": "object",
+  "properties": {
+    "machine": {
+      "type": "object",
+      "properties": {
+        "vendor-id": {"type": "string"},
+        "cpu-family": {"type": "number"},
+        "model": {"type": "number"},
+        "cpu-cores": {"type": "number"},
+        "processors": {"type": "number"},
+        "cache-size": {"type": "number"},
+        "memory": {"type": "number"},
+        "swap": {"type": "number"}
+      },
+      "required": ["vendor-id", "cpu-family", "model", "cpu-cores",
+                   "processors", "cache-size", "memory", "swap"]
+    },
+    "functions": {
+      "title": "Associative array of functions",
+      "type": "object",
+      "patternProperties": {
+        "^[_a-zA-Z][_a-zA-Z0-9]+$": {
+          "title": "Function names",
+          "type": "object",
+          "properties": {
+            "timing-type": {"type": "string"}
+          },
+          "required": ["timing-type"],
+          "patternProperties": {
+            "^[_a-zA-Z0-9]*$": {
+              "title": "Function variants",
+              "type": "object",
+              "properties": {
+                "duration": {"type": "number"},
+                "iterations": {"type": "number"},
+                "max": {"type": "number"},
+                "min": {"type": "number"},
+                "timings": {
+                  "type": "array",
+                  "items": {"type": "number"}
+                }
+              },
+              "required": ["duration", "iterations", "max", "min"],
+              "additionalProperties": false
+            }
+          },
+          "additionalProperties": false
+        }
+      },
+      "minProperties": 1
+    }
+  },
+  "required": ["machine", "functions"],
+  "additionalProperties": false
+}

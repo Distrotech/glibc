@@ -136,6 +136,8 @@ bench-func: $(binaries-bench)
 	  mv -f $(objpfx)bench.out $(objpfx)bench.out.old; \
 	fi; \
 	mv -f $(objpfx)bench.out-tmp $(objpfx)bench.out
+	$(.)scripts/validate_benchout.py $(objpfx)bench.out \
+		$(.)scripts/benchout.schema.json
 
 $(binaries-bench) $(binaries-benchset): %: %.o \
   $(sort $(filter $(common-objpfx)lib%,$(link-libc))) \
