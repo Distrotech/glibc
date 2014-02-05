@@ -121,7 +121,7 @@ bench-set: $(binaries-benchset)
 bench-func: $(binaries-bench)
 	{ echo "{"; \
 	echo "  \"machine\":"; \
-	./machine-info.sh; \
+	$(.)scripts/machine-info.sh; \
 	echo "  ,\"functions\": {"; \
 	for run in $^; do \
 	  if ! [ "x$${run}" = "x$<" ]; then \
