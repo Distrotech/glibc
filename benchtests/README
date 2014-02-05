@@ -78,7 +78,8 @@ the same file by using the `name' directive that looks something like this:
   ##name: 240bit
 
 See the pow-inputs file for an example of what such a partitioned input file
-would look like.
+would look like.  The valid value is a string that can contain numbers,
+alphabets and underscores.
 
 Benchmark Sets:
 ==============
