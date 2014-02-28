@@ -1,5 +1,12 @@
 2014-02-28  Roland McGrath  <roland@hack.frob.com>
 
+	* sysdeps/i386/tls.h (TLS_DTV_AT_TP): New macro.
+	* sysdeps/powerpc/tls.h (TLS_TCB_AT_TP): New macro.
+	* sysdeps/s390/tls.h (TLS_DTV_AT_TP): New macro.
+	* sysdeps/sh/tls.h (TLS_TCB_AT_TP): New macro.
+	* sysdeps/sparc/tls.h (TLS_DTV_AT_TP): New macro.
+	* sysdeps/x86_64/tls.h (TLS_DTV_AT_TP): New macro.
+
 	* Makefile (generated-dirs): Use += rather than =.
 
 2014-02-26  Joseph Myers  <joseph@codesourcery.com>
