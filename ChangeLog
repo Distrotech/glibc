@@ -1,5 +1,17 @@
 2014-02-28  Roland McGrath  <roland@hack.frob.com>
 
+	* scripts/versionlist.awk: New file.
+	* Makerules [$(build-shared) = yes]
+	(postclean-generated): Add Versions.def, not Versions.def.v and
+	Versions.def.v.i.
+	($(common-objpfx)Versions.def.v.i): Target removed.
+	($(common-objpfx)Versions.def): New target.
+	($(common-objpfx)Versions.all): Depend on that rather that
+	$(common-objpfx)Versions.def.v.
+	* Versions.def: File removed.
+
+2014-02-28  Roland McGrath  <roland@hack.frob.com>
+
 	* csu/Makefile (generated, before-compile): Use += rather than =.
 	* catgets/Makefile (generated, generated-dirs): Likewise.
 	* debug/Makefile (generated): Likewise.
