@@ -19,6 +19,8 @@
 #include <sysdep.h>
 #define _ERRNO_H	1
 #include <bits/errno.h>
+#include <tcb-offsets.h>
+
 
 /* Clone the calling process, but without copying the whole address space.
    The calling process is suspended until the new process exits or is
@@ -26,9 +28,15 @@
    and the process ID of the new process to the old process.  */
 
 ENTRY (__vfork)
-#ifdef SAVE_PID
-	SAVE_PID
-#endif
+	/* Save the PID value.  */
+	GET_TLS (r2)
+	NEGOFF_ADJ_BASE2 (r2, r0, PID_OFFSET) /* Save the TLS addr in r2.  */
+	ldr	r3, NEGOFF_OFF1 (r2, PID_OFFSET) /* Load the saved PID.  */
+	rsbs	r0, r3, #0		/* Negate it.  */
+	it	eq
+	moveq	r0, #0x80000000		/* Use 0x80000000 if it was 0.  */
+	str	r0, NEGOFF_OFF1 (r2, PID_OFFSET) /* Store the temp PID.  */
+
 	/* The DO_CALL macro saves r7 on the stack, to enable generation
 	   of ARM unwind info.  Since the stack is initially shared between
 	   parent and child of vfork, that saved value could be corrupted.
@@ -46,10 +54,13 @@ ENTRY (__vfork)
 	add	sp, sp, #4
 	cfi_adjust_cfa_offset (-4)
 	mov	r7, ip
-	cfi_restore (r7);
-#ifdef RESTORE_PID
-	RESTORE_PID
-#endif
+	cfi_restore (r7)
+
+	/* Restore the old PID value in the parent.  */
+	cmp	r0, #0		/* If we are the parent... */
+	it	ne
+	strne	r3, NEGOFF_OFF1 (r2, PID_OFFSET) /* restore the saved PID.  */
+
 	cmn	a1, #4096
 	it	cc
 	RETINSTR(cc, lr)

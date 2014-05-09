@@ -1,5 +1,12 @@
 2014-05-09  Roland McGrath  <roland@hack.frob.com>
 
+	* sysdeps/unix/sysv/linux/arm/vfork.S: Include <tcb-offsets.h>.
+	(__vfork): Incorporate save/restore of PID from nptl/vfork.S here.
+	* sysdeps/unix/sysv/linux/arm/nptl/vfork.S: File removed.
+	* sysdeps/unix/sysv/linux/arm/nptl/pt-vfork.S: Just include "vfork.S".
+
+2014-05-09  Roland McGrath  <roland@hack.frob.com>
+
 	* sysdeps/arm/armv7/strcmp.S: Use sfi_breg prefix on loads not from sp.
 	[NO_THUMB]: Cope without cbz, cnbz, and orn instructions.
 
