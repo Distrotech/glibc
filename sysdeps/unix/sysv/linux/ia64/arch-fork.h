@@ -1,4 +1,5 @@
-/* Copyright (C) 2003-2014 Free Software Foundation, Inc.
+/* ARCH_FORK definition for Linux fork implementation.  IA64 version.
+   Copyright (C) 2003-2014 Free Software Foundation, Inc.
    This file is part of the GNU C Library.
    Contributed by Jakub Jelinek <jakub@redhat.com>, 2003.
 
@@ -26,5 +27,3 @@
   INLINE_SYSCALL (clone2, 6,						      \
 		  CLONE_CHILD_SETTID | CLONE_CHILD_CLEARTID | SIGCHLD,	      \
 		  NULL, 0, NULL, &THREAD_SELF->tid, NULL)
-
-#include <sysdeps/unix/sysv/linux/fork.c>
