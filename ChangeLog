@@ -1,5 +1,72 @@
 2014-07-28  Adhemerval Zanella  <azanella@linux.vnet.ibm.com>
 
+	[BZ #6544]
+	[BZ #11216]
+	[BZ #12836]
+	[BZ #13151]
+	[BZ #13152]
+	[BZ #14292]
+	* include/stdio.h (fmemopen): Remove hidden prototype.
+	(__fmemopen): Add new hidden prototype.
+	* libio/Makefile: Add oldfmemopen object.
+	* libio/Versions [GLIBC_2.20]: Add new fmemopen symbol.
+	* libio/fmemopen.c (__fmemopen): Function rewrite to be POSIX
+	compliance.
+	* libio/oldfmemopen.c: New file: old fmemopen implementation for
+	symbol compatibility.
+	* stdio-common/Makefile [tests]: Add new tst-fmemopen3.
+	* stdio-common/psiginfo.c [psiginfo]: Call __fmemopen instead of
+	fmemopen.
+	* stdio-common/tst-fmemopen3.c: New file: more fmemopen tests, focus
+	on append and read mode.
+	* sysdeps/unix/sysv/linux/aarch64/nptl/libc.abilist [GLIBC_2.20]: Add
+	fmemopen.
+	* sysdeps/unix/sysv/linux/alpha/libc.abilist [GLIBC_2.20]: Likewise.
+	* sysdeps/unix/sysv/linux/arm/libc.abilist [GLIBC_2.20]: Likewise.
+	* sysdeps/unix/sysv/linux/i386/libc.abilist [GLIBC_2.20]: Likewise.
+	* sysdeps/unix/sysv/linux/ia64/nptl/libc.abilist [GLIBC_2.20]:
+	Likewise.
+	* sysdeps/unix/sysv/linux/m68k/coldfire/nptl/libc.abilist
+	[GLIBC_2.20]: Likewise.
+	* sysdeps/unix/sysv/linux/m68k/m680x0/nptl/libc.abilist [GLIBC_2.20]:
+	Likewise.
+	* sysdeps/unix/sysv/linux/microblaze/nptl/libc.abilist [GLIBC_2.20]:
+	Likewise.
+	* sysdeps/unix/sysv/linux/mips/mips32/fpu/nptl/libc.abilist
+	[GLIBC_2.20]: Likewise.
+	* sysdeps/unix/sysv/linux/mips/mips32/nofpu/nptl/libc.abilist
+	[GLIBC_2.20]: Likewise.
+	* sysdeps/unix/sysv/linux/mips/mips64/n32/nptl/libc.abilist
+	[GLIBC_2.20]: Likewise.
+	* sysdeps/unix/sysv/linux/mips/mips64/n64/nptl/libc.abilist
+	[GLIBC_2.20]: Likewise.
+	* sysdeps/unix/sysv/linux/powerpc/powerpc32/fpu/nptl/libc.abilist
+	[GLIBC_2.20]: Likewise.
+	* sysdeps/unix/sysv/linux/powerpc/powerpc32/nofpu/nptl/libc.abilist
+	[GLIBC_2.20]: Likewise.
+	* sysdeps/unix/sysv/linux/powerpc/powerpc64/nptl/libc.abilist
+	[GLIBC_2.20]: Likewise.
+	* sysdeps/unix/sysv/linux/s390/s390-32/nptl/libc.abilist [GLIBC_2.20]:
+	Likewise.
+	* sysdeps/unix/sysv/linux/s390/s390-64/nptl/libc.abilist [GLIBC_2.20]:
+	Likewise.
+	* sysdeps/unix/sysv/linux/sh/nptl/libc.abilist [GLIBC_2.20]: Likewise.
+	* sysdeps/unix/sysv/linux/sparc/sparc32/nptl/libc.abilist
+	[GLIBC_2.20]: Likewise.
+	* sysdeps/unix/sysv/linux/sparc/sparc64/nptl/libc.abilist
+	[GLIBC_2.20]: Likewise.
+	* sysdeps/unix/sysv/linux/tile/tilegx/tilegx32/libc.abilist
+	[GLIBC_2.20]: Likewise.
+	* sysdeps/unix/sysv/linux/tile/tilegx/tilegx64/libc.abilist
+	[GLIBC_2.20]: Likewise.
+	* sysdeps/unix/sysv/linux/tile/tilepro/libc.abilist [GLIBC_2.20]:
+	Likewise.
+	* sysdeps/unix/sysv/linux/x86_64/64/libc.abilist [GLIBC_2.20]:
+	Likewise.
+	* sysdeps/unix/sysv/linux/x86_64/x32/libc.abilist [GLIBC_2.20]:
+	Likewise.
+	* sysdeps/unix/sysv/linux/hppa/libc.abilist [GLIBC_2.20]: Likewise.
+
 	* stdio-common/tst-fmemopen2.c (do_test): Add test for NULL and zero
 	length buffers.
 	* stdio-common/tst-fmemopen.c (do_test): Refactor to use
