@@ -1,5 +1,7 @@
 2014-07-28  Adhemerval Zanella  <azanella@linux.vnet.ibm.com>
 
+	* stdio-common/tst-fmemopen2.c (do_test): Add test for NULL and zero
+	length buffers.
 	* stdio-common/tst-fmemopen.c (do_test): Refactor to use
 	test-skeleton.c.
 
