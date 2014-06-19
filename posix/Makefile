@@ -86,7 +86,7 @@ tests		:= tstgetopt testfnm runtests runptests	     \
 		   tst-getaddrinfo3 tst-fnmatch2 tst-cpucount tst-cpuset \
 		   bug-getopt1 bug-getopt2 bug-getopt3 bug-getopt4 \
 		   bug-getopt5 tst-getopt_long1 bug-regex34 bug-regex35 \
-		   tst-pathconf tst-getaddrinfo4
+		   tst-pathconf tst-getaddrinfo4 bug-regex36
 xtests		:= bug-ga2
 ifeq (yes,$(build-shared))
 test-srcs	:= globtest
@@ -101,6 +101,7 @@ install-others-programs	:= $(inst_libexecdir)/getconf
 before-compile	:= testcases.h ptestcases.h
 
 # So they get cleaned up.
+<<<<<<< HEAD
 generated := $(addprefix wordexp-test-result, 1 2 3 4 5 6 7 8 9 10) \
 	     annexc annexc.out wordexp-tst.out bug-regex2-mem \
 	     bug-regex2.mtrace bug-regex14-mem bug-regex14.mtrace \
@@ -111,6 +112,39 @@ generated := $(addprefix wordexp-test-result, 1 2 3 4 5 6 7 8 9 10) \
 	     bug-ga2.mtrace bug-ga2-mem bug-glob2.mtrace bug-glob2-mem \
 	     tst-vfork3-mem tst-vfork3.mtrace getconf.speclist \
 	     tst-fnmatch-mem tst-fnmatch.mtrace
+=======
+generated += $(addprefix wordexp-test-result, 1 2 3 4 5 6 7 8 9 10) \
+	     annexc annexc.out wordexp-tst.out bug-regex2-mem.out \
+	     bug-regex2.mtrace bug-regex14-mem.out bug-regex14.mtrace \
+	     bug-regex21-mem.out bug-regex21.mtrace \
+	     bug-regex31-mem.out bug-regex31.mtrace \
+	     tst-rxspencer-no-utf8-mem.out tst-rxspencer-no-utf8.mtrace \
+	     tst-getconf.out \
+	     tst-pcre-mem.out tst-pcre.mtrace tst-boost-mem.out \
+	     tst-boost.mtrace bug-ga2.mtrace bug-ga2-mem.out \
+	     bug-glob2.mtrace bug-glob2-mem.out tst-vfork3-mem.out \
+	     tst-vfork3.mtrace getconf.speclist tst-fnmatch-mem.out \
+	     tst-fnmatch.mtrace bug-regex36.mtrace
+
+ifeq ($(run-built-tests),yes)
+ifeq (yes,$(build-shared))
+tests-special += $(objpfx)globtest.out $(objpfx)wordexp-tst.out
+endif
+endif
+
+# Run a test on the header files we use.
+# XXX Please note that for now we ignore the result of this test.
+tests-special += $(objpfx)annexc.out
+ifeq ($(run-built-tests),yes)
+tests-special += $(objpfx)bug-regex2-mem.out $(objpfx)bug-regex14-mem.out \
+		 $(objpfx)bug-regex21-mem.out $(objpfx)bug-regex31-mem.out \
+		 $(objpfx)tst-rxspencer-no-utf8-mem.out $(objpfx)tst-pcre-mem.out \
+		 $(objpfx)tst-boost-mem.out $(objpfx)tst-getconf.out \
+		 $(objpfx)bug-glob2-mem.out $(objpfx)tst-vfork3-mem.out \
+		 $(objpfx)tst-fnmatch-mem.out $(objpfx)bug-regex36-mem.out
+xtests-special += $(objpfx)bug-ga2-mem.out
+endif
+>>>>>>> 4d43ef1... Fix memory leak in regexp compiler (BZ #17069)
 
 include ../Rules
 
@@ -259,6 +293,12 @@ bug-regex31-ENV = MALLOC_TRACE=$(objpfx)bug-regex31.mtrace
 
 $(objpfx)bug-regex31-mem: $(objpfx)bug-regex31.out
 	$(common-objpfx)malloc/mtrace $(objpfx)bug-regex31.mtrace > $@
+
+bug-regex36-ENV = MALLOC_TRACE=$(objpfx)bug-regex36.mtrace
+
+$(objpfx)bug-regex36-mem.out: $(objpfx)bug-regex36.out
+	$(common-objpfx)malloc/mtrace $(objpfx)bug-regex36.mtrace > $@; \
+	$(evaluate-test)
 
 tst-vfork3-ENV = MALLOC_TRACE=$(objpfx)tst-vfork3.mtrace
 
