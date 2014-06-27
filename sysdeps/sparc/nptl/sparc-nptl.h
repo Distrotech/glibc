@@ -1,7 +1,3 @@
-#ifndef _INTERNALTYPES_H
-
-#include_next <internaltypes.h>
-
 union sparc_pthread_barrier
 {
   struct pthread_barrier b;
@@ -31,5 +27,3 @@ struct sparc_old_sem
   unsigned char lock;
   unsigned char private;
 };
-
-#endif
