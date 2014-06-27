@@ -1,3 +1,9 @@
+2014-06-27  Roland McGrath  <roland@hack.frob.com>
+
+	* nptl/pt-fork.c: Rewritten.  Put everything under
+	[SHLIB_COMPAT (libpthread, GLIBC_2_0, GLIBC_2_20)].
+	Use IFUNC to redirect when possible.
+
 2014-07-07  Roland McGrath  <roland@hack.frob.com>
 
 	* sysdeps/nptl/lowlevellock.h: File removed.
