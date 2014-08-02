@@ -21,6 +21,8 @@
 
 #ifndef __ASSEMBLER__
 # include <stdint.h>
+#else
+# include <arm-features.h>
 #endif
 
 /* The __ARM_ARCH define is provided by gcc 4.8.  Construct it otherwise.  */
@@ -157,6 +159,30 @@
 	.arm
 # endif
 
+/* Load or store to/from address X + Y into/from R.  The first version
+   eschews the two-register addressing mode, while the second uses it.  */
+# define LDST_INDEXED_NOINDEX(OP, R, X, Y)		\
+	add	R, X, Y;				\
+	sfi_breg R,					\
+	OP	R, [R]
+# define LDST_INDEXED_INDEX(OP, R, X, Y)		\
+	OP	R, [X, Y]
+
+# ifdef ARM_NO_INDEX_REGISTER
+/* We're never using the two-register addressing mode, so this
+   always uses an intermediate add.  */
+#  define LDST_INDEXED(OP, R, X, Y)	LDST_INDEXED_NOINDEX (OP, R, X, Y)
+#  define LDST_PC_INDEXED(OP, R, X)	LDST_INDEXED_NOINDEX (OP, R, pc, X)
+# else
+/* The two-register addressing mode is OK, except on Thumb with pc.  */
+#  define LDST_INDEXED(OP, R, X, Y)	LDST_INDEXED_INDEX (OP, R, X, Y)
+#  ifdef __thumb2__
+#   define LDST_PC_INDEXED(OP, R, X)	LDST_INDEXED_NOINDEX (OP, R, pc, X)
+#  else
+#   define LDST_PC_INDEXED(OP, R, X)	LDST_INDEXED_INDEX (OP, R, pc, X)
+#  endif
+# endif
+
 /* Load or store to/from a pc-relative EXPR into/from R, using T.  */
 # ifdef __thumb2__
 #  define LDST_PCREL(OP, R, T, EXPR) \
@@ -166,6 +192,11 @@
 	.previous;					\
 99:	add	T, T, pc;				\
 	OP	R, [T]
+# elif defined (ARCH_HAS_T2)
+#  define LDST_PCREL(OP, R, T, EXPR)			\
+	movw	T, #:lower16:EXPR - 99f - PC_OFS;	\
+	movt	T, #:upper16:EXPR - 99f - PC_OFS;	\
+99:	LDST_PC_INDEXED (OP, R, T)
 # else
 #  define LDST_PCREL(OP, R, T, EXPR) \
 	ldr	T, 98f;					\
@@ -176,7 +207,21 @@
 # endif
 
 /* Load or store to/from a global EXPR into/from R, using T.  */
-# define LDST_GLOBAL(OP, R, T, EXPR)			\
+# ifdef ARCH_HAS_T2
+#  define LDR_GLOBAL(R, T, EXPR)					\
+	movw	R, #:lower16:_GLOBAL_OFFSET_TABLE_ - 97f - PC_OFS;	\
+	movw	T, #:lower16:99f - 98f - PC_OFS;			\
+	movt	R, #:upper16:_GLOBAL_OFFSET_TABLE_ - 97f - PC_OFS;	\
+	movt	T, #:upper16:99f - 98f - PC_OFS;			\
+	.pushsection .rodata.cst4, "aM", %progbits, 4;			\
+	.balign 4;							\
+99:	.word	EXPR##(GOT);						\
+	.popsection;							\
+97:	add	R, R, pc;						\
+98:	LDST_PC_INDEXED (ldr, T, T);					\
+	LDST_INDEXED (ldr, R, R, T)
+# else
+#  define LDR_GLOBAL(R, T, EXPR)			\
 	ldr	T, 99f;					\
 	ldr	R, 100f;				\
 98:	add	T, T, pc;				\
@@ -185,7 +230,8 @@
 99:	.word	_GLOBAL_OFFSET_TABLE_ - 98b - PC_OFS;	\
 100:	.word	EXPR##(GOT);				\
 	.previous;					\
-	OP	R, [T]
+	ldr	R, [T]
+# endif
 
 /* Cope with negative memory offsets, which thumb can't encode.
    Use NEGOFF_ADJ_BASE to (conditionally) alter the base register,
@@ -316,7 +362,7 @@ extern uintptr_t __pointer_chk_guard_local attribute_relro attribute_hidden;
 #else
 # ifdef __ASSEMBLER__
 #  define PTR_MANGLE_LOAD(guard, tmp)					\
-  LDST_GLOBAL(ldr, guard, tmp, C_SYMBOL_NAME(__pointer_chk_guard));
+  LDR_GLOBAL(guard, tmp, C_SYMBOL_NAME(__pointer_chk_guard));
 #  define PTR_MANGLE(dst, src, guard, tmp)				\
   PTR_MANGLE_LOAD(guard, tmp);						\
   PTR_MANGLE2(dst, src, guard)
