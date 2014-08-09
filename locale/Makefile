@@ -89,7 +89,7 @@ CPPFLAGS-locale-programs = -DLOCALE_PATH='$(localepath)' \
 			   -DCHARMAP_PATH='"$(i18ndir)/charmaps"' \
 			   -DREPERTOIREMAP_PATH='"$(i18ndir)/repertoiremaps"' \
 			   -DLOCSRCDIR='"$(i18ndir)/locales"' \
-			   -DNOT_IN_libc
+			   -DNOT_IN_libc -DIN_MODULE=MODULE_locale_programs
 
 CFLAGS-charmap.c = -Wno-write-strings -Wno-char-subscripts
 CFLAGS-locfile.c = -Wno-write-strings -Wno-char-subscripts
