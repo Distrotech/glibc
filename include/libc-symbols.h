@@ -22,12 +22,6 @@
 
 #include "libc-modules.h"
 
-#ifndef IN_MODULE
-# define IN_MODULE MODULE_libc
-#endif
-
-#define IS_IN_MODULE(lib) (IN_MODULE == MODULE_##lib)
-
 /* This file's macros are included implicitly in the compilation of every
    file in the C library by -imacros.
 

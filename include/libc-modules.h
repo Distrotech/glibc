@@ -29,6 +29,28 @@
 #define MODULE_libpcprofile	31
 #define MODULE_librpcsvc	32
 
+/* Added to the core library modules, i.e. libc, libpthread, libnss_*, etc.  */
+#define MODULE_libs		1000
+
 /* Catch-all for test modules and other binaries.  */
 #define MODULE_nonlib		98
 #define MODULE_extramodules	99
+
+#define IS_IN_MODULE(mod) (IN_MODULE == MODULE_##mod \
+			   || IN_MODULE == MODULE_##mod + MODULE_libs)
+
+#define IS_IN_MODULE_LIB (IN_MODULE > MODULE_libs)
+
+#if IS_IN_MODULE (libc)
+# define MODULE_NAME libc
+#elif IS_IN_MODULE (libpthread)
+# define MODULE_NAME libpthread
+#elif IS_IN_MODULE (rtld)
+# define MODULE_NAME rtld
+#elif IS_IN_MODULE (libm)
+# define MODULE_NAME libm
+#elif IS_IN_MODULE (libanl)
+# define MODULE_NAME libanl
+#elif IS_IN_MODULE (librt)
+# define MODULE_NAME librt
+#endif

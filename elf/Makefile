@@ -436,8 +436,8 @@ CFLAGS-cache.c = $(SYSCONF-FLAGS)
 CFLAGS-rtld.c = $(SYSCONF-FLAGS)
 
 CPPFLAGS-.os += $(if $(filter $(@F),$(patsubst %,%.os,$(all-rtld-routines))),\
-		     -DNOT_IN_libc=1 -DIS_IN_rtld=1 -DIN_LIB=rtld -UIN_MODULE \
-		     -DIN_MODULE=MODULE_rtld)
+		     -DNOT_IN_libc=1 -DIS_IN_rtld=1 -UIN_MODULE \
+		     -DIN_MODULE="MODULE_rtld + MODULE_libs")
 
 test-modules = $(addprefix $(objpfx),$(addsuffix .so,$(strip $(modules-names))))
 generated += $(addsuffix .so,$(strip $(modules-names)))
