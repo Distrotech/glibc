@@ -79,7 +79,10 @@ CFLAGS-nscd_gethst_r.c = -fexceptions
 CFLAGS-nscd_getai.c = -fexceptions
 CFLAGS-nscd_initgroups.c = -fexceptions
 
-CPPFLAGS-nonlib += -DIS_IN_nscd=1 -D_FORTIFY_SOURCE=2
+# Override the definition of IN_MODULE inherited from CPPFLAGS-nonlib.  We want
+# to be called nscd and not just a generic nonlib.
+CPPFLAGS-nonlib += -DIS_IN_nscd=1 -D_FORTIFY_SOURCE=2 -UIN_MODULE \
+		   -DIN_MODULE=MODULE_nscd
 
 ifeq (yesyes,$(have-fpie)$(build-shared))
 CFLAGS-nonlib += $(pie-ccflag)

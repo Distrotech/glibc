@@ -28,6 +28,8 @@
 #define MODULE_libnsl		30
 #define MODULE_libpcprofile	31
 #define MODULE_librpcsvc	32
+#define MODULE_nscd		33
+#define MODULE_ldconfig		34
 
 /* Added to the core library modules, i.e. libc, libpthread, libnss_*, etc.  */
 #define MODULE_libs		1000
