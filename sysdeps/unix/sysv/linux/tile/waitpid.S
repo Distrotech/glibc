@@ -1,7 +1,7 @@
 /*
 extern pid_t __waitpid_nocancel (pid_t, int *, int) attribute_hidden;
 */
-#if !defined NOT_IN_libc || defined IS_IN_libpthread || IS_IN_MODULE (librt)
+#if !defined NOT_IN_libc || IS_IN_MODULE (libpthread) || IS_IN_MODULE (librt)
 
 /* Call __NR_wait4, providing fourth argument (struct rusage *) as NULL. */
 #define PSEUDO_EXTRA move r3, zero;

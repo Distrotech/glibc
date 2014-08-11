@@ -22,7 +22,7 @@
 # include <nptl/pthreadP.h>
 #endif
 
-#if !defined NOT_IN_libc || defined IS_IN_libpthread || IS_IN_MODULE (librt)
+#if !defined NOT_IN_libc || IS_IN_MODULE (libpthread) || IS_IN_MODULE (librt)
 
 # undef PSEUDO
 
@@ -179,7 +179,7 @@ __GC_##name:								      \
 # undef PSEUDO_END
 # define PSEUDO_END(name) .endp
 
-# ifdef IS_IN_libpthread
+# if IS_IN_MODULE (libpthread)
 #  define CENABLE	br.call.sptk.many b0 = __pthread_enable_asynccancel
 #  define CDISABLE	br.call.sptk.many b0 = __pthread_disable_asynccancel
 # elif !defined NOT_IN_libc
