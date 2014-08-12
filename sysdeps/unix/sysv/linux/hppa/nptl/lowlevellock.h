@@ -58,7 +58,7 @@
 /* Initialize locks to zero.  */
 #define LLL_MUTEX_LOCK_INITIALIZER (0)
 
-#if !defined NOT_IN_libc || IS_IN_MODULE (rtld)
+#if IS_IN_MODULE (libc) || IS_IN_MODULE (rtld)
 /* In libc.so or ld.so all futexes are private.  */
 # ifdef __ASSUME_PRIVATE_FUTEX
 #  define __lll_private_flag(fl, private) \

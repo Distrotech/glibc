@@ -139,7 +139,6 @@ ifdef rtld-depfiles
 endif
 
 # This here is the whole point of all the shenanigans.
-rtld-CPPFLAGS := -DNOT_IN_libc=1 -UIN_MODULE \
-		 -DIN_MODULE="MODULE_rtld + MODULE_libs"
+rtld-CPPFLAGS := -UIN_MODULE -DIN_MODULE="MODULE_rtld + MODULE_libs"
 
 endif

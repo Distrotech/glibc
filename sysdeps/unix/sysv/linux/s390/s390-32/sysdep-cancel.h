@@ -22,7 +22,7 @@
 # include <nptl/pthreadP.h>
 #endif
 
-#if !defined NOT_IN_libc || IS_IN_MODULE (libpthread) || IS_IN_MODULE (librt)
+#if IS_IN_MODULE (libc) || IS_IN_MODULE (libpthread) || IS_IN_MODULE (librt)
 
 # undef PSEUDO
 # define PSEUDO(name, syscall_name, args)				      \
@@ -78,7 +78,7 @@ L(pseudo_end):
 # if IS_IN_MODULE (libpthread)
 #  define CENABLE	__pthread_enable_asynccancel
 #  define CDISABLE	__pthread_disable_asynccancel
-# elif !defined NOT_IN_libc
+# elif IS_IN_MODULE (libc)
 #  define CENABLE	__libc_enable_asynccancel
 #  define CDISABLE	__libc_disable_asynccancel
 # elif IS_IN_MODULE (librt)

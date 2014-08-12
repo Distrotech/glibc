@@ -1,4 +1,4 @@
-#ifndef NOT_IN_libc
+#if IS_IN_MODULE (libc)
 # include <wchar.h>
 
 # define WMEMCMP  __wmemcmp_sse2

@@ -18,7 +18,7 @@
    <http://www.gnu.org/licenses/>.  */
 
 
-#ifndef NOT_IN_libc
+#if IS_IN_MODULE (libc)
 
 # include <sysdep.h>
 

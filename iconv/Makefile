@@ -52,14 +52,11 @@ CFLAGS-gconv_cache.c += -DGCONV_DIR='"$(gconvdir)"'
 CFLAGS-gconv_conf.c = -DGCONV_PATH='"$(gconvdir)"'
 CFLAGS-iconvconfig.c = -DGCONV_PATH='"$(gconvdir)"' -DGCONV_DIR='"$(gconvdir)"'
 
-CPPFLAGS-iconv_charmap = -DNOT_IN_libc -UIN_MODULE \
-			 -DIN_MODULE=MODULE_iconv_programs
-CPPFLAGS-linereader = -DNOT_IN_libc -UIN_MODULE \
-		      -DIN_MODULE=MODULE_iconv_programs
-CPPFLAGS-strtab = -DNOT_IN_libc -UIN_MODULE -DIN_MODULE=MODULE_iconv_programs
-CPPFLAGS-charmap = -DNOT_IN_libc -UIN_MODULE -DIN_MODULE=MODULE_iconv_programs
-CPPFLAGS-charmap-dir = -DNOT_IN_libc -UIN_MODULE \
-		       -DIN_MODULE=MODULE_iconv_programs
+CPPFLAGS-iconv_charmap = -UIN_MODULE -DIN_MODULE=MODULE_iconv_programs
+CPPFLAGS-linereader = -UIN_MODULE -DIN_MODULE=MODULE_iconv_programs
+CPPFLAGS-strtab = -UIN_MODULE -DIN_MODULE=MODULE_iconv_programs
+CPPFLAGS-charmap = -UIN_MODULE -DIN_MODULE=MODULE_iconv_programs
+CPPFLAGS-charmap-dir = -UIN_MODULE -DIN_MODULE=MODULE_iconv_programs
 
 ifeq ($(run-built-tests),yes)
 xtests-special += $(objpfx)test-iconvconfig.out

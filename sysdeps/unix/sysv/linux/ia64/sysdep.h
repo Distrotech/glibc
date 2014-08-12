@@ -61,7 +61,7 @@
 #endif
 
 #if defined USE_DL_SYSINFO \
-	&& (!defined NOT_IN_libc \
+	&& (IS_IN_MODULE (libc) \
 	    || IS_IN_MODULE (libpthread) || IS_IN_MODULE (librt))
 # define IA64_USE_NEW_STUB
 #else

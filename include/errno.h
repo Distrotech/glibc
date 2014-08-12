@@ -27,7 +27,7 @@ extern int rtld_errno attribute_hidden;
 #  include <tls.h>
 
 #  undef  errno
-#  ifndef NOT_IN_libc
+#  if IS_IN_MODULE (libc)
 #   define errno __libc_errno
 #  else
 #   define errno errno		/* For #ifndef errno tests.  */

@@ -382,7 +382,7 @@ typedef struct re_dfa_t re_dfa_t;
 # endif
 #endif
 
-#ifndef NOT_IN_libc
+#if IS_IN_MODULE (libc)
 static reg_errcode_t re_string_realloc_buffers (re_string_t *pstr,
 						int new_buf_len)
      internal_function;
@@ -732,7 +732,7 @@ re_string_wchar_at (const re_string_t *pstr, int idx)
   return (wint_t) pstr->wcs[idx];
 }
 
-# ifndef NOT_IN_libc
+# if IS_IN_MODULE (libc)
 static int
 internal_function __attribute__ ((pure, unused))
 re_string_elem_size_at (const re_string_t *pstr, int idx)

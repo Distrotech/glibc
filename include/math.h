@@ -6,7 +6,7 @@
 /* Now define the internal interfaces.  */
 extern int __matherr (struct exception *__exc);
 
-# if !defined NOT_IN_libc || IS_IN_MODULE (libm)
+# if IS_IN_MODULE (libc) || IS_IN_MODULE (libm)
 hidden_proto (__finite)
 hidden_proto (__isinf)
 hidden_proto (__isnan)

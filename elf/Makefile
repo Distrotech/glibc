@@ -96,7 +96,7 @@ extra-objs += sotruss-lib.os sotruss-lib.so
 install-others += $(inst_auditdir)/sotruss-lib.so
 install-bin-script += sotruss
 generated += sotruss
-CPPFLAGS-sotruss-lib = -DNOT_IN_libc -DIN_MODULE=MODULE_extramodules
+CPPFLAGS-sotruss-lib = -UIN_MODULE -DIN_MODULE=MODULE_extramodules
 $(objpfx)sotruss-lib.so: $(objpfx)sotruss-lib.os
 	$(build-module-asneeded)
 $(objpfx)sotruss-lib.so: $(common-objpfx)libc.so $(objpfx)ld.so \
@@ -356,7 +356,7 @@ $(objpfx)ld.so: $(objpfx)librtld.os $(ld-map)
 # interp.c exists just to get this string into the libraries.
 CFLAGS-interp.c = -D'RUNTIME_LINKER="$(rtlddir)/$(rtld-installed-name)"'
 
-CPPFLAGS-interp = -DNOT_IN_libc=1 -DIN_MODULE=MODULE_extramodules
+CPPFLAGS-interp = -UIN_MODULE -DIN_MODULE=MODULE_extramodules
 $(objpfx)interp.os: $(common-objpfx)config.make
 
 ifneq (ld.so,$(rtld-installed-name))
@@ -438,8 +438,7 @@ CFLAGS-cache.c = $(SYSCONF-FLAGS)
 CFLAGS-rtld.c = $(SYSCONF-FLAGS)
 
 CPPFLAGS-.os += $(if $(filter $(@F),$(patsubst %,%.os,$(all-rtld-routines))),\
-		     -DNOT_IN_libc=1 -UIN_MODULE \
-		     -DIN_MODULE="MODULE_rtld + MODULE_libs")
+		     -UIN_MODULE -DIN_MODULE="MODULE_rtld + MODULE_libs")
 
 test-modules = $(addprefix $(objpfx),$(addsuffix .so,$(strip $(modules-names))))
 generated += $(addsuffix .so,$(strip $(modules-names)))

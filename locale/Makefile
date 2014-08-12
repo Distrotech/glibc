@@ -89,14 +89,13 @@ CPPFLAGS-locale-programs = -DLOCALE_PATH='$(localepath)' \
 			   -DCHARMAP_PATH='"$(i18ndir)/charmaps"' \
 			   -DREPERTOIREMAP_PATH='"$(i18ndir)/repertoiremaps"' \
 			   -DLOCSRCDIR='"$(i18ndir)/locales"' \
-			   -DNOT_IN_libc -UIN_MODULE \
-			   -DIN_MODULE=MODULE_locale_programs
+			   -UIN_MODULE -DIN_MODULE=MODULE_locale_programs
 
 CFLAGS-charmap.c = -Wno-write-strings -Wno-char-subscripts
 CFLAGS-locfile.c = -Wno-write-strings -Wno-char-subscripts
 CFLAGS-charmap-dir.c = -Wno-write-strings
 
-# This makes sure -DNOT_IN_libc et al are passed for all these modules.
+# This makes sure -DIN_MODULE et al are passed for all these modules.
 cpp-srcs-left := $(addsuffix .c,$(localedef-modules) $(localedef-aux) \
 				$(locale-modules) $(lib-modules))
 lib := locale-programs

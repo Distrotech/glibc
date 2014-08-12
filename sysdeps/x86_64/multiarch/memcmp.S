@@ -22,7 +22,7 @@
 #include <init-arch.h>
 
 /* Define multiple versions only for the definition in libc. */
-#ifndef NOT_IN_libc
+#if IS_IN_MODULE (libc)
 	.text
 ENTRY(memcmp)
 	.type	memcmp, @gnu_indirect_function

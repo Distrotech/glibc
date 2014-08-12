@@ -6,4 +6,4 @@
 module := $(firstword $(extra-modules-left))
 extra-modules-left := $(filter-out $(module),$(extra-modules-left))
 
-CPPFLAGS-$(module).c += -DNOT_IN_libc -UIN_MODULE -DIN_MODULE=MODULE_extramodules
+CPPFLAGS-$(module).c += -UIN_MODULE -DIN_MODULE=MODULE_extramodules

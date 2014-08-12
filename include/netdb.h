@@ -6,7 +6,7 @@
 /* Macros for accessing h_errno from inside libc.  */
 # if IS_IN_MODULE_LIB
 #  undef  h_errno
-#  ifndef NOT_IN_libc
+#  if IS_IN_MODULE (libc)
 #   define h_errno __libc_h_errno
 #  else
 #   define h_errno h_errno	/* For #ifndef h_errno tests.  */

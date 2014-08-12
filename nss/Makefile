@@ -105,8 +105,7 @@ $(objpfx)makedb: $(makedb-modules:%=$(objpfx)%.o)
 $(inst_vardbdir)/Makefile: db-Makefile $(+force)
 	$(do-install)
 
-CPPFLAGS-nss_test1 = -DNOT_IN_libc=1 -UIN_MODULE \
-		     -DIN_MODULE=MODULE_extramodules
+CPPFLAGS-nss_test1 = -UIN_MODULE -DIN_MODULE=MODULE_extramodules
 $(objpfx)/libnss_test1.so: $(objpfx)nss_test1.os $(link-libc-deps)
 	$(build-module)
 ifdef libnss_test1.so-version

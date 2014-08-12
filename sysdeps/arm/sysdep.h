@@ -293,7 +293,7 @@
 
 /* Pointer mangling support.  */
 #if (IS_IN_MODULE (rtld) || \
-     (!defined SHARED && (!defined NOT_IN_libc || IS_IN_MODULE (libpthread))))
+     (!defined SHARED && (IS_IN_MODULE (libc) || IS_IN_MODULE (libpthread))))
 # ifdef __ASSEMBLER__
 #  define PTR_MANGLE_LOAD(guard, tmp)					\
   LDST_PCREL(ldr, guard, tmp, C_SYMBOL_NAME(__pointer_chk_guard_local));

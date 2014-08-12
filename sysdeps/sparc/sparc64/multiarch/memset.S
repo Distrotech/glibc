@@ -20,7 +20,7 @@
 
 #include <sysdep.h>
 
-#if !defined NOT_IN_libc
+#if IS_IN_MODULE (libc)
 	.text
 ENTRY(memset)
 	.type	memset, @gnu_indirect_function

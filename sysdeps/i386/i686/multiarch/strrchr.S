@@ -21,7 +21,7 @@
 #include <sysdep.h>
 #include <init-arch.h>
 
-#ifndef NOT_IN_libc
+#if IS_IN_MODULE (libc)
 	.text
 ENTRY(strrchr)
 	.type	strrchr, @gnu_indirect_function
