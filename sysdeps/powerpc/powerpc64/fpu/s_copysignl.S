@@ -43,7 +43,7 @@ L(0):
 	blr
 END (__copysignl)
 
-#ifdef IS_IN_libm
+#if IS_IN_MODULE (libm)
 long_double_symbol (libm, __copysignl, copysignl)
 #else
 long_double_symbol (libc, __copysignl, copysignl)
