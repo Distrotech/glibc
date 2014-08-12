@@ -1,4 +1,4 @@
 /* No floating-point inline functions in rtld.  */
-#ifndef IS_IN_rtld
+#if !IS_IN_MODULE (rtld)
 # include <stdlib/bits/stdlib-float.h>
 #endif

@@ -292,7 +292,7 @@
 #endif
 
 /* Pointer mangling support.  */
-#if (defined IS_IN_rtld || \
+#if (IS_IN_MODULE (rtld) || \
      (!defined SHARED && (!defined NOT_IN_libc || IS_IN_MODULE (libpthread))))
 # ifdef __ASSEMBLER__
 #  define PTR_MANGLE_LOAD(guard, tmp)					\

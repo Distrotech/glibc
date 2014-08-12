@@ -309,7 +309,7 @@
 #endif	/* __ASSEMBLER__ */
 
 /* Pointer mangling is supported for AArch64.  */
-#if (defined IS_IN_rtld || \
+#if (IS_IN_MODULE (rtld) || \
      (!defined SHARED && (!defined NOT_IN_libc \
 			  || IS_IN_MODULE (libpthread))))
 # ifdef __ASSEMBLER__
