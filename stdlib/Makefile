@@ -145,7 +145,7 @@ LDFLAGS-tst-putenv = $(no-as-needed)
 
 $(objpfx)tst-putenvmod.so: $(objpfx)tst-putenvmod.os $(link-libc-deps)
 	$(build-module)
-CFLAGS-tst-putenvmod.c = -UIN_MODULE -DIN_MODULE=MODULE_extramodules
+CPPFLAGS-tst-putenvmod = -UIN_MODULE -DIN_MODULE=MODULE_extramodules
 
 $(objpfx)bug-getcontext: $(libm)
 $(objpfx)tst-strtod-round: $(libm)
