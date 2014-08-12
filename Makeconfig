@@ -817,7 +817,10 @@ libio-include = -I$(..)libio
 # Note that we can't use -std=* in CPPFLAGS, because it overrides
 # the implicit -lang-asm and breaks cpp behavior for .S files--notably
 # it causes cpp to stop predefining __ASSEMBLER__.
+# All sources are assumed to be in libc.so sources, unless
+# overridden by CPPFLAGS.
 CPPFLAGS = $(config-extra-cppflags) $(CPPUNDEFS) $(CPPFLAGS-config) \
+	   -DIN_MODULE=MODULE_libc+MODULE_libs \
 	   $($(subdir)-CPPFLAGS) \
 	   $(+includes) $(defines) \
 	   -include $(..)include/libc-symbols.h $(sysdep-CPPFLAGS) \

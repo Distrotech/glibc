@@ -48,7 +48,7 @@ extra-objs = mcheck-init.o libmcheck.a
 # Include the cleanup handler.
 aux := set-freeres thread-freeres
 
-CPPFLAGS-memusagestat = -DNOT_IN_libc -DIN_MODULE=MODULE_memusagestat
+CPPFLAGS-memusagestat = -DNOT_IN_libc -UIN_MODULE -DIN_MODULE=MODULE_memusagestat
 
 # The Perl script to analyze the output of the mtrace functions.
 ifneq ($(PERL),no)

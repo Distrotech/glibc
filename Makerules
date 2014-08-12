@@ -1162,7 +1162,7 @@ include $(patsubst %,$(..)cppflags-iterator.mk,$(cpp-srcs-left))
 endif
 
 # The include magic above causes those files to use this variable for flags.
-CPPFLAGS-nonlib = -DNOT_IN_libc=1 -DIN_MODULE=MODULE_nonlib
+CPPFLAGS-nonlib = -DNOT_IN_libc=1 -UIN_MODULE -DIN_MODULE=MODULE_nonlib
 
 
 ifeq ($(build-shared),yes)

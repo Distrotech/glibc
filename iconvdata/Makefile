@@ -76,7 +76,7 @@ test-srcs := tst-table-from tst-table-to
 endif
 
 # No code here is in libc.so.
-CPPFLAGS += -DNOT_IN_libc -DIN_MODULE=MODULE_iconvdata
+CPPFLAGS += -DNOT_IN_libc -UIN_MODULE -DIN_MODULE=MODULE_iconvdata
 
 libJIS-routines := jis0201 jis0208 jis0212
 libKSC-routines := ksc5601

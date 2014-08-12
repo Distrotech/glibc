@@ -178,7 +178,7 @@ ifeq ($(subdir),elf)
 sysdep-rtld-routines += dl-brk dl-sbrk dl-getcwd dl-openat64 dl-opendir \
 			dl-fxstatat64
 
-CPPFLAGS-lddlibc4 += -DNOT_IN_libc -DIN_MODULE=MODULE_lddlibc4
+CPPFLAGS-lddlibc4 += -DNOT_IN_libc -UIN_MODULE -DIN_MODULE=MODULE_lddlibc4
 
 others += pldd
 install-bin += pldd
