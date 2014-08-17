@@ -5,7 +5,7 @@ if [ "${MLIBDIR}" ];then
  else
   C_LIBDIRS="${B_LIBDIRS}"
 fi;
- 
+
 if [ ! -e ${ARCHROOT}/${1}/usr/${C_LIBDIRS}/locale/locale-archive ];then
   make DESTDIR=${3} localedata/install-locales
  else
@@ -89,6 +89,7 @@ if [ -e ${3}/etc/ld.so.cache ];then
 fi;
 
 if [ "${MLIBDIR}" ];then
+  mv ${3}/usr/${B_LIBDIRS}/${MLIBDIR}/*.o ${3}/usr/${B_LIBDIRS}/
   (cat <<EOF
 /${B_LIBDIRS}/${MLIBDIR}
 /usr/${B_LIBDIRS}/${MLIBDIR}
