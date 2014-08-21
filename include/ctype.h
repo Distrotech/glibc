@@ -7,7 +7,7 @@ libc_hidden_proto (__ctype_init)
 
 extern int __isctype (int __c, int __mask);
 
-# ifndef NOT_IN_libc
+# if IS_IN (libc)
 
 /* These accessors are used by the optimized macros to find the
    thread-local cache of ctype information from the current thread's
@@ -46,13 +46,13 @@ __ctype_tolower_loc (void)
   return __libc_tsd_address (const int32_t *, CTYPE_TOLOWER);
 }
 
-# endif	/* Not NOT_IN_libc.  */
+# endif	/* IS_IN (libc).  */
 #endif
 
 #include <ctype/ctype.h>
 
 #ifndef _ISOMAC
-# if !defined __NO_CTYPE && !defined NOT_IN_libc
+# if !defined __NO_CTYPE && IS_IN (libc)
 /* The spec says that isdigit must only match the decimal digits.  We
    can check this without a memory access.  */
 #  undef isdigit
