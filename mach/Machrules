@@ -226,6 +226,7 @@ extra-libs += $(interface-library)
 extra-libs-others += $(interface-library)
 
 ifeq (yes,$(build-shared))
+
 interface.so = $(interface-library:=.so)
 
 # Depend on libc.so so a DT_NEEDED is generated in the shared objects.
