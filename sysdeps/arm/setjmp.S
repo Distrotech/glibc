@@ -57,7 +57,7 @@ ENTRY (__sigsetjmp)
 
 #ifdef NEED_HWCAP
 	/* Check if we have a VFP unit.  */
-# ifdef IS_IN_rtld
+# if IS_IN (rtld)
 	ldr	a3, 1f
 	ldr	a4, .Lrtld_local_ro
 0:	add	a3, pc, a3
@@ -115,7 +115,7 @@ ENTRY (__sigsetjmp)
 	B	PLTJMP(C_SYMBOL_NAME(__sigjmp_save))
 
 #ifdef NEED_HWCAP
-# ifdef IS_IN_rtld
+# if IS_IN (rtld)
 1:	.long	_GLOBAL_OFFSET_TABLE_ - 0b - PC_OFS
 .Lrtld_local_ro:
 	.long	C_SYMBOL_NAME(_rtld_local_ro)(GOTOFF)
