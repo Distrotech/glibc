@@ -97,6 +97,7 @@ install-others += $(inst_auditdir)/sotruss-lib.so
 install-bin-script += sotruss
 generated += sotruss
 libof-sotruss-lib = extramodules
+CPPFLAGS-sotruss-lib = -DNOT_IN_libc
 $(objpfx)sotruss-lib.so: $(objpfx)sotruss-lib.os
 	$(build-module-asneeded)
 $(objpfx)sotruss-lib.so: $(common-objpfx)libc.so $(objpfx)ld.so \
