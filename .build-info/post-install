@@ -76,14 +76,6 @@ echo "include /etc/ld.so.conf.d/*.conf" > ${3}/etc/ld.so.conf
 EOF
 ) > ${3}/etc/ld.so.conf.d/glibc_${1}.conf
 
-if [ ! -e ${3}/usr/include/gnu/stubs-x32.h  ] && [ -e ${3}/usr/include/gnu/stubs-64.h ];then
-  ln -s stubs-64.h ${3}/usr/include/gnu/stubs-x32.h
-fi;
-
-if [ ! -e ${3}/usr/include/gnu/stubs-32.h  ];then
-  touch ${3}/usr/include/gnu/stubs-32.h
-fi;
-
 if [ -e ${3}/etc/ld.so.cache ];then
   rm ${3}/etc/ld.so.cache
 fi;
