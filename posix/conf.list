@@ -100,7 +100,6 @@ SYSCONF:POSIX {
   USER_GROUPS_R
   VERSION
 # Additional variables not in getconf.
-  THREAD_DESTRUCTOR_ITERATIONS
   IPV6
   RAW_SOCKETS
 }
