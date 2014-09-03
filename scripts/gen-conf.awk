@@ -1,3 +1,8 @@
+# Generate confdefs-defs.h with definitions for {CONF}_DEF for each
+# configuration variable that getconf or sysconf may use.  Currently it is
+# equipped only to generate such macros for specification macros and for
+# SYSCONF macros in the _POSIX namespace.
+
 BEGIN {
   PROCINFO["sorted_in"] = "@val_type_asc"
   prefix = ""
