@@ -27,10 +27,7 @@
 /* Consider moving to syscalls.list.  */
 
 ssize_t
-__libc_readv (fd, vector, count)
-     int fd;
-     const struct iovec *vector;
-     int count;
+__libc_readv (int fd, const struct iovec *vector, int count)
 {
   ssize_t result;
 

@@ -27,11 +27,7 @@
 /* Consider moving to syscalls.list.  */
 
 ssize_t
-__libc_pwrite (fd, buf, count, offset)
-     int fd;
-     const void *buf;
-     size_t count;
-     off_t offset;
+__libc_pwrite (int fd, const void *buf, size_t count, off_t offset)
 {
   ssize_t result;
 
