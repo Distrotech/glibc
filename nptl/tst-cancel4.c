@@ -38,8 +38,10 @@
 #include <sys/un.h>
 #include <sys/wait.h>
 
-#include "pthreadP.h"
-
+/* The signal used for asynchronous cancelation.  */
+#ifndef SIGCANCEL
+# define SIGCANCEL       __SIGRTMIN
+#endif
 
 /* Since STREAMS are not supported in the standard Linux kernel and
    there we don't advertise STREAMS as supported is no need to test
@@ -247,6 +249,9 @@ tf_write  (void *arg)
   char buf[WRITE_BUFFER_SIZE];
   memset (buf, '\0', sizeof (buf));
   s = write (fd, buf, sizeof (buf));
+  /* The write can return a value higher than 0 (meaning partial write)
+     due the SIGCANCEL, but the thread may still pending cancellation.  */
+  pthread_testcancel ();
 
   pthread_cleanup_pop (0);
 
@@ -1139,6 +1144,8 @@ tf_send (void *arg)
   char mem[700000];
 
   send (tempfd2, mem, arg == NULL ? sizeof (mem) : 1, 0);
+  /* Check for partial send.  */
+  pthread_testcancel ();
 
   pthread_cleanup_pop (0);
 

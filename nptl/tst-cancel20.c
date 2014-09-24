@@ -49,6 +49,9 @@ sh_body (void)
       puts ("read succeeded");
       exit (1);
     }
+  /* The read can return a value higher than 0 (meaning partial reads)
+     due the SIGCANCEL, but the thread may still pending cancellation.  */
+  pthread_testcancel ();
 
   pthread_cleanup_pop (0);
 }
@@ -84,7 +87,8 @@ tf_body (void)
       puts ("read succeeded");
       exit (1);
     }
-
+  /* Check for partial read.  */
+  pthread_testcancel ();
   read (fd[0], &c, 1);
 
   pthread_cleanup_pop (0);

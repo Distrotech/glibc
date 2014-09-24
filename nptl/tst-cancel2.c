@@ -33,6 +33,9 @@ tf (void *arg)
   char buf[100000];
 
   while (write (fd[1], buf, sizeof (buf)) > 0);
+  /* The write can return a value higher than 0 (meaning partial write)
+     due the SIGCANCEL, but the thread may still pending cancellation.  */
+  pthread_testcancel ();
 
   return (void *) 42l;
 }
