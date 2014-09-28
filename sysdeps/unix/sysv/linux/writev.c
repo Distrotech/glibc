@@ -30,20 +30,7 @@
 ssize_t
 __libc_writev (int fd, const struct iovec *vector, int count)
 {
-  ssize_t result;
-
-  if (SINGLE_THREAD_P)
-    result = INLINE_SYSCALL (writev, 3, fd, vector, count);
-  else
-    {
-      int oldtype = LIBC_CANCEL_ASYNC ();
-
-      result = INLINE_SYSCALL (writev, 3, fd, vector, count);
-
-      LIBC_CANCEL_RESET (oldtype);
-    }
-
-  return result;
+  return SYSCALL_CANCEL (writev, fd, vector, count);
 }
 strong_alias (__libc_writev, __writev)
 weak_alias (__libc_writev, writev)

@@ -5,7 +5,7 @@ extern int __call_pselect6 (int nfds, fd_set *readfds, fd_set *writefds,
 			    void *data) attribute_hidden;
 
 
-#define CALL_PSELECT6(nfds, readfds, writefds, exceptfds, timeout, data) \
+#define __CALL_PSELECT6(nfds, readfds, writefds, exceptfds, timeout, data) \
   ({ int r = __call_pselect6 (nfds, readfds, writefds, exceptfds, timeout,    \
 			      data);					      \
      if (r < 0 && r > -4096)						      \
@@ -14,5 +14,21 @@ extern int __call_pselect6 (int nfds, fd_set *readfds, fd_set *writefds,
 	 r = -1;							      \
        }								      \
      r; })
+
+#define CALL_PSELECT6(nfds, readfds, writefds, exceptfds, timeout, data) \
+  ({									      \
+    int __r;								      \
+    if (SINGLE_THREAD_P)						      \
+      __r = __CALL_PSELECT6 (nfds, readfds, writefds, exceptfds, timeout,     \
+                             data);					      \
+    else								      \
+      {									      \
+	int oldtype = LIBC_CANCEL_ASYNC ();				      \
+	__r = __CALL_PSELECT6 (nfds, readfds, writefds, exceptfds, timeout,   \
+			       data);					      \
+	LIBC_CANCEL_RESET (oldtype);					      \
+      }									      \
+   __r;									      \
+  })
 
 #include "../pselect.c"

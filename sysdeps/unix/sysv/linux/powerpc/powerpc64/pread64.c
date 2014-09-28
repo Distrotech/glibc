@@ -28,22 +28,7 @@
 ssize_t
 __libc_pread64 (int fd, void *buf, size_t count, off64_t offset)
 {
-  ssize_t result;
-
-  if (SINGLE_THREAD_P)
-    {
-      result = INLINE_SYSCALL (pread, 4, fd, buf, count, offset);
-
-      return result;
-    }
-
-  int oldtype = LIBC_CANCEL_ASYNC ();
-
-   result = INLINE_SYSCALL (pread, 4, fd, buf, count, offset);
-
-  LIBC_CANCEL_RESET (oldtype);
-
-  return result;
+  return SYSCALL_CANCEL (pread, fd, buf, count, offset);
 }
 
 weak_alias (__libc_pread64, __pread64)
