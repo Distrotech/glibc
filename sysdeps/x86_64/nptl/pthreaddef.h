@@ -16,6 +16,9 @@
    License along with the GNU C Library; if not, see
    <http://www.gnu.org/licenses/>.  */
 
+#ifndef _PTHREADDEF_H
+# define _PTHREADDEF_H
+
 /* Default stack size.  */
 #define ARCH_STACK_DEFAULT_SIZE	(2 * 1024 * 1024)
 
@@ -42,3 +45,13 @@
 /* Location of current stack frame.  The frame pointer is not usable.  */
 #define CURRENT_STACK_FRAME \
   ({ register char *frame __asm__("rsp"); frame; })
+
+#ifndef __ASSEMBLER__
+static inline
+long int __pthread_get_ip (const ucontext_t *uc)
+{
+  return (long int)uc->uc_mcontext.gregs[REG_RIP];
+}
+#endif
+
+#endif

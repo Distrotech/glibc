@@ -307,6 +307,15 @@
   INTERNAL_SYSCALL (name, err, nr, ##args)
 # endif
 
+# undef SYSCALL_CANCEL_ERROR
+# define SYSCALL_CANCEL_ERROR(__val)					      \
+  ((unsigned long int) (long int) (__val) >= -4095L)
+
+# undef SYSCALL_CANCEL_ERRNO
+# define SYSCALL_CANCEL_ERRNO(__val)					      \
+  (-(__val))
+
+
 # define LOAD_ARGS_0()
 # define LOAD_REGS_0
 # define ASM_ARGS_0

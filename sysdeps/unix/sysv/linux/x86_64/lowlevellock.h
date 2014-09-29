@@ -124,6 +124,20 @@
     __status;								      \
   })
 
+#define lll_futex_wait_cancel(futexp, val, private) \
+  lll_futex_timed_wait_cancel (futexp, val, NULL, private)
+
+#define lll_futex_timed_wait_cancel(futexp, val, timespec, private)	      \
+  ({									      \
+    long int __ret;							      \
+    int __op = FUTEX_WAIT;						      \
+                                                                              \
+    __ret = __syscall_cancel (__NR_futex, (long int) (futexp),		      \
+			      (long int)__lll_private_flag (__op, private),   \
+			      (long int)(val), (long int)(timespec), 0, 0);   \
+    __ret;								      \
+  })
+
 
 #define lll_futex_wake(futex, nr, private) \
   ({									      \
@@ -137,6 +151,18 @@
 			"d" (_nr)					      \
 		      : "memory", "cc", "r10", "r11", "cx");		      \
     __status;								      \
+  })
+
+#define lll_futex_wake_unlock(futexp, nr_wake, nr_wake2, futexp2, private) \
+  ({									      \
+    INTERNAL_SYSCALL_DECL (__err);					      \
+    long int __ret;							      \
+									      \
+    __ret = INTERNAL_SYSCALL (futex, __err, 6, (futexp),		      \
+			      __lll_private_flag (FUTEX_WAKE_OP, private),    \
+			      (nr_wake), (nr_wake2), (futexp2),		      \
+			      FUTEX_OP_CLEAR_WAKE_IF_GT_ONE);		      \
+    INTERNAL_SYSCALL_ERROR_P (__ret, __err);				      \
   })
 
 
@@ -405,18 +431,9 @@ extern int __lll_timedlock_elision (int *futex, short *adapt_count,
    The macro parameter must not have any side effect.  */
 #define lll_wait_tid(tid) \
   do {									      \
-    int __ignore;							      \
-    register __typeof (tid) _tid asm ("edx") = (tid);			      \
-    if (_tid != 0)							      \
-      __asm __volatile ("xorq %%r10, %%r10\n\t"				      \
-			"1:\tmovq %2, %%rax\n\t"			      \
-			"syscall\n\t"					      \
-			"cmpl $0, (%%rdi)\n\t"				      \
-			"jne 1b"					      \
-			: "=&a" (__ignore)				      \
-			: "S" (FUTEX_WAIT), "i" (SYS_futex), "D" (&tid),      \
-			  "d" (_tid)					      \
-			: "memory", "cc", "r10", "r11", "cx");		      \
+    __typeof (tid) __tid;						      \
+    while ((__tid = (tid)) != 0)					      \
+      lll_futex_wait_cancel (&(tid), __tid, LLL_SHARED);		      \
   } while (0)
 
 extern int __lll_timedwait_tid (int *tid, const struct timespec *abstime)
