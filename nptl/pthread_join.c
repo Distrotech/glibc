@@ -61,13 +61,10 @@ pthread_join (pthread_t threadid, void **thread_return)
      un-wait-ed for again.  */
   pthread_cleanup_push (cleanup, &pd->joinid);
 
-  /* Switch to asynchronous cancellation.  */
-  int oldtype = CANCEL_ASYNC ();
-
   if ((pd == self
        || (self->joinid == pd
 	   && (pd->cancelhandling
-	       & (CANCELING_BITMASK | CANCELED_BITMASK | EXITING_BITMASK
+	       & (CANCELED_BITMASK | EXITING_BITMASK
 		  | TERMINATED_BITMASK)) == 0))
       && !CANCEL_ENABLED_AND_CANCELED (self->cancelhandling))
     /* This is a deadlock situation.  The threads are waiting for each
@@ -88,10 +85,6 @@ pthread_join (pthread_t threadid, void **thread_return)
   else
     /* Wait for the child.  */
     lll_wait_tid (pd->tid);
-
-
-  /* Restore cancellation mode.  */
-  CANCEL_RESET (oldtype);
 
   /* Remove the handler.  */
   pthread_cleanup_pop (0);

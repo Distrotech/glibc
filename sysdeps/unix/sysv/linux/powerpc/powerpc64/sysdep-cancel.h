@@ -31,116 +31,42 @@
 #  define DASHDASHPFX(str) __##str
 # endif
 
-#if _CALL_ELF == 2
-#define CANCEL_FRAMESIZE (FRAME_MIN_SIZE+16+48)
-#define CANCEL_PARM_SAVE (FRAME_MIN_SIZE+16)
-#else
-#define CANCEL_FRAMESIZE (FRAME_MIN_SIZE+16)
-#define CANCEL_PARM_SAVE (CANCEL_FRAMESIZE+FRAME_PARM_SAVE)
-#endif
+# ifdef NOT_IN_libc
+#  undef HIDDEN_JUMPTARGET
+#  define HIDDEN_JUMPTARGET(__symbol) __symbol
+# endif
+
+#define CANCEL_FRAMESIZE (FRAME_MIN_SIZE)
 
 # undef PSEUDO
 # define PSEUDO(name, syscall_name, args)				\
   .section ".text";							\
   ENTRY (name)								\
-    SINGLE_THREAD_P;							\
-    bne- .Lpseudo_cancel;						\
-  .type DASHDASHPFX(syscall_name##_nocancel),@function;			\
-  .globl DASHDASHPFX(syscall_name##_nocancel);				\
-  DASHDASHPFX(syscall_name##_nocancel):					\
-    DO_CALL (SYS_ify (syscall_name));					\
-    PSEUDO_RET;								\
-  .size DASHDASHPFX(syscall_name##_nocancel),.-DASHDASHPFX(syscall_name##_nocancel);	\
-  .Lpseudo_cancel:							\
-    stdu 1,-CANCEL_FRAMESIZE(1);					\
-    cfi_adjust_cfa_offset (CANCEL_FRAMESIZE);				\
-    mflr 9;								\
-    std  9,CANCEL_FRAMESIZE+FRAME_LR_SAVE(1);				\
+    mflr r0;								\
+    std  r0,FRAME_LR_SAVE(r1);						\
     cfi_offset (lr, FRAME_LR_SAVE);					\
-    DOCARGS_##args;	/* save syscall args around CENABLE.  */	\
-    CENABLE;								\
-    std  3,FRAME_MIN_SIZE(1); /* store CENABLE return value (MASK).  */	\
-    UNDOCARGS_##args;	/* restore syscall args.  */			\
-    DO_CALL (SYS_ify (syscall_name));					\
-    mfcr 0;		/* save CR/R3 around CDISABLE.  */		\
-    std  3,FRAME_MIN_SIZE+8(1);						\
-    std  0,CANCEL_FRAMESIZE+FRAME_CR_SAVE(1);				\
-    cfi_offset (cr, FRAME_CR_SAVE);					\
-    ld   3,FRAME_MIN_SIZE(1); /* pass MASK to CDISABLE.  */		\
-    CDISABLE;								\
-    ld   9,CANCEL_FRAMESIZE+FRAME_LR_SAVE(1);				\
-    ld   0,CANCEL_FRAMESIZE+FRAME_CR_SAVE(1); /* restore CR/R3. */	\
-    ld   3,FRAME_MIN_SIZE+8(1);						\
-    mtlr 9;								\
-    mtcr 0;								\
-    addi 1,1,CANCEL_FRAMESIZE;						\
+    stdu r1,-CANCEL_FRAMESIZE(r1);					\
+    cfi_adjust_cfa_offset (CANCEL_FRAMESIZE);				\
+    mr   r9,r8;								\
+    mr   r8,r7;								\
+    mr   r7,r6;								\
+    mr   r6,r5;								\
+    mr   r5,r4;								\
+    mr   r4,r3;								\
+    li   r3,SYS_ify (syscall_name);					\
+    bl   HIDDEN_JUMPTARGET(__syscall_cancel);				\
+    nop;								\
+
+# undef PSEUDO_RET
+# define PSEUDO_RET							\
+    bl   JUMPTARGET(__syscall_cancel_error);				\
+    nop;								\
+    addi r1,r1,CANCEL_FRAMESIZE;					\
     cfi_adjust_cfa_offset (-CANCEL_FRAMESIZE);				\
+    ld   r0,FRAME_LR_SAVE(r1);						\
+    mtlr r0;								\
     cfi_restore (lr);							\
-    cfi_restore (cr)
-
-# define DOCARGS_0
-# define UNDOCARGS_0
-
-# define DOCARGS_1	std 3,CANCEL_PARM_SAVE(1); DOCARGS_0
-# define UNDOCARGS_1	ld 3,CANCEL_PARM_SAVE(1); UNDOCARGS_0
-
-# define DOCARGS_2	std 4,CANCEL_PARM_SAVE+8(1); DOCARGS_1
-# define UNDOCARGS_2	ld 4,CANCEL_PARM_SAVE+8(1); UNDOCARGS_1
-
-# define DOCARGS_3	std 5,CANCEL_PARM_SAVE+16(1); DOCARGS_2
-# define UNDOCARGS_3	ld 5,CANCEL_PARM_SAVE+16(1); UNDOCARGS_2
-
-# define DOCARGS_4	std 6,CANCEL_PARM_SAVE+24(1); DOCARGS_3
-# define UNDOCARGS_4	ld 6,CANCEL_PARM_SAVE+24(1); UNDOCARGS_3
-
-# define DOCARGS_5	std 7,CANCEL_PARM_SAVE+32(1); DOCARGS_4
-# define UNDOCARGS_5	ld 7,CANCEL_PARM_SAVE+32(1); UNDOCARGS_4
-
-# define DOCARGS_6	std 8,CANCEL_PARM_SAVE+40(1); DOCARGS_5
-# define UNDOCARGS_6	ld 8,CANCEL_PARM_SAVE+40(1); UNDOCARGS_5
-
-# ifdef IS_IN_libpthread
-#  ifdef SHARED
-#   define CENABLE	bl JUMPTARGET(__pthread_enable_asynccancel)
-#   define CDISABLE	bl JUMPTARGET(__pthread_disable_asynccancel)
-#  else
-#   define CENABLE	bl JUMPTARGET(__pthread_enable_asynccancel); nop
-#   define CDISABLE	bl JUMPTARGET(__pthread_disable_asynccancel); nop
-#  endif
-# elif !defined NOT_IN_libc
-#  ifdef SHARED
-#   define CENABLE	bl JUMPTARGET(__libc_enable_asynccancel)
-#   define CDISABLE	bl JUMPTARGET(__libc_disable_asynccancel)
-#  else
-#   define CENABLE	bl JUMPTARGET(__libc_enable_asynccancel); nop
-#   define CDISABLE	bl JUMPTARGET(__libc_disable_asynccancel); nop
-#  endif
-# elif defined IS_IN_librt
-#  ifdef SHARED
-#   define CENABLE	bl JUMPTARGET(__librt_enable_asynccancel)
-#   define CDISABLE	bl JUMPTARGET(__librt_disable_asynccancel)
-#  else
-#   define CENABLE	bl JUMPTARGET(__librt_enable_asynccancel); nop
-#   define CDISABLE	bl JUMPTARGET(__librt_disable_asynccancel); nop
-#  endif
-# else
-#  error Unsupported library
-# endif
-
-# ifndef __ASSEMBLER__
-#  define SINGLE_THREAD_P						\
-  __builtin_expect (THREAD_GETMEM (THREAD_SELF,				\
-				   header.multiple_threads) == 0, 1)
-# else
-#   define SINGLE_THREAD_P						\
-  lwz   10,MULTIPLE_THREADS_OFFSET(13);				\
-  cmpwi 10,0
-# endif
-
-#elif !defined __ASSEMBLER__
-
-# define SINGLE_THREAD_P (1)
-# define NO_CANCELLATION 1
+    blr
 
 #endif
 

@@ -73,11 +73,20 @@ handle_signal (int signum)
       FAIL ();
       return;
     }
-  /* Do not check name for signal trampoline.  */
+  /* Check the syscall symbol cancellation wrapper.  */
   i = 2;
-  if (!match (symbols[i++], "read"))
+  if (!match (symbols[i++], "__syscall_cancel"))
     {
       /* Perhaps symbols[2] is __kernel_vsyscall?  */
+      if (!match (symbols[i++], "__syscall_cancel"))
+	{
+	  FAIL ();
+	  return;
+	}
+    }
+  /* The syscall symbol itself.  */
+  if (!match (symbols[i++], "read"))
+    {
       if (!match (symbols[i++], "read"))
 	{
 	  FAIL ();

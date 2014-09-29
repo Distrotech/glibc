@@ -41,24 +41,21 @@
       {									      \
 	pthread_mutex_unlock (&__aio_requests_mutex);			      \
 									      \
-	int oldtype;							      \
-	if (cancel)							      \
-	  oldtype = LIBC_CANCEL_ASYNC ();				      \
-									      \
 	int status;							      \
 	do								      \
 	  {								      \
-	    status = lll_futex_timed_wait (futexaddr, oldval, timeout,	      \
-					   LLL_PRIVATE);		      \
+	    if (cancel)							      \
+	      status = lll_futex_timed_wait_cancel (futexaddr, oldval,	      \
+						    timeout, LLL_PRIVATE);    \
+	    else							      \
+	      status = lll_futex_timed_wait (futexaddr, oldval, timeout,      \
+					     LLL_PRIVATE);		      \
 	    if (status != -EWOULDBLOCK)					      \
 	      break;							      \
 									      \
 	    oldval = *futexaddr;					      \
 	  }								      \
 	while (oldval != 0);						      \
-									      \
-	if (cancel)							      \
-	  LIBC_CANCEL_RESET (oldtype);					      \
 									      \
 	if (status == -EINTR)						      \
 	  result = EINTR;						      \

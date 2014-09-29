@@ -41,9 +41,8 @@ __pthread_kill (pthread_t threadid, int signo)
     /* Not a valid thread handle.  */
     return ESRCH;
 
-  /* Disallow sending the signal we use for cancellation, timers,
-     for the setxid implementation.  */
-  if (signo == SIGCANCEL || signo == SIGTIMER || signo == SIGSETXID)
+  /* Disallow sending the signal we use for setxid implementation.  */
+  if (signo == SIGSETXID)
     return EINVAL;
 
   /* We have a special syscall to do the work.  */

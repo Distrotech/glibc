@@ -18,10 +18,9 @@
 
 #include <errno.h>
 #include <signal.h>
-#include "pthreadP.h"
-#include "atomic.h"
+#include <pthreadP.h>
+#include <atomic.h>
 #include <sysdep.h>
-
 
 int
 pthread_cancel (pthread_t th)
@@ -36,67 +35,10 @@ pthread_cancel (pthread_t th)
 #ifdef SHARED
   pthread_cancel_init ();
 #endif
-  int result = 0;
-  int oldval;
-  int newval;
-  do
-    {
-    again:
-      oldval = pd->cancelhandling;
-      newval = oldval | CANCELING_BITMASK | CANCELED_BITMASK;
 
-      /* Avoid doing unnecessary work.  The atomic operation can
-	 potentially be expensive if the bug has to be locked and
-	 remote cache lines have to be invalidated.  */
-      if (oldval == newval)
-	break;
+  THREAD_ATOMIC_BIT_SET (pd, cancelhandling, CANCELED_BIT);
 
-      /* If the cancellation is handled asynchronously just send a
-	 signal.  We avoid this if possible since it's more
-	 expensive.  */
-      if (CANCEL_ENABLED_AND_CANCELED_AND_ASYNCHRONOUS (newval))
-	{
-	  /* Mark the cancellation as "in progress".  */
-	  if (atomic_compare_and_exchange_bool_acq (&pd->cancelhandling,
-						    oldval | CANCELING_BITMASK,
-						    oldval))
-	    goto again;
-
-	  /* The cancellation handler will take care of marking the
-	     thread as canceled.  */
-	  INTERNAL_SYSCALL_DECL (err);
-
-	  /* One comment: The PID field in the TCB can temporarily be
-	     changed (in fork).  But this must not affect this code
-	     here.  Since this function would have to be called while
-	     the thread is executing fork, it would have to happen in
-	     a signal handler.  But this is no allowed, pthread_cancel
-	     is not guaranteed to be async-safe.  */
-	  int val;
-	  val = INTERNAL_SYSCALL (tgkill, err, 3,
-				  THREAD_GETMEM (THREAD_SELF, pid), pd->tid,
-				  SIGCANCEL);
-
-	  if (INTERNAL_SYSCALL_ERROR_P (val, err))
-	    result = INTERNAL_SYSCALL_ERRNO (val, err);
-
-	  break;
-	}
-
-	/* A single-threaded process should be able to kill itself, since there is
-	   nothing in the POSIX specification that says that it cannot.  So we set
-	   multiple_threads to true so that cancellation points get executed.  */
-	THREAD_SETMEM (THREAD_SELF, header.multiple_threads, 1);
-#ifndef TLS_MULTIPLE_THREADS_IN_TCB
-	__pthread_multiple_threads = *__libc_multiple_threads_ptr = 1;
-#endif
-    }
-  /* Mark the thread as canceled.  This has to be done
-     atomically since other bits could be modified as well.  */
-  while (atomic_compare_and_exchange_bool_acq (&pd->cancelhandling, newval,
-					       oldval));
-
-  return result;
+  return __pthread_kill (th, SIGCANCEL);
 }
 
 PTHREAD_STATIC_FN_REQUIRE (pthread_create)

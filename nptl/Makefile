@@ -30,7 +30,7 @@ install-lib-ldscripts := libpthread.so
 
 routines = alloca_cutoff forward libc-lowlevellock libc-cancellation \
 	   libc-cleanup libc_pthread_init libc_multiple_threads \
-	   register-atfork unregister-atfork
+	   register-atfork unregister-atfork syscall_cancel
 shared-only-routines = forward
 
 libpthread-routines = nptl-init vars events version \
@@ -103,7 +103,6 @@ libpthread-routines = nptl-init vars events version \
 		      cleanup cleanup_defer cleanup_compat \
 		      cleanup_defer_compat unwind \
 		      pt-longjmp pt-cleanup\
-		      cancellation \
 		      lowlevellock lowlevelrobustlock \
 		      pt-fork pt-vfork \
 		      ptw-write ptw-read ptw-close ptw-fcntl ptw-accept \
@@ -156,7 +155,6 @@ CFLAGS-pthread_setcanceltype.c = -fexceptions -fasynchronous-unwind-tables
 
 # These are internal functions which similar functionality as setcancelstate
 # and setcanceltype.
-CFLAGS-cancellation.c = -fasynchronous-unwind-tables
 CFLAGS-libc-cancellation.c = -fasynchronous-unwind-tables
 
 # Calling pthread_exit() must cause the registered cancel handlers to

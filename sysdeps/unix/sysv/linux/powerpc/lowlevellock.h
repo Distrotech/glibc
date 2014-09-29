@@ -103,6 +103,33 @@
     INTERNAL_SYSCALL_ERROR_P (__ret, __err) ? -__ret : __ret;		      \
   })
 
+#define lll_futex_wait_cancel(futexp, val, private) \
+  lll_futex_timed_wait_cancel (futexp, val, NULL, private)
+
+#define lll_futex_timed_wait_cancel(futexp, val, timespec, private)	      \
+  ({									      \
+    long int __ret;							      \
+    int __op = FUTEX_WAIT;						      \
+                                                                              \
+    __ret = __syscall_cancel (__NR_futex, __SSC (futexp),		      \
+			      __SSC (__lll_private_flag (__op, private)),     \
+			      __SSC (val), __SSC (timespec), 0, 0);           \
+    __ret;								      \
+  })
+
+#define lll_futex_timed_wait_bitset_cancel(futexp, val, timespec, clockbit,   \
+					   private)			      \
+  ({                                                                          \
+    long int __ret;                                                           \
+    int __op = FUTEX_WAIT_BITSET | clockbit;                                  \
+                                                                              \
+    __ret = __syscall_cancel (__NR_futex, __SSC (futexp),		      \
+			      __SSC (__lll_private_flag (__op, private)),     \
+			      __SSC (val), __SSC (timespec), 0,	              \
+                              FUTEX_BITSET_MATCH_ANY);                        \
+    __ret;								      \
+  })
+
 #define lll_futex_wake(futexp, nr, private) \
   ({									      \
     INTERNAL_SYSCALL_DECL (__err);					      \
@@ -154,6 +181,22 @@
 			      __lll_private_flag (__op, private),	      \
 			      (val), (timespec), mutex); 		      \
     INTERNAL_SYSCALL_ERROR_P (__ret, __err) ? -__ret : __ret;		      \
+  })
+
+#define lll_futex_wait_requeue_pi_cancel(futexp, val, mutex, private) \
+  lll_futex_timed_wait_requeue_pi_cancel (futexp, val, NULL, 0, mutex, private)
+
+#define lll_futex_timed_wait_requeue_pi_cancel(futexp, val, timespec, 	      \
+					       clockbit, mutex, private)      \
+  ({									      \
+    long int __ret;							      \
+    int __op = FUTEX_WAIT_REQUEUE_PI | clockbit;			      \
+									      \
+    __ret = __syscall_cancel (__NR_futex, (long int) (futexp),		      \
+			      (long int) __lll_private_flag (__op, private),  \
+			      (long int )(val), (long int) (timespec), 	      \
+			      (long int ) mutex, 0); 		      	      \
+    __ret;								      \
   })
 
 #define lll_futex_cmp_requeue_pi(futexp, nr_wake, nr_move, mutex, val, priv)  \
@@ -325,7 +368,7 @@ extern int __lll_robust_timedlock_wait
   do {									      \
     __typeof (tid) __tid;						      \
     while ((__tid = (tid)) != 0)					      \
-      lll_futex_wait (&(tid), __tid, LLL_SHARED);			      \
+      lll_futex_wait_cancel (&(tid), __tid, LLL_SHARED);		      \
   } while (0)
 
 extern int __lll_timedwait_tid (int *, const struct timespec *)

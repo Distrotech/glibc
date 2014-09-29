@@ -23,9 +23,14 @@
 void
 __pthread_exit (void *value)
 {
-  THREAD_SETMEM (THREAD_SELF, result, value);
+  struct pthread *self = THREAD_SELF;
 
-  __do_cancel ();
+  THREAD_SETMEM (self, result, value);
+
+  THREAD_ATOMIC_BIT_SET (self, cancelhandling, EXITING_BIT);
+
+  __pthread_unwind ((__pthread_unwind_buf_t *)
+		    THREAD_GETMEM (self, cleanup_jmp_buf));
 }
 strong_alias (__pthread_exit, pthread_exit)
 

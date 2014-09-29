@@ -48,10 +48,10 @@
 
 #if _CALL_ELF == 2
 #define FRAMESIZE (FRAME_MIN_SIZE+16+64)
-#define stackblock (FRAME_MIN_SIZE+16)
+#define STACKBLOCK (FRAME_MIN_SIZE+16)
 #else
 #define FRAMESIZE (FRAME_MIN_SIZE+16)
-#define stackblock (FRAMESIZE+FRAME_PARM_SAVE) /* offset to parm save area.  */
+#define STACKBLOCK (FRAMESIZE+FRAME_PARM_SAVE) /* offset to parm save area.  */
 #endif
 
 	.text
@@ -59,75 +59,52 @@ ENTRY(__socket)
 	CALL_MCOUNT NARGS
 	stdu r1,-FRAMESIZE(r1)
 	cfi_adjust_cfa_offset(FRAMESIZE)
+
 #if NARGS >= 1
-	std  r3,stackblock(r1)
+	std  r3,STACKBLOCK(r1)
 #endif
 #if NARGS >= 2
-	std  r4,8+stackblock(r1)
+	std  r4,8+STACKBLOCK(r1)
 #endif
 #if NARGS >= 3
-	std  r5,16+stackblock(r1)
+	std  r5,16+STACKBLOCK(r1)
 #endif
 #if NARGS >= 4
-	std  r6,24+stackblock(r1)
+	std  r6,24+STACKBLOCK(r1)
 #endif
 #if NARGS >= 5
-	std  r7,32+stackblock(r1)
+	std  r7,32+STACKBLOCK(r1)
 #endif
 #if NARGS >= 6
-	std  r8,40+stackblock(r1)
+	std  r8,40+STACKBLOCK(r1)
 #endif
 #if NARGS >= 7
-	std  r9,48+stackblock(r1)
+	std  r9,48+STACKBLOCK(r1)
 #endif
 #if NARGS >= 8
-	std  r10,56+stackblock(r1)
+	std  r10,56+STACKBLOCK(r1)
 #endif
 #if NARGS >= 9
 #error too many arguments!
 #endif
-
-#if defined NEED_CANCELLATION && defined CENABLE
-	SINGLE_THREAD_P
-	bne-	.Lsocket_cancel
-#endif
-
-	li	r3,P(SOCKOP_,socket)
-	addi	r4,r1,stackblock
-	DO_CALL(SYS_ify(socketcall))
-	addi	r1,r1,FRAMESIZE
-	cfi_adjust_cfa_offset(-FRAMESIZE)
-	PSEUDO_RET
-
-#if defined NEED_CANCELLATION && defined CENABLE
-.Lsocket_cancel:
-	cfi_adjust_cfa_offset(FRAMESIZE)
 	mflr	r9
 	std	r9,FRAMESIZE+FRAME_LR_SAVE(r1)
-	cfi_offset (lr, FRAME_LR_SAVE)
-	CENABLE
-	std	r3,FRAME_MIN_SIZE+8(r1)
-	li	r3,P(SOCKOP_,socket)
-	addi	r4,r1,stackblock
-	DO_CALL(SYS_ify(socketcall))
-	mfcr	r0
-	std	r3,FRAME_MIN_SIZE(r1)
-	std	r0,FRAMESIZE+FRAME_CR_SAVE(r1)
-	cfi_offset (cr, FRAME_CR_SAVE)
-	ld  	r3,FRAME_MIN_SIZE+8(r1)
-	CDISABLE
-	ld	r4,FRAMESIZE+FRAME_LR_SAVE(r1)
-	ld	r0,FRAMESIZE+FRAME_CR_SAVE(r1)
-	ld	r3,FRAME_MIN_SIZE(r1)
-	mtlr	r4
-	mtcr	r0
+	cfi_offset(lr, FRAME_LR_SAVE);
+
+	li	r3,SYS_ify (socketcall)
+	li	r4,P(SOCKOP_,socket)
+	addi	r5,r1,STACKBLOCK
+	bl	HIDDEN_JUMPTARGET(__syscall_cancel)
+	nop
+	bl	JUMPTARGET(__syscall_cancel_error)
+	nop
+	ld	r9,FRAMESIZE+FRAME_LR_SAVE(r1)
+	mtlr	r9
+	cfi_restore(lr)
 	addi	r1,r1,FRAMESIZE
 	cfi_adjust_cfa_offset(-FRAMESIZE)
-	cfi_restore(lr)
-	cfi_restore(cr)
-	PSEUDO_RET
-#endif
-PSEUDO_END (__socket)
+	blr
+END (__socket)
 
 #ifndef NO_WEAK_ALIAS
 weak_alias (__socket, socket)

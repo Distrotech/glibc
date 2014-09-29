@@ -23,8 +23,7 @@
 
 #include <sys/syscall.h>
 
-
-#ifndef NO_CANCELLATION
+#ifndef IS_IN_rtld
 int
 __fcntl_nocancel (int fd, int cmd, ...)
 {
@@ -38,7 +37,6 @@ __fcntl_nocancel (int fd, int cmd, ...)
   return INLINE_SYSCALL (fcntl, 3, fd, cmd, arg);
 }
 #endif
-
 
 int
 __libc_fcntl (int fd, int cmd, ...)

@@ -27,6 +27,3 @@ system (const char *line)
 {
   return __libc_system (line);
 }
-
-/* __libc_system in libc.so handles cancellation.  */
-LIBC_CANCEL_HANDLED ();

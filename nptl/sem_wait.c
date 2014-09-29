@@ -37,21 +37,6 @@ __sem_wait_cleanup (void *arg)
   atomic_decrement (&isem->nwaiters);
 }
 
-/* This is in a seperate function in order to make sure gcc
-   puts the call site into an exception region, and thus the
-   cleanups get properly run.  */
-static int
-__attribute__ ((noinline))
-do_futex_wait (struct new_sem *isem)
-{
-  int err, oldtype = __pthread_enable_asynccancel ();
-
-  err = lll_futex_wait (&isem->value, 0, isem->private ^ FUTEX_PRIVATE_FLAG);
-
-  __pthread_disable_asynccancel (oldtype);
-  return err;
-}
-
 int
 __new_sem_wait (sem_t *sem)
 {
@@ -67,7 +52,8 @@ __new_sem_wait (sem_t *sem)
 
   while (1)
     {
-      err = do_futex_wait(isem);
+      err = lll_futex_wait_cancel (&isem->value, 0,
+				   isem->private ^ FUTEX_PRIVATE_FLAG);
       if (err != 0 && err != -EWOULDBLOCK)
 	{
 	  __set_errno (-err);
@@ -104,14 +90,8 @@ __old_sem_wait (sem_t *sem)
       if (atomic_decrement_if_positive (futex) > 0)
 	return 0;
 
-      /* Enable asynchronous cancellation.  Required by the standard.  */
-      int oldtype = __pthread_enable_asynccancel ();
-
       /* Always assume the semaphore is shared.  */
-      err = lll_futex_wait (futex, 0, LLL_SHARED);
-
-      /* Disable asynchronous cancellation.  */
-      __pthread_disable_asynccancel (oldtype);
+      err = lll_futex_wait_cancel (futex, 0, LLL_SHARED);
     }
   while (err == 0 || err == -EWOULDBLOCK);
 

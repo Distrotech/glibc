@@ -28,7 +28,6 @@ int
 __clock_nanosleep (clockid_t clock_id, int flags, const struct timespec *req,
 		   struct timespec *rem)
 {
-  INTERNAL_SYSCALL_DECL (err);
   int r;
 
   if (clock_id == CLOCK_THREAD_CPUTIME_ID)
@@ -36,19 +35,9 @@ __clock_nanosleep (clockid_t clock_id, int flags, const struct timespec *req,
   if (clock_id == CLOCK_PROCESS_CPUTIME_ID)
     clock_id = MAKE_PROCESS_CPUCLOCK (0, CPUCLOCK_SCHED);
 
-  if (SINGLE_THREAD_P)
-    r = INTERNAL_SYSCALL (clock_nanosleep, err, 4, clock_id, flags, req, rem);
-  else
-    {
-      int oldstate = LIBC_CANCEL_ASYNC ();
+  r = SYSCALL_CANCEL_NCS (clock_nanosleep, clock_id, flags, req, rem);
 
-      r = INTERNAL_SYSCALL (clock_nanosleep, err, 4, clock_id, flags, req,
-			    rem);
-
-      LIBC_CANCEL_RESET (oldstate);
-    }
-
-  return (INTERNAL_SYSCALL_ERROR_P (r, err)
-	  ? INTERNAL_SYSCALL_ERRNO (r, err) : 0);
+  return (SYSCALL_CANCEL_ERROR (r)
+	  ? SYSCALL_CANCEL_ERRNO (r) : 0);
 }
 weak_alias (__clock_nanosleep, clock_nanosleep)

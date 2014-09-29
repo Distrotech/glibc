@@ -115,7 +115,7 @@ __lll_timedwait_tid (int *tidp, const struct timespec *abstime)
 
       /* Wait until thread terminates.  The kernel so far does not use
 	 the private futex operations for this.  */
-      if (lll_futex_timed_wait (tidp, tid, &rt, LLL_SHARED) == -ETIMEDOUT)
+      if (lll_futex_timed_wait_cancel (tidp, tid, &rt, LLL_SHARED) == -ETIMEDOUT)
 	return ETIMEDOUT;
     }
 

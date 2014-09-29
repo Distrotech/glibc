@@ -55,32 +55,17 @@ do_sigwait (const sigset_t *set, int *sig)
 
   /* XXX The size argument hopefully will have to be changed to the
      real size of the user-level sigset_t.  */
-#ifdef INTERNAL_SYSCALL
-  INTERNAL_SYSCALL_DECL (err);
   do
-    ret = INTERNAL_SYSCALL (rt_sigtimedwait, err, 4, set,
-			    NULL, NULL, _NSIG / 8);
-  while (INTERNAL_SYSCALL_ERROR_P (ret, err)
-	 && INTERNAL_SYSCALL_ERRNO (ret, err) == EINTR);
-  if (! INTERNAL_SYSCALL_ERROR_P (ret, err))
+    ret = SYSCALL_CANCEL_NCS (rt_sigtimedwait, set, NULL, NULL, _NSIG / 8);
+  while (SYSCALL_CANCEL_ERROR (ret)
+	 && SYSCALL_CANCEL_ERRNO (ret) == EINTR);
+  if (!SYSCALL_CANCEL_ERROR (ret))
     {
       *sig = ret;
       ret = 0;
     }
   else
-    ret = INTERNAL_SYSCALL_ERRNO (ret, err);
-#else
-  do
-    ret = INLINE_SYSCALL (rt_sigtimedwait, 4, set, NULL, NULL, _NSIG / 8);
-  while (ret == -1 && errno == EINTR);
-  if (ret != -1)
-    {
-      *sig = ret;
-      ret = 0;
-    }
-  else
-    ret = errno;
-#endif
+    ret = SYSCALL_CANCEL_ERRNO (ret);
 
   return ret;
 }
@@ -88,16 +73,7 @@ do_sigwait (const sigset_t *set, int *sig)
 int
 __sigwait (const sigset_t *set, int *sig)
 {
-  if (SINGLE_THREAD_P)
-    return do_sigwait (set, sig);
-
-  int oldtype = LIBC_CANCEL_ASYNC ();
-
-  int result = do_sigwait (set, sig);
-
-  LIBC_CANCEL_RESET (oldtype);
-
-  return result;
+  return do_sigwait (set, sig);
 }
 libc_hidden_def (__sigwait)
 weak_alias (__sigwait, sigwait)

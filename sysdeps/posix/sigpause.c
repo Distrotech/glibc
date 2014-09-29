@@ -50,16 +50,7 @@ do_sigpause (int sig_or_mask, int is_sig)
 int
 __sigpause (int sig_or_mask, int is_sig)
 {
-  if (SINGLE_THREAD_P)
-    return do_sigpause (sig_or_mask, is_sig);
-
-  int oldtype = LIBC_CANCEL_ASYNC ();
-
-  int result = do_sigpause (sig_or_mask, is_sig);
-
-  LIBC_CANCEL_RESET (oldtype);
-
-  return result;
+  return do_sigpause (sig_or_mask, is_sig);
 }
 libc_hidden_def (__sigpause)
 

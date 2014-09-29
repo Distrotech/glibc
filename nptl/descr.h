@@ -263,23 +263,20 @@ struct pthread
   /* Bit set if asynchronous cancellation mode is selected.  */
 #define CANCELTYPE_BIT		1
 #define CANCELTYPE_BITMASK	(0x01 << CANCELTYPE_BIT)
-  /* Bit set if canceling has been initiated.  */
-#define CANCELING_BIT		2
-#define CANCELING_BITMASK	(0x01 << CANCELING_BIT)
-  /* Bit set if canceled.  */
-#define CANCELED_BIT		3
+  /* Bit set if threads is canceled.  */
+#define CANCELED_BIT		2
 #define CANCELED_BITMASK	(0x01 << CANCELED_BIT)
   /* Bit set if thread is exiting.  */
-#define EXITING_BIT		4
+#define EXITING_BIT		3
 #define EXITING_BITMASK		(0x01 << EXITING_BIT)
   /* Bit set if thread terminated and TCB is freed.  */
-#define TERMINATED_BIT		5
+#define TERMINATED_BIT		4
 #define TERMINATED_BITMASK	(0x01 << TERMINATED_BIT)
   /* Bit set if thread is supposed to change XID.  */
-#define SETXID_BIT		6
+#define SETXID_BIT		5
 #define SETXID_BITMASK		(0x01 << SETXID_BIT)
   /* Mask for the rest.  Helps the compiler to optimize.  */
-#define CANCEL_RESTMASK		0xffffff80
+#define CANCEL_RESTMASK		0xffffffc0
 
 #define CANCEL_ENABLED_AND_CANCELED(value) \
   (((value) & (CANCELSTATE_BITMASK | CANCELED_BITMASK | EXITING_BITMASK	      \

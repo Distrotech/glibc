@@ -188,36 +188,41 @@ sigcancel_handler (int sig, siginfo_t *si, void *ctx)
     return;
 
   struct pthread *self = THREAD_SELF;
+  volatile struct pthread *pd = (volatile struct pthread *) self;
+  ucontext_t *uc = ctx;
+  const char *tip = (const char *)__pthread_get_ip (ctx);
 
-  int oldval = THREAD_GETMEM (self, cancelhandling);
-  while (1)
+  extern const char __syscall_cancel_arch_start[1];
+  extern const char __syscall_cancel_arch_end[1];
+
+  if (((pd->cancelhandling & (CANCELSTATE_BITMASK)) != 0)
+      || ((pd->cancelhandling & CANCELED_BITMASK) == 0))
+    return;
+
+  __sigaddset (&uc->uc_sigmask, SIGCANCEL);
+
+  /* Check if asynchronous cancellation mode is set and if interrupted
+     instruction pointer falls within the cancellable syscall code.  For
+     interruptable syscalls that might generate external side-effects (partial
+     reads or writes, for instance), the kernel will set the IP to after
+     '__syscall_cancel_arch_end', thus disabling the cancellation and allowing
+     the process to handle such conditions.  */
+  if (pd->cancelhandling & CANCELTYPE_BITMASK ||
+      (tip >= __syscall_cancel_arch_start && tip < __syscall_cancel_arch_end))
     {
-      /* We are canceled now.  When canceled by another thread this flag
-	 is already set but if the signal is directly send (internally or
-	 from another process) is has to be done here.  */
-      int newval = oldval | CANCELING_BITMASK | CANCELED_BITMASK;
+      THREAD_ATOMIC_BIT_SET (self, cancelhandling, EXITING_BIT);
+      THREAD_SETMEM (self, result, PTHREAD_CANCELED);
 
-      if (oldval == newval || (oldval & EXITING_BITMASK) != 0)
-	/* Already canceled or exiting.  */
-	break;
+      /* __pthread_sigmask removes SIGCANCEL from the set.  */
+      INTERNAL_SYSCALL_DECL (err);
+      INTERNAL_SYSCALL (rt_sigprocmask, err, 4, SIGCANCEL, &uc->uc_sigmask, 0,
+                        _NSIG / 8);
 
-      int curval = THREAD_ATOMIC_CMPXCHG_VAL (self, cancelhandling, newval,
-					      oldval);
-      if (curval == oldval)
-	{
-	  /* Set the return value.  */
-	  THREAD_SETMEM (self, result, PTHREAD_CANCELED);
-
-	  /* Make sure asynchronous cancellation is still enabled.  */
-	  if ((newval & CANCELTYPE_BITMASK) != 0)
-	    /* Run the registered destructors and terminate the thread.  */
-	    __do_cancel ();
-
-	  break;
-	}
-
-      oldval = curval;
+      __do_cancel ();
     }
+
+  INLINE_SYSCALL (tgkill, 3, THREAD_GETMEM (THREAD_SELF, pid), pd->tid,
+		  SIGCANCEL);
 }
 
 
@@ -375,7 +380,10 @@ __pthread_initialize_minimal_internal (void)
      it is only asynchronous cancellation which is affected.  */
   struct sigaction sa;
   sa.sa_sigaction = sigcancel_handler;
-  sa.sa_flags = SA_SIGINFO;
+  /* The signal handle should be non-interruptible to avoid the risk of
+     spurious EINTR caused by SIGCANCEL sent to process or if pthread_cancel
+     is called while cancellation is disabled in the target thread.  */
+  sa.sa_flags = SA_SIGINFO | SA_RESTART;
   __sigemptyset (&sa.sa_mask);
 
   (void) __libc_sigaction (SIGCANCEL, &sa, NULL);

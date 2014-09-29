@@ -15,6 +15,9 @@
    License along with the GNU C Library; if not, see
    <http://www.gnu.org/licenses/>.  */
 
+#ifndef _PTHREADDEF_H
+# define _PTHREADDEF_H
+
 /* Default stack size.  */
 #define ARCH_STACK_DEFAULT_SIZE	(4 * 1024 * 1024)
 
@@ -31,3 +34,11 @@
 
 /* Location of current stack frame.  */
 #define CURRENT_STACK_FRAME	__builtin_frame_address (0)
+
+static inline
+const char * __pthread_get_ip (const ucontext_t *uc)
+{
+  return (char *)uc->uc_mcontext.gp_regs[PT_NIP];
+}
+
+#endif

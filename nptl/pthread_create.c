@@ -266,7 +266,7 @@ start_thread (void *arg)
   /* If the parent was running cancellation handlers while creating
      the thread the new thread inherited the signal mask.  Reset the
      cancellation signal mask.  */
-  if (__glibc_unlikely (pd->parent_cancelhandling & CANCELING_BITMASK))
+  if (__glibc_unlikely (pd->parent_cancelhandling & CANCELED_BITMASK))
     {
       INTERNAL_SYSCALL_DECL (err);
       sigset_t mask;
@@ -293,14 +293,10 @@ start_thread (void *arg)
 
       if (__glibc_unlikely (pd->stopped_start))
 	{
-	  int oldtype = CANCEL_ASYNC ();
-
 	  /* Get the lock the parent locked to force synchronization.  */
 	  lll_lock (pd->lock, LLL_PRIVATE);
 	  /* And give it up right away.  */
 	  lll_unlock (pd->lock, LLL_PRIVATE);
-
-	  CANCEL_RESET (oldtype);
 	}
 
       LIBC_PROBE (pthread_start, 3, (pthread_t) pd, pd->start_routine, pd->arg);

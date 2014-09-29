@@ -29,22 +29,6 @@
 
 extern void __sem_wait_cleanup (void *arg) attribute_hidden;
 
-/* This is in a seperate function in order to make sure gcc
-   puts the call site into an exception region, and thus the
-   cleanups get properly run.  */
-static int
-__attribute__ ((noinline))
-do_futex_timed_wait (struct new_sem *isem, struct timespec *rt)
-{
-  int err, oldtype = __pthread_enable_asynccancel ();
-
-  err = lll_futex_timed_wait (&isem->value, 0, rt,
-			      isem->private ^ FUTEX_PRIVATE_FLAG);
-
-  __pthread_disable_asynccancel (oldtype);
-  return err;
-}
-
 int
 sem_timedwait (sem_t *sem, const struct timespec *abstime)
 {
@@ -93,7 +77,8 @@ sem_timedwait (sem_t *sem, const struct timespec *abstime)
       /* Do wait.  */
       rt.tv_sec = sec;
       rt.tv_nsec = nsec;
-      err = do_futex_timed_wait(isem, &rt);
+      err = lll_futex_timed_wait_cancel (&isem->value, 0, &rt,
+				         isem->private ^ FUTEX_PRIVATE_FLAG);
       if (err != 0 && err != -EWOULDBLOCK)
 	{
 	  __set_errno (-err);

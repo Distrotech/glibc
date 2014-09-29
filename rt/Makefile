@@ -62,7 +62,6 @@ include ../Rules
 
 CFLAGS-aio_suspend.c = -fexceptions
 CFLAGS-clock_nanosleep.c = -fexceptions -fasynchronous-unwind-tables
-CFLAGS-librt-cancellation.c = -fasynchronous-unwind-tables
 
 LDFLAGS-rt.so = -Wl,--enable-new-dtags,-z,nodelete
 

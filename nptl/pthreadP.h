@@ -272,49 +272,31 @@ __do_cancel (void)
   struct pthread *self = THREAD_SELF;
 
   /* Make sure we get no more cancellations.  */
-  THREAD_ATOMIC_BIT_SET (self, cancelhandling, EXITING_BIT);
+  int oldval = THREAD_GETMEM (self, cancelhandling);
+  while (1)
+    {
+      int newval = (oldval | CANCELSTATE_BITMASK);
+      newval &= ~(CANCELTYPE_BITMASK);
+      if (oldval == newval)
+	break;
+
+      int curval = THREAD_ATOMIC_CMPXCHG_VAL (self, cancelhandling, newval,
+					  oldval);
+      if (__glibc_likely (curval == oldval))
+	break;
+      oldval = curval;
+    }
+
+  THREAD_SETMEM (self, result, PTHREAD_CANCELED);
 
   __pthread_unwind ((__pthread_unwind_buf_t *)
 		    THREAD_GETMEM (self, cleanup_jmp_buf));
 }
 
-
-/* Set cancellation mode to asynchronous.  */
-#define CANCEL_ASYNC() \
-  __pthread_enable_asynccancel ()
-/* Reset to previous cancellation mode.  */
-#define CANCEL_RESET(oldtype) \
-  __pthread_disable_asynccancel (oldtype)
-
-#if !defined NOT_IN_libc
-/* Same as CANCEL_ASYNC, but for use in libc.so.  */
-# define LIBC_CANCEL_ASYNC() \
-  __libc_enable_asynccancel ()
-/* Same as CANCEL_RESET, but for use in libc.so.  */
-# define LIBC_CANCEL_RESET(oldtype) \
-  __libc_disable_asynccancel (oldtype)
-# define LIBC_CANCEL_HANDLED() \
-  __asm (".globl " __SYMBOL_PREFIX "__libc_enable_asynccancel"); \
-  __asm (".globl " __SYMBOL_PREFIX "__libc_disable_asynccancel")
-#elif defined IS_IN_libpthread
-# define LIBC_CANCEL_ASYNC() CANCEL_ASYNC ()
-# define LIBC_CANCEL_RESET(val) CANCEL_RESET (val)
-# define LIBC_CANCEL_HANDLED() \
-  __asm (".globl " __SYMBOL_PREFIX "__pthread_enable_asynccancel"); \
-  __asm (".globl " __SYMBOL_PREFIX "__pthread_disable_asynccancel")
-#elif defined IS_IN_librt
-# define LIBC_CANCEL_ASYNC() \
-  __librt_enable_asynccancel ()
-# define LIBC_CANCEL_RESET(val) \
-  __librt_disable_asynccancel (val)
-# define LIBC_CANCEL_HANDLED() \
-  __asm (".globl " __SYMBOL_PREFIX "__librt_enable_asynccancel"); \
-  __asm (".globl " __SYMBOL_PREFIX "__librt_disable_asynccancel")
-#else
-# define LIBC_CANCEL_ASYNC()	0 /* Just a dummy value.  */
-# define LIBC_CANCEL_RESET(val)	((void)(val)) /* Nothing, but evaluate it.  */
-# define LIBC_CANCEL_HANDLED()	/* Nothing.  */
-#endif
+extern long int __syscall_cancel_arch (volatile void *, __syscall_arg_t nr,
+     __syscall_arg_t arg1, __syscall_arg_t arg2, __syscall_arg_t arg3,
+     __syscall_arg_t arg4, __syscall_arg_t arg5, __syscall_arg_t arg6);
+libc_hidden_proto (__syscall_cancel_arch);
 
 
 /* Internal prototypes.  */
@@ -482,9 +464,6 @@ extern int __pthread_equal (pthread_t thread1, pthread_t thread2);
 extern int __pthread_kill (pthread_t threadid, int signo);
 extern void __pthread_exit (void *value) __attribute__ ((__noreturn__));
 extern int __pthread_setcanceltype (int type, int *oldtype);
-extern int __pthread_enable_asynccancel (void) attribute_hidden;
-extern void __pthread_disable_asynccancel (int oldtype)
-     internal_function attribute_hidden;
 
 #ifdef IS_IN_libpthread
 hidden_proto (__pthread_mutex_init)
@@ -514,16 +493,6 @@ extern int __pthread_cond_wait_2_0 (pthread_cond_2_0_t *cond,
 extern int __pthread_getaffinity_np (pthread_t th, size_t cpusetsize,
 				     cpu_set_t *cpuset);
 
-/* The two functions are in libc.so and not exported.  */
-extern int __libc_enable_asynccancel (void) attribute_hidden;
-extern void __libc_disable_asynccancel (int oldtype)
-     internal_function attribute_hidden;
-
-
-/* The two functions are in librt.so and not exported.  */
-extern int __librt_enable_asynccancel (void) attribute_hidden;
-extern void __librt_disable_asynccancel (int oldtype)
-     internal_function attribute_hidden;
 
 #ifdef IS_IN_libpthread
 /* Special versions which use non-exported functions.  */

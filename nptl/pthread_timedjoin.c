@@ -71,16 +71,8 @@ pthread_timedjoin_np (pthread_t threadid, void **thread_return,
      un-wait-ed for again.  */
   pthread_cleanup_push (cleanup, &pd->joinid);
 
-  /* Switch to asynchronous cancellation.  */
-  int oldtype = CANCEL_ASYNC ();
-
-
   /* Wait for the child.  */
   result = lll_timedwait_tid (pd->tid, abstime);
-
-
-  /* Restore cancellation mode.  */
-  CANCEL_RESET (oldtype);
 
   /* Remove the handler.  */
   pthread_cleanup_pop (0);
