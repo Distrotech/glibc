@@ -40,7 +40,7 @@
 
 /* 0(r1) and 4(r1) are reserved by the ABI, 8(r1), 12(r1), 16(r1) are used
    for temp saves.  44(r1) is used to save r30.  */
-#define stackblock 20
+#define STACKBLOCK 20
 
 #ifndef __socket
 # ifndef NO_WEAK_ALIAS
@@ -55,63 +55,42 @@ ENTRY(__socket)
 	stwu r1,-48(r1)
 	cfi_adjust_cfa_offset(48)
 #if NARGS >= 1
-	stw  r3,stackblock(r1)
+	stw  r3,STACKBLOCK(r1)
 #endif
 #if NARGS >= 2
-	stw  r4,4+stackblock(r1)
+	stw  r4,4+STACKBLOCK(r1)
 #endif
 #if NARGS >= 3
-	stw  r5,8+stackblock(r1)
+	stw  r5,8+STACKBLOCK(r1)
 #endif
 #if NARGS >= 4
-	stw  r6,12+stackblock(r1)
+	stw  r6,12+STACKBLOCK(r1)
 #endif
 #if NARGS >= 5
-	stw  r7,16+stackblock(r1)
+	stw  r7,16+STACKBLOCK(r1)
 #endif
 #if NARGS >= 6
-	stw  r8,20+stackblock(r1)
+	stw  r8,20+STACKBLOCK(r1)
 #endif
 #if NARGS >= 7
 #error too many arguments!
 #endif
-
-#if defined NEED_CANCELLATION && defined CENABLE
-	SINGLE_THREAD_P
-	bne-	.Lsocket_cancel
-#endif
-
-	li	r3,P(SOCKOP_,socket)
-	addi	r4,r1,stackblock
-	DO_CALL(SYS_ify(socketcall))
-	addi	r1,r1,48
-	PSEUDO_RET
-
-#if defined NEED_CANCELLATION && defined CENABLE
-.Lsocket_cancel:
 	mflr	r9
+	SETUP_PIC;
 	stw	r9,52(r1)
 	cfi_offset (lr, 4)
-	CENABLE
-	stw	r3,16(r1)
-	li	r3,P(SOCKOP_,socket)
-	addi	r4,r1,stackblock
-	DO_CALL(SYS_ify(socketcall))
-	mfcr	r0
-	stw	r3,8(r1)
-	stw	r0,12(r1)
-	lwz	r3,16(r1)
-	CDISABLE
-	lwz	r4,52(r1)
-	lwz	r0,12(r1)
-	lwz	r3,8(r1)
-	mtlr	r4
-	mtcr	r0
-	addi	r1,r1,48
-	PSEUDO_RET
-#endif
 
-PSEUDO_END (__socket)
+	li	r3,SYS_ify(socketcall)
+	li	r4,P(SOCKOP_,socket)
+	addi	r5,r1,STACKBLOCK
+	CANCEL_JUMPTARGET
+	lwz	r9,52(r1)
+	addi	r1,r1,48
+	cfi_adjust_cfa_offset(-48)
+	mtlr	r9
+	cfi_restore(lr)
+	b	__syscall_cancel_error@local;
+END (__socket)
 
 #ifndef NO_WEAK_ALIAS
 weak_alias (__socket, socket)

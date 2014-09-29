@@ -25,89 +25,56 @@
 
 #if !defined NOT_IN_libc || defined IS_IN_libpthread || defined IS_IN_librt
 
+# ifdef NOT_IN_libc
+#  define SETUP_PIC							\
+    bcl     20,31,got_label;						\
+got_label:
+
+#  define CANCEL_JUMPTARGET						\
+    stw   r30,8(r1);							\
+    mflr  r30;								\
+    addis r30,r30,_GLOBAL_OFFSET_TABLE_-got_label@ha;			\
+    addi  r30,r30,_GLOBAL_OFFSET_TABLE_-got_label@l;			\
+    bl    __syscall_cancel@plt;						\
+    lwz   r30,8(r1)
+# else
+#  define SETUP_PIC
+#  if defined SHARED && defined PIC
+#   define CANCEL_JUMPTARGET						\
+    bl    __GI___syscall_cancel@locaL
+#  else
+#   define CANCEL_JUMPTARGET						\
+    bl    __syscall_cancel
+#  endif
+# endif
+
 # undef PSEUDO
 # define PSEUDO(name, syscall_name, args)				\
   .section ".text";							\
   ENTRY (name)								\
-    SINGLE_THREAD_P;							\
-    bne- .Lpseudo_cancel;						\
-  .type __##syscall_name##_nocancel,@function;				\
-  .globl __##syscall_name##_nocancel;					\
-  __##syscall_name##_nocancel:						\
-    DO_CALL (SYS_ify (syscall_name));					\
-    PSEUDO_RET;								\
-  .size __##syscall_name##_nocancel,.-__##syscall_name##_nocancel;	\
-  .Lpseudo_cancel:							\
-    stwu 1,-48(1);							\
-    cfi_adjust_cfa_offset (48);						\
-    mflr 9;								\
-    stw 9,52(1);							\
+    stwu r1,-16(r1);							\
+    cfi_adjust_cfa_offset (16);						\
+    mflr r0;								\
+    SETUP_PIC;								\
+    stw  r0,20(r1);							\
     cfi_offset (lr, 4);							\
-    DOCARGS_##args;	/* save syscall args around CENABLE.  */	\
-    CENABLE;								\
-    stw 3,16(1);	/* store CENABLE return value (MASK).  */	\
-    UNDOCARGS_##args;	/* restore syscall args.  */			\
-    DO_CALL (SYS_ify (syscall_name));					\
-    mfcr 0;		/* save CR/R3 around CDISABLE.  */		\
-    stw 3,8(1);								\
-    stw 0,12(1);							\
-    lwz 3,16(1);	/* pass MASK to CDISABLE.  */			\
-    CDISABLE;								\
-    lwz 4,52(1);							\
-    lwz 0,12(1);	/* restore CR/R3. */				\
-    lwz 3,8(1);								\
-    mtlr 4;								\
-    mtcr 0;								\
-    addi 1,1,48;
+    mr   r9,r8;								\
+    mr   r8,r7;								\
+    mr   r7,r6;								\
+    mr   r6,r5;								\
+    mr   r5,r4;								\
+    mr   r4,r3;								\
+    li   r3,SYS_ify (syscall_name);					\
+    CANCEL_JUMPTARGET;							\
+    lwz  r0,20(r1);							\
+    addi r1,r1,16;							\
+    cfi_adjust_cfa_offset (-16);					\
+    mtlr r0;								\
+    cfi_restore (lr);
 
-# define DOCARGS_0
-# define UNDOCARGS_0
-
-# define DOCARGS_1	stw 3,20(1); DOCARGS_0
-# define UNDOCARGS_1	lwz 3,20(1); UNDOCARGS_0
-
-# define DOCARGS_2	stw 4,24(1); DOCARGS_1
-# define UNDOCARGS_2	lwz 4,24(1); UNDOCARGS_1
-
-# define DOCARGS_3	stw 5,28(1); DOCARGS_2
-# define UNDOCARGS_3	lwz 5,28(1); UNDOCARGS_2
-
-# define DOCARGS_4	stw 6,32(1); DOCARGS_3
-# define UNDOCARGS_4	lwz 6,32(1); UNDOCARGS_3
-
-# define DOCARGS_5	stw 7,36(1); DOCARGS_4
-# define UNDOCARGS_5	lwz 7,36(1); UNDOCARGS_4
-
-# define DOCARGS_6	stw 8,40(1); DOCARGS_5
-# define UNDOCARGS_6	lwz 8,40(1); UNDOCARGS_5
-
-# ifdef IS_IN_libpthread
-#  define CENABLE	bl __pthread_enable_asynccancel@local
-#  define CDISABLE	bl __pthread_disable_asynccancel@local
-# elif !defined NOT_IN_libc
-#  define CENABLE	bl __libc_enable_asynccancel@local
-#  define CDISABLE	bl __libc_disable_asynccancel@local
-# elif defined IS_IN_librt
-#  define CENABLE	bl __librt_enable_asynccancel@local
-#  define CDISABLE	bl __librt_disable_asynccancel@local
-# else
-#  error Unsupported library
-# endif
-
-# ifndef __ASSEMBLER__
-#  define SINGLE_THREAD_P						\
-  __builtin_expect (THREAD_GETMEM (THREAD_SELF,				\
-				   header.multiple_threads) == 0, 1)
-# else
-#  define SINGLE_THREAD_P						\
-  lwz 10,MULTIPLE_THREADS_OFFSET(2);					\
-  cmpwi 10,0
-# endif
-
-#elif !defined __ASSEMBLER__
-
-# define SINGLE_THREAD_P (1)
-# define NO_CANCELLATION 1
+# undef PSEUDO_RET
+# define PSEUDO_RET							\
+    b    __syscall_cancel_error@local;
 
 #endif
 

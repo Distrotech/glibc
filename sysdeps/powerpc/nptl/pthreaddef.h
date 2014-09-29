@@ -38,7 +38,11 @@
 static inline
 const char * __pthread_get_ip (const ucontext_t *uc)
 {
+# ifdef __powerpc64__
   return (char *)uc->uc_mcontext.gp_regs[PT_NIP];
+# else
+  return (char *)uc->uc_mcontext.uc_regs->gregs[PT_NIP];
+# endif
 }
 
 #endif

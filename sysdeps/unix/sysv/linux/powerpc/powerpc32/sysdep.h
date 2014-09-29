@@ -168,6 +168,14 @@
     sc_ret;								\
   })
 
+#undef SYSCALL_CANCEL_ERROR
+#define SYSCALL_CANCEL_ERROR(err)					\
+  (err > 0xfffffffffffff000UL)
+
+#undef SYSCALL_CANCEL_ERRNO
+#define SYSCALL_CANCEL_ERRNO(err)					\
+  (-err)
+
 /* Define a macro which expands inline into the wrapper code for a system
    call. This use is for internal calls that do not need to handle errors
    normally. It will never touch errno.
