@@ -21,3 +21,7 @@ endif
 ifeq ($(subdir),stdlib)
 gen-as-const-headers += ucontext_i.sym
 endif
+
+ifeq ($(subdir),nptl)
+sysdep_routines += syscall_i386
+endif

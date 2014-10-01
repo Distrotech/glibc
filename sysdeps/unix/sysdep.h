@@ -75,6 +75,16 @@ typedef long __syscall_arg_t;
     sc_ret;								\
   })
 
+#ifndef SYSCALL_CANCEL_ERROR
+# define SYSCALL_CANCEL_ERROR(__err)					\
+  (__err > -4096UL)
+#endif
+
+#ifndef SYSCALL_CANCEL_ERRNO
+# define SYSCALL_CANCEL_ERRNO(__err)					\
+  (-__err)
+#endif
+
 long int __syscall_cancel (__syscall_arg_t nr, __syscall_arg_t arg1,
 			   __syscall_arg_t arg2, __syscall_arg_t arg3,
 			   __syscall_arg_t arg4, __syscall_arg_t arg5,

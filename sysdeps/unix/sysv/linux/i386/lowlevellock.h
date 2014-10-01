@@ -145,6 +145,21 @@
     __status;								      \
   })
 
+#define lll_futex_wait_cancel(futexp, val, private) \
+  lll_futex_timed_wait_cancel (futexp, val, NULL, private)
+
+#define lll_futex_timed_wait_cancel(futexp, val, timespec, private)	      \
+  ({									      \
+    int __ret;							      	      \
+    int __op = FUTEX_WAIT;						      \
+                                                                              \
+    __ret = __syscall_cancel (__NR_futex, (int) (futexp),		      \
+			      (int)__lll_private_flag (__op, private),	      \
+			      (int)(val), (int)(timespec), 0, 0);	      \
+    __ret;								      \
+  })
+
+
 
 #define lll_futex_wake(futex, nr, private) \
   ({									      \

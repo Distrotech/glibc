@@ -1,5 +1,4 @@
-/* Selective file content synch'ing.
-   Copyright (C) 2006-2014 Free Software Foundation, Inc.
+/* Copyright (C) 2014 Free Software Foundation, Inc.
    This file is part of the GNU C Library.
 
    The GNU C Library is free software; you can redistribute it and/or
@@ -16,28 +15,27 @@
    License along with the GNU C Library; if not, see
    <http://www.gnu.org/licenses/>.  */
 
-#include <errno.h>
-#include <fcntl.h>
-#include <sysdep-cancel.h>
+#include <sysdep.h>
 
-
-extern int __call_sync_file_range (int fd, off64_t offset, off64_t nbytes,
-				   unsigned int flags)
-     attribute_hidden;
-
-
-int
-sync_file_range (int fd, __off64_t from, __off64_t to, unsigned int flags)
+#undef INTERNAL_SYSCALL_NCS
+#define INTERNAL_SYSCALL_NCS(__name, __err, __nr, __arg1, __arg2, __arg3,    \
+			     __arg4, __arg5, __arg6)			     \
+  __syscall6_i386 (__name, __arg1, __arg2, __arg3, __arg4, __arg5, __arg6)
+ 
+static inline long
+__syscall6_i386 (long __name, long __a1, long __a2, long __a3, long __a4,
+		 long __a5, long __a6)
 {
-  if (SINGLE_THREAD_P)
-    return __call_sync_file_range (fd, from, to, flags);
-
-  int result;
-  int oldtype = LIBC_CANCEL_ASYNC ();
-
-  result = __call_sync_file_range (fd, from, to, flags);
-
-  LIBC_CANCEL_RESET (oldtype);
-
-  return result;
+  unsigned long __ret;
+  long __args[] = { __a5, __a6 };
+  asm volatile ("push %6\n"
+		"call __vsyscall6_i386\n"
+		"add  $4,%%esp"
+		 : "=a" (__ret)
+		 : "a" (__name), "d"(__a1), "c"(__a2), "D"(__a3), "S"(__a4),
+		   "g" (0+__args)
+		 : "memory");
+  return __ret;
 }
+
+#include <nptl/libc-cancellation.c>
