@@ -10,6 +10,11 @@ Version 2.21
 * The following bugs are resolved with this release:
 
   6652, 14171, 17266, 17363, 17370, 17371, 17411.
+
+* The obsolete sigvec function has been removed.  This was the original
+  4.2BSD interface that inspired the POSIX.1 sigaction interface, which
+  programs have been using instead for about 25 years.  Of course, ABI
+  compatibility for old binaries using sigvec remains intact.
 
 Version 2.20
 
