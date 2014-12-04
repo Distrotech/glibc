@@ -22,44 +22,16 @@
 #include <string.h>
 #include <unistd.h>
 #include "semaphoreP.h"
-
+#include <shm-directory.h>
 
 int
-sem_unlink (name)
-     const char *name;
+sem_unlink (const char *name)
 {
-  char *fname;
-  size_t namelen;
-
-  /* Determine where the shmfs is mounted.  */
-  __pthread_once (&__namedsem_once, __where_is_shmfs);
-
-  /* If we don't know the mount points there is nothing we can do.  Ever.  */
-  if (mountpoint.dir == NULL)
-    {
-      __set_errno (ENOSYS);
-      return -1;
-    }
-
   /* Construct the filename.  */
-  while (name[0] == '/')
-    ++name;
-
-  if (name[0] == '\0')
-    {
-      /* The name "/" is not supported.  */
-      __set_errno (ENOENT);
-      return -1;
-    }
-  namelen = strlen (name);
-
-  /* Create the name of the file.  */
-  fname = (char *) alloca (mountpoint.dirlen + namelen + 1);
-  __mempcpy (__mempcpy (fname, mountpoint.dir, mountpoint.dirlen),
-	     name, namelen + 1);
+  SHM_GET_NAME (ENOENT, -1, SEM_SHM_PREFIX);
 
   /* Now try removing it.  */
-  int ret = unlink (fname);
+  int ret = unlink (shm_name);
   if (ret < 0 && errno == EPERM)
     __set_errno (EACCES);
   return ret;
