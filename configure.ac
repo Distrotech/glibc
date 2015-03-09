@@ -345,6 +345,12 @@ void foo (int i, void *p)
   fi
 fi
 
+AC_ARG_ENABLE(gold,
+              [AS_HELP_STRING([--enable-gold],
+	       [use gold to build glibc @<:@default=no@:>@])],
+              [enable_gold=$enableval],
+	      [enable_gold=no])
+
 AC_ARG_ENABLE([build-nscd],
 	      [AS_HELP_STRING([--disable-build-nscd],
 	       [disable building and installing the nscd daemon])],
@@ -933,10 +939,60 @@ AC_CHECK_PROG_VER(AS, $AS, --version,
 		  [GNU assembler.* \([0-9]*\.[0-9.]*\)],
 		  [2.1[0-9][0-9]*|2.2[2-9]*|2.[3-9][0-9]*|[3-9].*|[1-9][0-9]*],
 		  AS=: critic_missing="$critic_missing as")
-AC_CHECK_PROG_VER(LD, $LD, --version,
-		  [GNU ld.* \([0-9][0-9]*\.[0-9.]*\)],
-		  [2.1[0-9][0-9]*|2.2[2-9]*|2.[3-9][0-9]*|[3-9].*|[1-9][0-9]*],
-		  LD=: critic_missing="$critic_missing ld")
+
+# Accept gold 1.11 or higher
+if test -n "`$LD --version | sed -n 's/^GNU \(gold\).*$/\1/p'`"; then
+  case $LD in
+  *ld.gold) LD_BFD="`echo $LD | sed -e 's/.gold$/.bfd/'`";;
+  *ld) LD_BFD=${LD}.bfd;;
+  *) AC_MSG_ERROR([unsupported gold linker: $LD]);;
+  esac
+  ld_is_gold=yes
+  AC_CHECK_PROG_VER(LD, $LD, --version,
+		    [GNU gold.* \([0-9][0-9]*\.[0-9.]*\)],
+		    [1.1[1-9]*|1.[2-9][0-9]*|1.1[0-9][0-9]*|[2-9].*|[1-9][0-9]*],
+		    LD=:)
+else
+  ld_is_gold=no
+  LD_BFD=$LD
+fi
+LDBFDFLAGS=
+# The gold linker has no builtin default linker script and it can't be
+# to create shared libraries.  Unless --enable-gold is used, it should
+# only be used to create executables.  Use -fuse-ld=bfd to create shared
+# libraries if it works.
+if test $ld_is_gold = no || test $enable_gold = no; then
+  if test $ld_is_gold = yes; then
+    AC_CACHE_CHECK(if $CC accepts -fuse-ld=bfd,
+		   libc_cv_cc_use_bfd, [dnl
+		   cat > conftest.c <<EOF
+int main (void) { return 0; }
+EOF
+    if AC_TRY_COMMAND([${CC-cc} $CFLAGS $CPPFLAGS -fuse-ld=bfd -nostdlib -nostartfiles -o conftest conftest.c])
+    then
+      libc_cv_cc_use_bfd=yes
+      LDBFDFLAGS="-fuse-ld=bfd"
+    else
+      libc_cv_cc_use_bfd=no
+    fi
+    rm -f conftest*])
+    if test "x$libc_cv_cc_use_bfd" != xyes; then
+      AC_MSG_ERROR([${CC-cc} does not support -fuse-ld=bfd])
+    fi
+  else
+    libc_cv_cc_use_bfd=no
+  fi
+  AC_CHECK_PROG_VER(LD_BFD, $LD_BFD, --version,
+		    [GNU ld.* \([0-9][0-9]*\.[0-9.]*\)],
+		    [2.1[0-9][0-9]*|2.2[2-9]*|2.[3-9][0-9]*|[3-9].*|[1-9][0-9]*],
+		    LD=:)
+else
+  libc_cv_cc_use_bfd=no
+fi
+if test "$LD" = ":"; then
+  critic_missing="$critic_missing ld"
+fi
+AC_SUBST(libc_cv_cc_use_bfd)
 
 # These programs are version sensitive.
 AC_CHECK_TOOL_PREFIX
@@ -1472,7 +1528,7 @@ if test "$use_default_link" = default; then
 	  .string "bar"
 EOF
   if AC_TRY_COMMAND([dnl
-  ${CC-cc} $ASFLAGS -shared -o conftest.so conftest.s 1>&AS_MESSAGE_LOG_FD]) &&
+  ${CC-cc} $ASFLAGS $LDBFDFLAGS -shared -o conftest.so conftest.s 1>&AS_MESSAGE_LOG_FD]) &&
        ac_try=`$READELF -S conftest.so | sed -n \
 	 ['${x;p;}
 	  s/^ *\[ *[1-9][0-9]*\]  *\([^ ][^ ]*\)  *\([^ ][^ ]*\) .*$/\2 \1/

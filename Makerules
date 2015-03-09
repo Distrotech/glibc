@@ -517,6 +517,11 @@ $(LINK.o) -shared $(static-libgcc) -Wl,-O1 $(sysdep-LDFLAGS) \
 	  -L$(subst :, -L,$(rpath-link)) -Wl,-rpath-link=$(rpath-link)
 endef
 
+ifeq (yes,$(use-bfd))
+# Use BFD linker to create shared libraries.
+shlib-LDFLAGS = -fuse-ld=bfd
+endif
+
 ifeq (yes,$(use-default-link))
 # If the linker is good enough, we can let it use its default linker script.
 shlib-lds =
@@ -528,7 +533,7 @@ $(common-objpfx)shlib.lds: $(common-objpfx)config.make $(..)Makerules
 	$(LINK.o) -shared -Wl,-O1 \
 		  -nostdlib -nostartfiles \
 		  $(sysdep-LDFLAGS) $(rtld-LDFLAGS) $(LDFLAGS.so) \
-		  -Wl,--verbose 2>&1 | \
+		  $(shlib-LDFLAGS) -Wl,--verbose 2>&1 | \
 	  sed > $@T \
 	      -e '/^=========/,/^=========/!d;/^=========/d' \
 	      $(if $(filter yes,$(have-hash-style)), \
@@ -562,7 +567,7 @@ shlib-lds-flags = -T $(shlib-lds)
 endif
 
 define build-shlib
-$(build-shlib-helper) -o $@ $(shlib-lds-flags) \
+$(build-shlib-helper) -o $@ $(shlib-lds-flags) $(shlib-LDFLAGS) \
 	  $(csu-objpfx)abi-note.o $(build-shlib-objlist)
 endef
 
@@ -570,7 +575,7 @@ define build-module-helper
 $(LINK.o) -shared $(static-libgcc) $(sysdep-LDFLAGS) $(rtld-LDFLAGS) \
 	  $(if $($(@F)-no-z-defs)$(no-z-defs),,-Wl,-z,defs) \
 	  -B$(csu-objpfx) $(load-map-file) \
-	  $(LDFLAGS.so) $(LDFLAGS-$(@F:%.so=%).so) \
+	  $(LDFLAGS.so) $(LDFLAGS-$(@F:%.so=%).so) $(shlib-LDFLAGS) \
 	  -L$(subst :, -L,$(rpath-link)) -Wl,-rpath-link=$(rpath-link)
 endef
 
@@ -618,7 +623,7 @@ endif
 # from being allocated in libc.so, which introduces evil dependencies
 # between libc.so and ld.so, which can make it impossible to upgrade.
 $(common-objpfx)libc_pic.os: $(common-objpfx)libc_pic.a
-	$(LINK.o) -nostdlib -nostartfiles -r -o $@ \
+	$(LINK.o) -nostdlib -nostartfiles -r -o $@  $(shlib-LDFLAGS) \
 	$(LDFLAGS-c_pic.os) -Wl,-d $(whole-archive) $^ -o $@
 
 ifeq (,$(strip $(shlib-lds-flags)))
