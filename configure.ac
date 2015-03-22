@@ -345,6 +345,12 @@ void foo (int i, void *p)
   fi
 fi
 
+AC_ARG_ENABLE(gold,
+              [AS_HELP_STRING([--enable-gold],
+	       [use gold to build glibc @<:@default=no@:>@])],
+              [enable_gold=$enableval],
+	      [enable_gold=no])
+
 AC_ARG_ENABLE([build-nscd],
 	      [AS_HELP_STRING([--disable-build-nscd],
 	       [disable building and installing the nscd daemon])],
@@ -933,10 +939,23 @@ AC_CHECK_PROG_VER(AS, $AS, --version,
 		  [GNU assembler.* \([0-9]*\.[0-9.]*\)],
 		  [2.1[0-9][0-9]*|2.2[2-9]*|2.[3-9][0-9]*|[3-9].*|[1-9][0-9]*],
 		  AS=: critic_missing="$critic_missing as")
-AC_CHECK_PROG_VER(LD, $LD, --version,
-		  [GNU ld.* \([0-9][0-9]*\.[0-9.]*\)],
-		  [2.1[0-9][0-9]*|2.2[2-9]*|2.[3-9][0-9]*|[3-9].*|[1-9][0-9]*],
-		  LD=: critic_missing="$critic_missing ld")
+
+# Accept gold 1.11 or higher
+if test -n "`$LD --version | sed -n 's/^GNU \(gold\).*$/\1/p'`"; then
+  case $LD in
+  *ld.gold) LD_BFD="`echo $LD | sed -e 's/.gold$/.bfd/'`";;
+  *ld) LD_BFD=${LD}.bfd;;
+  *) AC_MSG_ERROR([unsupported gold linker: $LD]);;
+  esac
+  ld_is_gold=yes
+  AC_CHECK_PROG_VER(LD, $LD, --version,
+		    [GNU gold.* \([0-9][0-9]*\.[0-9.]*\)],
+		    [1.1[1-9]*|1.[2-9][0-9]*|1.1[0-9][0-9]*|[2-9].*|[1-9][0-9]*],
+		    LD=:)
+else
+  ld_is_gold=no
+  LD_BFD=$LD
+fi
 
 # These programs are version sensitive.
 AC_CHECK_TOOL_PREFIX

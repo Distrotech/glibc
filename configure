@@ -773,6 +773,7 @@ enable_multi_arch
 enable_nss_crypt
 enable_obsolete_rpc
 enable_systemtap
+enable_gold
 enable_build_nscd
 enable_nscd
 enable_pt_chown
@@ -1437,6 +1438,7 @@ Optional Features:
   --enable-obsolete-rpc   build and install the obsolete RPC code for
                           link-time usage
   --enable-systemtap      enable systemtap static probe points [default=no]
+  --enable-gold           use gold to build glibc [default=no]
   --disable-build-nscd    disable building and installing the nscd daemon
   --disable-nscd          library functions will not contact the nscd daemon
   --enable-pt_chown       Enable building and installing pt_chown
@@ -3801,6 +3803,14 @@ See \`config.log' for more details" "$LINENO" 5; }
   fi
 fi
 
+# Check whether --enable-gold was given.
+if test "${enable_gold+set}" = set; then :
+  enableval=$enable_gold; enable_gold=$enableval
+else
+  enable_gold=no
+fi
+
+
 # Check whether --enable-build-nscd was given.
 if test "${enable_build_nscd+set}" = set; then :
   enableval=$enable_build_nscd; build_nscd=$enableval
@@ -4647,7 +4657,16 @@ if test $ac_verc_fail = yes; then
   AS=: critic_missing="$critic_missing as"
 fi
 
-for ac_prog in $LD
+
+# Accept gold 1.11 or higher
+if test -n "`$LD --version | sed -n 's/^GNU \(gold\).*$/\1/p'`"; then
+  case $LD in
+  *ld.gold) LD_BFD="`echo $LD | sed -e 's/.gold$/.bfd/'`";;
+  *ld) LD_BFD=${LD}.bfd;;
+  *) as_fn_error $? "unsupported gold linker: $LD" "$LINENO" 5;;
+  esac
+  ld_is_gold=yes
+  for ac_prog in $LD
 do
   # Extract the first word of "$ac_prog", so it can be a program name with args.
 set dummy $ac_prog; ac_word=$2
@@ -4695,10 +4714,10 @@ else
   # Found it, now check the version.
   { $as_echo "$as_me:${as_lineno-$LINENO}: checking version of $LD" >&5
 $as_echo_n "checking version of $LD... " >&6; }
-  ac_prog_version=`$LD --version 2>&1 | sed -n 's/^.*GNU ld.* \([0-9][0-9]*\.[0-9.]*\).*$/\1/p'`
+  ac_prog_version=`$LD --version 2>&1 | sed -n 's/^.*GNU gold.* \([0-9][0-9]*\.[0-9.]*\).*$/\1/p'`
   case $ac_prog_version in
     '') ac_prog_version="v. ?.??, bad"; ac_verc_fail=yes;;
-    2.1[0-9][0-9]*|2.2[2-9]*|2.[3-9][0-9]*|[3-9].*|[1-9][0-9]*)
+    1.1[1-9]*|1.[2-9][0-9]*|1.1[0-9][0-9]*|[2-9].*|[1-9][0-9]*)
        ac_prog_version="$ac_prog_version, ok"; ac_verc_fail=no;;
     *) ac_prog_version="$ac_prog_version, bad"; ac_verc_fail=yes;;
 
@@ -4707,9 +4726,13 @@ $as_echo_n "checking version of $LD... " >&6; }
 $as_echo "$ac_prog_version" >&6; }
 fi
 if test $ac_verc_fail = yes; then
-  LD=: critic_missing="$critic_missing ld"
+  LD=:
 fi
 
+else
+  ld_is_gold=no
+  LD_BFD=$LD
+fi
 
 # These programs are version sensitive.
 
