@@ -1,5 +1,15 @@
 2015-05-13  Adhemerval Zanella  <adhemerval.zanella@linaro.org>
 
+	* sysdeps/unix/sysv/linux/i386/sysdep.h (HAVE_CLOCK_GETTIME_VSYSCALL):
+	Define.
+	(HAVE_GETTIMEOFDAY_VSYSCALL): Likewise.
+	* sysdeps/unix/sysv/linux/x86_64/sysdep.h
+	(HAVE_CLOCK_GETTIME_VSYSCALL): Likewise.
+	(HAVE_GETTIMEOFDAY_VSYSCALL): Likewise.
+	* sysdeps/unix/sysv/linux/timespec_get.c: Include errno.h.
+	* sysdeps/unix/sysv/linux/x86/clock_gettime.c: Remove file.
+	* sysdeps/unix/sysv/linux/x86/timespec_get.c: Likewise.
+
 	* sysdeps/unix/sysv/linux/aarch64/gettimeofday.c: Remove file.
 	* sysdeps/unix/sysv/linux/s390/gettimeofday.c: Likewise.
 	* sysdeps/unix/sysv/linux/tile/gettimeofday.c: Likewise.
