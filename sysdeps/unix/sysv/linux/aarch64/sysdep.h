@@ -155,6 +155,7 @@
 /* List of system calls which are supported as vsyscalls.  */
 # define HAVE_CLOCK_GETRES_VSYSCALL	1
 # define HAVE_CLOCK_GETTIME_VSYSCALL	1
+# define HAVE_GETTIMEOFDAY_VSYSCALL	1
 
 # define INTERNAL_VSYSCALL_NCS(funcptr, err, nr, args...)	\
   ({								\
