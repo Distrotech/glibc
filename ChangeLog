@@ -1,5 +1,28 @@
 2015-05-13  Adhemerval Zanella  <adhemerval.zanella@linaro.org>
 
+	* sysdeps/unix/sysv/linux/powerpc/powerpc32/sysdep.h
+	(HAVE_GETCPU_VSYSCALL): Define.
+	* sysdeps/unix/sysv/linux/powerpc/powerpc64/sysdep.h
+	(HAVE_GETCPU_VSYSCALL): Likewise.
+	* sysdeps/unix/sysv/linux/powerpc/sched_getcpu.c: Remove file.
+	* sysdeps/unix/sysv/linux/sched_getcpu.c (HAVE_VSYSCALL): Define if
+	HAVE_GETCPU_VSYSCALL and include sysdep-vdso.
+	(sched_getcpu): Use INLINE_VSYSCALL instead of INLINE_SYSCALL.
+	* sysdeps/unix/sysv/linux/x86/libc-vdso.h (getcpu): Add vDSO
+	prototype.
+	* sysdeps/unix/sysv/linux/x86_64/init-first.c
+	(__syscall_clock_gettime): Remove prototype.
+	(__vdso_platform_setup): Remove vsyscall getcpu fallback.
+	* sysdeps/unix/sysv/linux/x86_64/sched_getcpu.S: Remove file.
+	* sysdeps/unix/sysv/linux/x86_64/syscalls.list
+	(__syscall_clock_gettime): Remove defintion.
+	* sysdeps/unix/sysv/linux/x86_64/sysdep.h (HAVE_GETCPU_VSYSCALL):
+	Define.
+	* sysdeps/unix/sysv/linux/x86_64/x32/Makefile: Remove file.
+	* sysdeps/unix/sysv/linux/x86_64/x32/init-first.c: Likewise.
+	* sysdeps/unix//sysv/linux/x86_64/x32/sched_getcpu-static.c: Likewise.
+	* sysdeps/unix/sysv/linux/x86_64/x32/sched_getcpu.S: Likewise.
+
 	* sysdeps/unix/sysv/linux/i386/sysdep.h (HAVE_CLOCK_GETTIME_VSYSCALL):
 	Define.
 	(HAVE_GETTIMEOFDAY_VSYSCALL): Likewise.

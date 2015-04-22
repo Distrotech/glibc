@@ -27,25 +27,16 @@ long int (*VDSO_SYMBOL(clock_gettime)) (clockid_t, struct timespec *)
 long int (*VDSO_SYMBOL(getcpu)) (unsigned *, unsigned *, void *)
   attribute_hidden;
 
-extern long int __syscall_clock_gettime (clockid_t, struct timespec *);
-
-
 static inline void
 __vdso_platform_setup (void)
 {
   PREPARE_VERSION (linux26, "LINUX_2.6", 61765110);
 
   void *p = _dl_vdso_vsym ("__vdso_clock_gettime", &linux26);
-  if (p == NULL)
-    p = __syscall_clock_gettime;
   PTR_MANGLE (p);
   VDSO_SYMBOL(clock_gettime) = p;
 
   p = _dl_vdso_vsym ("__vdso_getcpu", &linux26);
-  /* If the vDSO is not available we fall back on the old vsyscall.  */
-#define VSYSCALL_ADDR_vgetcpu	0xffffffffff600800
-  if (p == NULL)
-    p = (void *) VSYSCALL_ADDR_vgetcpu;
   PTR_MANGLE (p);
   VDSO_SYMBOL(getcpu) = p;
 }
