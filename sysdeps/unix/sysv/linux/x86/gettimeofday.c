@@ -21,6 +21,14 @@
 #ifdef SHARED
 
 # include <dl-vdso.h>
+# include <errno.h>
+
+/* If the vDSO is not available we fall back on the syscall.  */
+static int
+__gettimeofday_syscall (struct timeval *tv, struct timezone *tz)
+{
+  return INLINE_SYSCALL (gettimeofday, 2, tv, tz);
+}
 
 void *gettimeofday_ifunc (void) __asm__ ("__gettimeofday");
 
@@ -31,7 +39,7 @@ gettimeofday_ifunc (void)
 
   /* If the vDSO is not available we fall back on the old vsyscall.  */
   return (_dl_vdso_vsym ("__vdso_gettimeofday", &linux26)
-	  ?: GETTIMEOFAY_FALLBACK);
+	  ?: (void*) (&__gettimeofday_syscall));
 }
 asm (".type __gettimeofday, %gnu_indirect_function");
 

@@ -1,5 +1,18 @@
 2015-05-13  Adhemerval Zanella  <adhemerval.zanella@linaro.org>
 
+	* sysdeps/unix/sysv/linux/i386/gettimeofday.c
+	(__gettimeofday_syscall): Remove.
+	* sysdeps/unix/sysv/linux/i386/time.c (__time_syscall): Remove.
+	* sysdeps/unix/sysv/linux/x86/gettimeofday.c (__gettimeofday_syscall):
+	Add function.
+	(gettimeofday_ifunc): Use __gettimeofday_syscall as fallback mechanism
+	if vDSO is not present.
+	* sysdeps/unix/sysv/linux/x86/time.c (__time_syscall): Add function.
+	(time_ifunc): Use __time_syscall as fallback mechanism if vDSO is not
+	present.
+	* sysdeps/unix/sysv/linux/x86_64/gettimeofday.c: Remove file.
+	* sysdeps/unix/sysv/linux/x86_64/time.c: Likewise.
+
 	* sysdeps/unix/sysv/linux/powerpc/powerpc32/sysdep.h
 	(HAVE_GETCPU_VSYSCALL): Define.
 	* sysdeps/unix/sysv/linux/powerpc/powerpc64/sysdep.h
