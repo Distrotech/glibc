@@ -24,4 +24,10 @@ include ../Makeconfig
 
 routines = tunables
 
+$(objpfx)tunables.os: tunable-list.h
+
+tunable-list.h: $(..)scripts/gen-tunables.awk tunables.list
+	$(AWK) -f $^ > $@.tmp
+	mv $@{.tmp,}
+
 include ../Rules

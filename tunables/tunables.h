@@ -18,6 +18,8 @@
    License along with the GNU C Library; if not, see
    <http://www.gnu.org/licenses/>.  */
 
+#include "tunable-list.h"
+
 typedef enum
 {
   TUNABLE_TYPE_SECURE,
@@ -27,28 +29,25 @@ typedef enum
 
 typedef struct _tunable tunable_t;
 
-/* Add your tunable IDs here.  */
-typedef enum
-{
-  TUNABLES_MAX
-} tunable_id_t;
-
+/* Build a full tunable name from a top namespace, tunable namespace and the
+   id.  */
 #define FULL_NAME(top,ns,id) (top ## _ ## ns ## _ ## id)
 #define FULL_NAME_S(top,ns,id) (#top "_" #ns "_" #id)
 
+/* Start registering tunables in the current namespace.  */
 #define TUNABLES_NAMESPACE_BEGIN(size) \
   tunables_namespace_begin (TUNABLE_NAMESPACE, size)
 
 /* Register a tunable.  This macro validates that the call is OK and then calls
    tunable_init to do the real work of adding the tunable and setting its value
    based on its environment variable(s).  */
-#define TUNABLE_REGISTER(id,alias,val,size,type,secure) \
+#define TUNABLE_REGISTER(id,alias,val,size,type) \
 ({									      \
   static_assert (FULL_NAME (TOP_NAMESPACE, TUNABLE_NAMESPACE, id)	      \
 		 < TUNABLES_MAX);					      \
-  tunable_init (FULL_NAME (TOP_NAMESPACE, TUNABLE_NAMESPACE, id),	      \
-		FULL_NAME_S (TOP_NAMESPACE, TUNABLE_NAMESPACE, id),	      \
-		(alias), (val), (size), (type), (secure));		      \
+  tunable_register (FULL_NAME (TOP_NAMESPACE, TUNABLE_NAMESPACE, id),	      \
+		    FULL_NAME_S (TOP_NAMESPACE, TUNABLE_NAMESPACE, id),	      \
+		    (alias), (val), (size), (type));			      \
 									      \
 })
 

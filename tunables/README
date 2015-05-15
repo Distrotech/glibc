@@ -14,9 +14,16 @@ distributions for specific tunables if they want to add their own tunables.
 Downstream implementations are discouraged from using the GLIBC namespace for
 tunables they don't intend to push upstream.
 
+There are two steps to adding tunables:
+
+1. Add tunable IDs:
+
+TODO: finish this.
+
 Modules that wish to use the tunables interface must define the
-TUNABLE_NAMESPACE macro.  A tunable may then be added by adding the full ID of
-the tunable to the tunable_id_t enum and then calling the TUNABLE_REGISTER
+TUNABLE_NAMESPACE macro.  To begin registering tunables, call the
+TUNABLE_NAMESPACE_BEGIN() macro.  Tunables may be added by adding the full ID
+of the tunable to the tunable_id_t enum and then calling the TUNABLE_REGISTER
 macro when it wants to read the environment variables to initialize the
 variable that is to be tuned.
 
@@ -36,7 +43,9 @@ The TUNABLE_REGISTER macro takes the following arguments:
 - size:		Size of the tunable variable.
 
 - type:		Type of the tunable variable.  It must be one of the values
-		defined in the tunable_type_t enum.
+		defined in the tunable_type_t enum.  If a value is safe to load
+		for setuid binaries, the type should be the OR of the actual
+		type and TUNABLE_TYPE_SECURE.
 
 Future work:
 ------------

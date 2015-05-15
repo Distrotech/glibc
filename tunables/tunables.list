@@ -1,0 +1,8 @@
+GLIBC {
+  MALLOC {
+    MMAP_THRESHOLD
+    TRIM_THRESHOLD
+    ARENA_MAX
+    ARENA_TEST
+  }
+}
