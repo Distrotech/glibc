@@ -20,6 +20,7 @@
 #include <stdbool.h>
 
 #define TUNABLE_NAMESPACE MALLOC
+#include <tunables/tunables.h>
 
 /* Compile-time constants.  */
 
@@ -307,41 +308,6 @@ ptmalloc_unlock_all2 (void)
 # endif
 #endif  /* !NO_THREADS */
 
-/* Initialization routine. */
-#include <string.h>
-extern char **_environ;
-
-static char *
-internal_function
-next_env_entry (char ***position)
-{
-  char **current = *position;
-  char *result = NULL;
-
-  while (*current != NULL)
-    {
-      if (__builtin_expect ((*current)[0] == 'M', 0)
-          && (*current)[1] == 'A'
-          && (*current)[2] == 'L'
-          && (*current)[3] == 'L'
-          && (*current)[4] == 'O'
-          && (*current)[5] == 'C'
-          && (*current)[6] == '_')
-        {
-          result = &(*current)[7];
-
-          /* Save current position for next visit.  */
-          *position = ++current;
-
-          break;
-        }
-
-      ++current;
-    }
-
-  return result;
-}
-
 
 #ifdef SHARED
 static void *
@@ -354,6 +320,60 @@ extern struct dl_open_hook *_dl_open_hook;
 libc_hidden_proto (_dl_open_hook);
 #endif
 
+static void
+tunable_set_mallopt_top_pad (const char *val)
+{
+  __libc_mallopt (M_TOP_PAD, atoi (val));
+}
+
+static void
+tunable_set_mallopt_perturb (const char *val)
+{
+  __libc_mallopt (M_PERTURB, atoi (val));
+}
+
+static void
+tunable_set_mallopt_mmap_max (const char *val)
+{
+  __libc_mallopt (M_MMAP_MAX, atoi (val));
+}
+
+static void
+tunable_set_mallopt_arena_max (const char *val)
+{
+  __libc_mallopt (M_ARENA_MAX, atoi (val));
+}
+
+static void
+tunable_set_mallopt_arena_test (const char *val)
+{
+  __libc_mallopt (M_ARENA_TEST, atoi (val));
+}
+
+static void
+tunable_set_mallopt_trim_threshold (const char *val)
+{
+  __libc_mallopt (M_TRIM_THRESHOLD, atoi (val));
+}
+
+static void
+tunable_set_mallopt_mmap_threshold (const char *val)
+{
+  __libc_mallopt (M_MMAP_THRESHOLD, atoi (val));
+}
+
+static void
+tunable_set_mallopt_check (const char *val)
+{
+  if (val[0])
+    {
+      __libc_mallopt (M_CHECK_ACTION, (int) (val[0] - '0'));
+      if (check_action != 0)
+        __malloc_check_init ();
+    }
+}
+
+/* Initialization routine. */
 static void
 ptmalloc_init (void)
 {
@@ -377,74 +397,22 @@ ptmalloc_init (void)
   tsd_key_create (&arena_key, NULL);
   tsd_setspecific (arena_key, (void *) &main_arena);
   thread_atfork (ptmalloc_lock_all, ptmalloc_unlock_all, ptmalloc_unlock_all2);
-  const char *s = NULL;
-  if (__glibc_likely (_environ != NULL))
-    {
-      char **runp = _environ;
-      char *envline;
 
-      while (__builtin_expect ((envline = next_env_entry (&runp)) != NULL,
-                               0))
-        {
-          size_t len = strcspn (envline, "=");
+  TUNABLES_NAMESPACE_BEGIN (8);
 
-          if (envline[len] != '=')
-            /* This is a "MALLOC_" variable at the end of the string
-               without a '=' character.  Ignore it since otherwise we
-               will access invalid memory below.  */
-            continue;
+  TUNABLE_REGISTER_SECURE (CHECK, "MALLOC_CHECK_", tunable_set_mallopt_check);
+  TUNABLE_REGISTER (TOP_PAD, "MALLOC_TOP_PAD_", tunable_set_mallopt_top_pad);
+  TUNABLE_REGISTER (PERTURB, "MALLOC_PERTURB_", tunable_set_mallopt_perturb);
+  TUNABLE_REGISTER (MMAP_THRESHOLD, "MALLOC_MMAP_THRESHOLD_",
+		    tunable_set_mallopt_mmap_threshold);
+  TUNABLE_REGISTER (TRIM_THRESHOLD, "MALLOC_TRIM_THRESHOLD_",
+		    tunable_set_mallopt_trim_threshold);
+  TUNABLE_REGISTER (MMAP_MAX, "MALLOC_MMAP_MAX_", tunable_set_mallopt_mmap_max);
+  TUNABLE_REGISTER (ARENA_MAX, "MALLOC_ARENA_MAX", tunable_set_mallopt_arena_max);
+  TUNABLE_REGISTER (ARENA_TEST, "MALLOC_ARENA_TEST", tunable_set_mallopt_arena_test);
 
-          switch (len)
-            {
-            case 6:
-              if (memcmp (envline, "CHECK_", 6) == 0)
-                s = &envline[7];
-              break;
-            case 8:
-              if (!__builtin_expect (__libc_enable_secure, 0))
-                {
-                  if (memcmp (envline, "TOP_PAD_", 8) == 0)
-                    __libc_mallopt (M_TOP_PAD, atoi (&envline[9]));
-                  else if (memcmp (envline, "PERTURB_", 8) == 0)
-                    __libc_mallopt (M_PERTURB, atoi (&envline[9]));
-                }
-              break;
-            case 9:
-              if (!__builtin_expect (__libc_enable_secure, 0))
-                {
-                  if (memcmp (envline, "MMAP_MAX_", 9) == 0)
-                    __libc_mallopt (M_MMAP_MAX, atoi (&envline[10]));
-                  else if (memcmp (envline, "ARENA_MAX", 9) == 0)
-                    __libc_mallopt (M_ARENA_MAX, atoi (&envline[10]));
-                }
-              break;
-            case 10:
-              if (!__builtin_expect (__libc_enable_secure, 0))
-                {
-                  if (memcmp (envline, "ARENA_TEST", 10) == 0)
-                    __libc_mallopt (M_ARENA_TEST, atoi (&envline[11]));
-                }
-              break;
-            case 15:
-              if (!__builtin_expect (__libc_enable_secure, 0))
-                {
-                  if (memcmp (envline, "TRIM_THRESHOLD_", 15) == 0)
-                    __libc_mallopt (M_TRIM_THRESHOLD, atoi (&envline[16]));
-                  else if (memcmp (envline, "MMAP_THRESHOLD_", 15) == 0)
-                    __libc_mallopt (M_MMAP_THRESHOLD, atoi (&envline[16]));
-                }
-              break;
-            default:
-              break;
-            }
-        }
-    }
-  if (s && s[0])
-    {
-      __libc_mallopt (M_CHECK_ACTION, (int) (s[0] - '0'));
-      if (check_action != 0)
-        __malloc_check_init ();
-    }
+  TUNABLES_NAMESPACE_INIT ();
+
   void (*hook) (void) = atomic_forced_read (__malloc_initialize_hook);
   if (hook != NULL)
     (*hook)();

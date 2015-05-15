@@ -33,10 +33,15 @@ struct _tunable
 {
   char *name;
   char *alias;
-  void *val;
-  size_t size;
-  tunable_type_t type;
+  union
+    {
+      int ns_size;
+      tunable_setter_t set;
+    } data;
+#define set data.set
+#define ns_size data.ns_size
   bool initialized;
+  bool enable_secure;
 };
 
 /* The full list of tunables.  */
@@ -46,30 +51,14 @@ static tunable_t tunable_list[TUNABLES_MAX];
 void
 tunables_namespace_begin (tunable_id_t id, size_t size)
 {
-  tunable_list[id].size = size;
-}
-
-/* Set the value of a tunable from its environment variable(s).  */
-static void
-tunable_set (tunable_t *t, const char *val)
-{
-  switch (t->type & ~TUNABLE_TYPE_SECURE)
-    {
-    case TUNABLE_TYPE_SIZE_T:
-      *(size_t *) t->val = strtoul (val, NULL, 0);
-    case TUNABLE_TYPE_STRING:
-      memcpy (t->val, val, t->size);
-    default:
-      __builtin_trap ();
-    }
-  t->initialized = true;
+  tunable_list[id].ns_size = size;
 }
 
 /* Initialize all tunables in the namespace group specified by ID.  */
 void
 tunables_init (tunable_id_t id)
 {
-  int end = tunable_list[id].size;
+  int end = tunable_list[id].ns_size;
 
   /* Traverse through the environment to find environment variables we may need
      to set.  */
@@ -86,17 +75,16 @@ tunables_init (tunable_id_t id)
       if (envline[len] == '\0')
 	continue;
 
-      for (int i = id; i < end; i++)
+      for (int i = id + 1; i < end; i++)
 	{
 	  /* Skip over tunables that are either initialized or are not safe to
 	     load for setuid binaries.  */
-	  if ((__libc_enable_secure
-	       && (tunable_list[id].type & TUNABLE_TYPE_SECURE) == 0)
-	      || tunable_list[id].initialized)
+	  if ((__libc_enable_secure && !tunable_list[i].enable_secure)
+	      || tunable_list[i].initialized)
 	    continue;
 
-	  const char *name = tunable_list[id].name;
-	  const char *alias = tunable_list[id].alias;
+	  const char *name = tunable_list[i].name;
+	  const char *alias = tunable_list[i].alias;
 	  char *val = NULL;
 
 	  if (memcmp (envline, name, MIN(len, strlen (name))) == 0)
@@ -106,7 +94,8 @@ tunables_init (tunable_id_t id)
 
 	  if (val != NULL)
 	    {
-	      tunable_set (&tunable_list[id], val);
+	      tunable_list[i].set (val);
+	      tunable_list[i].initialized = true;
 	      break;
 	    }
 	}
@@ -117,11 +106,10 @@ tunables_init (tunable_id_t id)
 /* Initialize a tunable and set its value via the set environment variable.  */
 void
 tunable_register (tunable_id_t id, const char *name, const char *alias,
-		void *val, size_t size, tunable_type_t type)
+		  tunable_setter_t set_func, bool secure)
 {
   tunable_list[id].name = __strdup (name);
   tunable_list[id].alias = alias ? __strdup (alias) : NULL;
-  tunable_list[id].val = val;
-  tunable_list[id].size = size;
-  tunable_list[id].type = type;
+  tunable_list[id].set = set_func;
+  tunable_list[id].enable_secure = secure;
 }

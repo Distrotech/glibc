@@ -20,36 +20,51 @@
 
 #include "tunable-list.h"
 
-typedef enum
-{
-  TUNABLE_TYPE_SECURE,
-  TUNABLE_TYPE_SIZE_T = 1 << 1,
-  TUNABLE_TYPE_STRING = 1 << 2
-} tunable_type_t;
-
+typedef void (*tunable_setter_t) (const char *);
 typedef struct _tunable tunable_t;
+
+extern void tunables_namespace_begin (tunable_id_t, size_t);
+extern void tunable_register (tunable_id_t, const char *, const char *,
+			      tunable_setter_t, bool);
+extern void tunables_init (tunable_id_t);
 
 /* Build a full tunable name from a top namespace, tunable namespace and the
    id.  */
-#define FULL_NAME(top,ns,id) (top ## _ ## ns ## _ ## id)
+#define FULL_NAME(top,ns,id) FULL_NAME1 (top,ns,id)
+#define FULL_NAME1(top,ns,id) (top ## _ ## ns ## _ ## id)
+
 #define FULL_NAME_S(top,ns,id) (#top "_" #ns "_" #id)
+
+#define NS_NAME(top, ns) NS_NAME1(top, ns)
+#define NS_NAME1(top, ns) (top ## _ ## ns)
 
 /* Start registering tunables in the current namespace.  */
 #define TUNABLES_NAMESPACE_BEGIN(size) \
-  tunables_namespace_begin (TUNABLE_NAMESPACE, size)
+  tunables_namespace_begin (NS_NAME(TOP_NAMESPACE, TUNABLE_NAMESPACE), size)
 
 /* Register a tunable.  This macro validates that the call is OK and then calls
    tunable_init to do the real work of adding the tunable and setting its value
    based on its environment variable(s).  */
-#define TUNABLE_REGISTER(id,alias,val,size,type) \
+#define TUNABLE_REGISTER(id,alias,set) \
 ({									      \
-  static_assert (FULL_NAME (TOP_NAMESPACE, TUNABLE_NAMESPACE, id)	      \
-		 < TUNABLES_MAX);					      \
   tunable_register (FULL_NAME (TOP_NAMESPACE, TUNABLE_NAMESPACE, id),	      \
 		    FULL_NAME_S (TOP_NAMESPACE, TUNABLE_NAMESPACE, id),	      \
-		    (alias), (val), (size), (type));			      \
+		    (alias), (set), false);				      \
 									      \
 })
 
+/* Does exactly the same thing as TUNABLE_REGISTER, except that it allows the
+   tunable to look for environment variable values even for setuid binaries.
+   This is a separate macro and not just another parameter in TUNABLE_REGISTER
+   to avoid accidentally setting a secure flag where it is not required.  */
+#define TUNABLE_REGISTER_SECURE(id,alias,set) \
+({									      \
+  tunable_register (FULL_NAME (TOP_NAMESPACE, TUNABLE_NAMESPACE, id),	      \
+		    FULL_NAME_S (TOP_NAMESPACE, TUNABLE_NAMESPACE, id),	      \
+		    (alias), (set), true);				      \
+									      \
+})
+
+/* Initialize tunables in the namespace.  */
 #define TUNABLES_NAMESPACE_INIT() \
-  tunables_init (TUNABLE_NAMESPACE, size)
+  tunables_init (NS_NAME (TOP_NAMESPACE, TUNABLE_NAMESPACE))
