@@ -19,6 +19,8 @@
 
 #include <stdbool.h>
 
+#define TUNABLE_NAMESPACE MALLOC
+
 /* Compile-time constants.  */
 
 #define HEAP_MIN_SIZE (32 * 1024)
