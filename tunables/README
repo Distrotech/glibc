@@ -1,0 +1,48 @@
+			TUNABLE FRAMEWORK
+			=================
+
+The tunable framework allows modules within glibc to register variables that
+may be tweaked through an environment variable or an API call.  It aims to
+enforce a strict namespace rule to bring consistency to naming of these tunable
+environment variables across the project.
+
+Adding a tunable:
+-----------------
+
+The TOP_NAMESPACE is defined by default as GLIBC and it may be overridden in
+distributions for specific tunables if they want to add their own tunables.
+Downstream implementations are discouraged from using the GLIBC namespace for
+tunables they don't intend to push upstream.
+
+Modules that wish to use the tunables interface must define the
+TUNABLE_NAMESPACE macro.  A tunable may then be added by adding the full ID of
+the tunable to the tunable_id_t enum and then calling the TUNABLE_REGISTER
+macro when it wants to read the environment variables to initialize the
+variable that is to be tuned.
+
+The TUNABLE_REGISTER macro takes the following arguments:
+
+- id:		The short name of the tunable.  It will be concatenated with
+		the TOP_NAMESPACE and TUNABLE_NAMESPACE to build the full ID of
+		the tunable.  It must match the tunable ID added to the
+		tunable_id_t enum.
+
+- alias:	The old name of the tunable.  This is for compatibility, to
+		support porting of already existing environment variables into
+		the tunables framework.
+
+- val:		A pointer to the variable that is to be tuned.
+
+- size:		Size of the tunable variable.
+
+- type:		Type of the tunable variable.  It must be one of the values
+		defined in the tunable_type_t enum.
+
+Future work:
+------------
+
+The framework currently only allows a one-time initialization of variables
+through environment variables and in some cases, modification of variables via
+an API call.  A future goal for this project is to allow tweaking of some
+values in a running process, possibly through some kind of shared memory
+mechanism.

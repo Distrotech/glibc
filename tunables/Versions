@@ -1,0 +1,6 @@
+# Exports from tunables should only be in the GLIBC_PRIVATE namespace.
+libc {
+  GLIBC_PRIVATE {
+    tunable_init;
+  }
+}

@@ -874,7 +874,8 @@ CPPFLAGS = $(config-extra-cppflags) $(CPPUNDEFS) $(CPPFLAGS-config) \
 	   $(CPPFLAGS-$(suffix $@)) \
 	   $(foreach lib,$(libof-$(basename $(@F))) \
 			 $(libof-$(<F)) $(libof-$(@F)),$(CPPFLAGS-$(lib))) \
-	   $(CPPFLAGS-$(<F)) $(CPPFLAGS-$(@F)) $(CPPFLAGS-$(basename $(@F)))
+	   $(CPPFLAGS-$(<F)) $(CPPFLAGS-$(@F)) $(CPPFLAGS-$(basename $(@F))) \
+	   -DTOP_NAMESPACE=GLIBC
 override CFLAGS	= -std=gnu99 $(gnu89-inline-CFLAGS) $(config-extra-cflags) \
 		  $(filter-out %frame-pointer,$(+cflags)) $(+gccwarn-c) \
 		  $(sysdep-CFLAGS) $(CFLAGS-$(suffix $@)) $(CFLAGS-$(<F)) \
@@ -1086,7 +1087,7 @@ all-subdirs = csu assert ctype locale intl catgets math setjmp signal	    \
 	      grp pwd posix io termios resource misc socket sysvipc gmon    \
 	      gnulib iconv iconvdata wctype manual shadow gshadow po argp   \
 	      crypt localedata timezone rt conform debug		    \
-	      $(add-on-subdirs) dlfcn elf
+	      $(add-on-subdirs) dlfcn elf tunables
 
 ifndef avoid-generated
 # sysd-sorted itself will contain rules making the sysd-sorted target
