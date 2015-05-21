@@ -1,5 +1,16 @@
 2015-05-20  Roland McGrath  <roland@hack.frob.com>
 
+	* sysdeps/nacl/exit-thread.h (__exit_thread): Replace inline
+	function with extern declaration.
+	* sysdeps/nacl/exit-thread.c: New file.
+	* sysdeps/nacl/Makefile [$(subdir) = csu] (sysdep_routines): Add it.
+	* sysdeps/nacl/Versions (libc: GLIBC_PRIVATE): Add __exit_thread.
+
+	* sysdeps/generic/exit-thread.h (__exit_thread): Take new
+	argument DETACHED.
+	* sysdeps/unix/sysv/linux/exit-thread.h (__exit_thread): Likewise.
+	* csu/libc-start.c (LIBC_START_MAIN): Update caller.
+
 	* sysdeps/nacl/pthread-pids.h: New file.
 	* sysdeps/nacl/createthread.c: Include <pthread-pids.h>.
 	(create_thread): Use __nacl_get_tid to initialize PD->tid.
