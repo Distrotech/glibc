@@ -94,20 +94,16 @@ __libc_ifunc_impl_list (const char *name, struct libc_ifunc_impl *array,
 
   /* Support sysdeps/x86_64/multiarch/strcasecmp_l.S.  */
   IFUNC_IMPL (i, name, strcasecmp,
-	      IFUNC_IMPL_ADD (array, i, strcasecmp, HAS_AVX,
-			      __strcasecmp_avx)
-	      IFUNC_IMPL_ADD (array, i, strcasecmp, HAS_SSE4_2,
-			      __strcasecmp_sse42)
+	      IFUNC_IMPL_ADD (array, i, strcasecmp, 1,
+			      __strcasecmp_sse2_unaligned)
 	      IFUNC_IMPL_ADD (array, i, strcasecmp, HAS_SSSE3,
 			      __strcasecmp_ssse3)
 	      IFUNC_IMPL_ADD (array, i, strcasecmp, 1, __strcasecmp_sse2))
 
   /* Support sysdeps/x86_64/multiarch/strcasecmp_l.S.  */
   IFUNC_IMPL (i, name, strcasecmp_l,
-	      IFUNC_IMPL_ADD (array, i, strcasecmp_l, HAS_AVX,
-			      __strcasecmp_l_avx)
-	      IFUNC_IMPL_ADD (array, i, strcasecmp_l, HAS_SSE4_2,
-			      __strcasecmp_l_sse42)
+	      IFUNC_IMPL_ADD (array, i, strcasecmp_l, 1,
+			      __strcasecmp_sse2_unaligned_l)
 	      IFUNC_IMPL_ADD (array, i, strcasecmp_l, HAS_SSSE3,
 			      __strcasecmp_l_ssse3)
 	      IFUNC_IMPL_ADD (array, i, strcasecmp_l, 1,
