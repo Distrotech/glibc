@@ -7,7 +7,7 @@ endif
 ifeq ($(subdir),string)
 
 sysdep_routines += strncat-c stpncpy-c strncpy-c strcmp-ssse3 \
-		   strcmp-sse2-unaligned strncmp-ssse3 \
+		   strcmp-sse2-unaligned strncmp-sse2-unaligned strncmp-ssse3 \
 		   memcpy-ssse3 \
 		   memcpy-sse2-unaligned mempcpy-ssse3 \
 		   memmove-ssse3 memcpy-ssse3-back mempcpy-ssse3-back \
@@ -30,7 +30,7 @@ CFLAGS-strspn-c.c += -msse4
 endif
 
 ifeq (yes,$(config-cflags-avx2))
-sysdep_routines += memset-avx2 strcpy-avx2 stpcpy-avx2 memcmp-avx2  strcmp-avx2
+sysdep_routines += memset-avx2 strcpy-avx2 stpcpy-avx2 memcmp-avx2  strcmp-avx2 strncmp-avx2
 endif
 endif
 

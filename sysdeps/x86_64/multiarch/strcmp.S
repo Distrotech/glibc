@@ -31,8 +31,8 @@
 	test	%r9, %r9;				\
 	je	LABEL(strcmp_exitz);			\
 	mov	%r9, %r11
-
-# define STRCMP_SSE42	__strncmp_sse42
+# define STRCMP_AVX2	__strncmp_avx2
+# define STRCMP_SSE2_UNALIGNED	__strncmp_sse2_unaligned
 # define STRCMP_SSSE3	__strncmp_ssse3
 # define STRCMP_SSE2	__strncmp_sse2
 # define __GI_STRCMP	__GI_strncmp
@@ -69,8 +69,9 @@
 # define USE_AS_STRCMP
 # define UPDATE_STRNCMP_COUNTER
 # ifndef STRCMP
+#  define STRCMP_AVX2	__strcmp_avx2
+#  define STRCMP_SSE2_UNALIGNED	__strcmp_sse2_unaligned
 #  define STRCMP	strcmp
-#  define STRCMP_SSE42	__strcmp_sse42
 #  define STRCMP_SSSE3	__strcmp_ssse3
 #  define STRCMP_SSE2	__strcmp_sse2
 #  define __GI_STRCMP	__GI_strcmp
@@ -89,23 +90,23 @@ ENTRY(STRCMP)
 	jne	1f
 	call	__init_cpu_features
 1:
-#ifdef USE_AS_STRCMP
-# ifdef HAVE_AVX2_SUPPORT
+# if defined (USE_AS_STRCMP) || defined (USE_AS_STRNCMP)
+#  ifdef HAVE_AVX2_SUPPORT
 
-        leaq    __strcmp_avx2(%rip), %rax
+        leaq    STRCMP_AVX2(%rip), %rax
         testl   $bit_AVX_Fast_Unaligned_Load, __cpu_features+FEATURE_OFFSET+index_AVX_Fast_Unaligned_Load(%rip)
 	jnz	3f
-# endif
-	leaq	__strcmp_sse2_unaligned(%rip), %rax
+#  endif
+	leaq	STRCMP_SSE2_UNALIGNED(%rip), %rax
 	testl   $bit_Fast_Unaligned_Load, __cpu_features+FEATURE_OFFSET+index_Fast_Unaligned_Load(%rip)
 	jnz     3f
-#else
+# else
 	testl	$bit_Slow_SSE4_2, __cpu_features+FEATURE_OFFSET+index_Slow_SSE4_2(%rip)
 	jnz	2f
 	leaq	STRCMP_SSE42(%rip), %rax
 	testl	$bit_SSE4_2, __cpu_features+CPUID_OFFSET+index_SSE4_2(%rip)
 	jnz	3f
-#endif
+# endif
 2:	leaq	STRCMP_SSSE3(%rip), %rax
 	testl	$bit_SSSE3, __cpu_features+CPUID_OFFSET+index_SSSE3(%rip)
 	jnz	3f
@@ -166,15 +167,13 @@ END(__strncasecmp)
 weak_alias (__strncasecmp, strncasecmp)
 # endif
 
-# undef LABEL
-# define LABEL(l) .L##l##_sse42
-# define GLABEL(l) l##_sse42
-# define SECTION sse4.2
-# include "strcmp-sse42.S"
-
-
-# ifdef HAVE_AVX_SUPPORT
-#  if defined USE_AS_STRCASECMP_L || defined USE_AS_STRNCASECMP_L
+# if defined USE_AS_STRCASECMP_L || defined USE_AS_STRNCASECMP_L
+#  undef LABEL
+#  define LABEL(l) .L##l##_sse42
+#  define GLABEL(l) l##_sse42
+#  define SECTION sse4.2
+#  include "strcmp-sse42.S"
+#  ifdef HAVE_AVX_SUPPORT
 #   define LABEL(l) .L##l##_avx
 #   define GLABEL(l) l##_avx
 #   define USE_AVX 1

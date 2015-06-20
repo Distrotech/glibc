@@ -257,8 +257,9 @@ __libc_ifunc_impl_list (const char *name, struct libc_ifunc_impl *array,
 
   /* Support sysdeps/x86_64/multiarch/strncmp.S.  */
   IFUNC_IMPL (i, name, strncmp,
-	      IFUNC_IMPL_ADD (array, i, strncmp, HAS_SSE4_2,
-			      __strncmp_sse42)
+ 	      IFUNC_IMPL_ADD (array, i, strncmp, 1, __strncmp_sse2_unaligned)
+	      IFUNC_IMPL_ADD (array, i, strncmp, HAS_AVX2, __strncmp_avx2)
+
 	      IFUNC_IMPL_ADD (array, i, strncmp, HAS_SSSE3,
 			      __strncmp_ssse3)
 	      IFUNC_IMPL_ADD (array, i, strncmp, 1, __strncmp_sse2))

@@ -19,6 +19,14 @@
 #include "sysdep.h"
 
 ENTRY ( __strcmp_sse2_unaligned)
+#ifdef AS_STRNCMP
+	lea	-1(%rdx), %r10
+	test	%rdx, %rdx
+	je	L(ret_zero)
+L(back_to_start):
+	xor	%rdx, %rdx
+#endif
+
 	pxor	%xmm7, %xmm7
 	movl	%esi, %eax
 	andl	$4095, %eax
@@ -29,20 +37,35 @@ ENTRY ( __strcmp_sse2_unaligned)
 	andl	$4095, %eax
 	cmpl	$4032, %eax
 	jg	L(cross_page)
+#ifdef AS_STRNCMP
+	cmp	$64, %r10
+	jae	L(dont_set_mask)
+	bts	%r10, %rdx
+L(dont_set_mask):
+#endif
+
 	movdqu	(%rdi), %xmm1
 	movdqu	(%rsi), %xmm0
 	pcmpeqb	%xmm1, %xmm0
 	pminub	%xmm1, %xmm0
 	pcmpeqb	%xmm7, %xmm0
 	pmovmskb %xmm0, %eax
+#ifdef AS_STRNCMP
+	or	%dx, %ax
+#else
 	test	%eax, %eax
+#endif
 	je	L(next_48_bytes)
 	bsf	%eax, %edx
 	movzbl	(%rdi, %rdx), %eax
 	movzbl	(%rsi, %rdx), %edx
 	subl	%edx, %eax
 	ret
-
+#ifdef AS_STRNCMP
+	L(ret_zero):
+	xor	%eax, %eax
+	ret
+#endif
 	.p2align 4
 L(next_48_bytes):
 	movdqu	16(%rdi), %xmm6
@@ -54,16 +77,19 @@ L(next_48_bytes):
 	pcmpeqb	%xmm7, %xmm3
 	movdqu	48(%rdi), %xmm4
 	pcmpeqb	%xmm5, %xmm2
-	pmovmskb %xmm3, %edx
 	movdqu	48(%rsi), %xmm0
 	pminub	%xmm5, %xmm2
 	pcmpeqb	%xmm7, %xmm2
 	pcmpeqb	%xmm4, %xmm0
 	pmovmskb %xmm2, %eax
+	salq	$32, %rax
+#ifdef AS_STRNCMP
+	or	%rdx, %rax
+#endif
+	pmovmskb %xmm3, %edx
 	sal	$16, %edx
 	pminub	%xmm4, %xmm0
 	pcmpeqb	%xmm7, %xmm0
-	salq	$32, %rax
 	orq	%rdx, %rax
 	pmovmskb %xmm0, %ecx
 	salq	$48, %rcx
@@ -82,6 +108,10 @@ L(main_loop_header):
 #endif
 	leaq	64(%rdi), %rdx
 	andq	$-64, %rdx
+# ifdef AS_STRNCMP
+	addq	%rdi, %r10
+	subq	%rdx, %r10
+# endif
 	subq	%rdi, %rdx
 	leaq	(%rdi, %rdx), %rax
 	addq	%rsi, %rdx
@@ -90,6 +120,15 @@ L(main_loop_header):
 	andl	$4095, %ecx
 	sub	%ecx, %esi
 	shr	$6, %esi
+#ifdef AS_STRNCMP
+	mov	%r10, %r9
+	addq	%rdx, %r10
+	shr	$6, %r9
+	cmp	%r9, %rsi
+	jb	L(dont_set_page_bound)
+	mov	%r9, %rsi
+L(dont_set_page_bound):
+#endif
 
 	.p2align 4
 L(loop):
@@ -111,7 +150,7 @@ L(back_to_loop):
 	addq	$64, %rdx
 	vpmovmskb %ymm2, %edi
 	test	%edi, %edi
-	je	.Lloop
+	je	L(loop)
 	shl	$32, %rdi
 	vpcmpeqb %ymm7, %ymm0, %ymm0
 	vpmovmskb %ymm0, %ecx
@@ -164,6 +203,14 @@ L(back_to_loop):
 
 	.p2align 4
 L(loop_cross_page):
+#ifdef AS_STRNCMP
+	mov	%r10, %r9
+	sub	%rdx, %r9
+	cmp	$64, %r9
+	jb	L(prepare_back_to_start)
+#endif
+
+
 	mov	%edx, %ecx
 	and	$63, %ecx
 	neg	%rcx
@@ -219,6 +266,14 @@ L(loop_cross_page):
 #endif
 	mov	%edx, %ecx
 	mov	$63, %esi
+#ifdef AS_STRNCMP
+	shr	$6, %r9
+	sub	$1, %r9
+	cmp	%r9, %rsi
+	jb	L(dont_set_bound2)
+	mov	%r9, %rsi
+L(dont_set_bound2):
+#endif
 	shrq	%cl, %rdi
 	test	%rdi, %rdi
 	je	L(back_to_loop)
@@ -230,6 +285,18 @@ L(loop_cross_page):
 	movzbl	(%rdx, %rcx), %edx
 	subl	%edx, %eax
 	ret
+
+#ifdef AS_STRNCMP
+L(prepare_back_to_start):
+# ifdef USE_AVX2
+	vzeroupper
+# endif
+	mov	%r9, %r10
+	mov	%rdx, %rsi
+	mov	%rax, %rdi
+	jmp	L(back_to_start)
+#endif
+
 
 L(cross_page):
 	xorl	%edx, %edx
@@ -244,6 +311,9 @@ L(cross_page_loop_start):
 	movzbl	(%rsi, %rdx), %ecx
 	subl	%ecx, %eax
 	jne	L(different)
+	cmp	%rdx, %r10
+	je	L(different)
+
 	test	%ecx, %ecx
 	jne	L(cross_page_loop)
 L(different):
