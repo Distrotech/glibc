@@ -77,6 +77,9 @@ L(return):
 	ret
 
 L(main_loop_header):
+#ifdef USE_AVX2
+	vpxor	%xmm7, %xmm7, %xmm7
+#endif
 	leaq	64(%rdi), %rdx
 	andq	$-64, %rdx
 	subq	%rdi, %rdx
@@ -93,6 +96,28 @@ L(loop):
 	add	$-1, %rsi
 	ja	L(loop_cross_page)
 L(back_to_loop):
+#ifdef USE_AVX2
+	vmovdqa	(%rax), %ymm4
+	vmovdqa	32(%rax), %ymm5
+	vmovdqu	(%rdx), %ymm0
+	vmovdqu	32(%rdx), %ymm1
+	vpcmpeqb %ymm4, %ymm0, %ymm0
+	vpminub	%ymm4, %ymm0, %ymm0
+	vpcmpeqb %ymm5, %ymm1, %ymm1
+	vpminub	%ymm5, %ymm1, %ymm1
+	vpminub	%ymm0, %ymm1, %ymm2
+	vpcmpeqb %ymm7, %ymm2, %ymm2
+	addq	$64, %rax
+	addq	$64, %rdx
+	vpmovmskb %ymm2, %edi
+	test	%edi, %edi
+	je	.Lloop
+	shl	$32, %rdi
+	vpcmpeqb %ymm7, %ymm0, %ymm0
+	vpmovmskb %ymm0, %ecx
+	or	%rdi, %rcx
+	vzeroupper
+#else
 	movdqu	(%rdx), %xmm0
 	movdqu	16(%rdx), %xmm1
 	movdqa	(%rax), %xmm2
@@ -130,6 +155,7 @@ L(back_to_loop):
 	orq	%rdi, %rcx
 	sal	$16, %esi
 	orq	%rsi, %rcx
+#endif
 	bsfq	%rcx, %rcx
 	movzbl	-64(%rax, %rcx), %eax
 	movzbl	-64(%rdx, %rcx), %edx
@@ -141,7 +167,23 @@ L(loop_cross_page):
 	mov	%edx, %ecx
 	and	$63, %ecx
 	neg	%rcx
-
+#ifdef USE_AVX2
+	vmovdqu	(%rax, %rcx), %ymm4
+	vmovdqu	32(%rax, %rcx), %ymm5
+	vmovdqa	(%rdx, %rcx), %ymm0
+	vmovdqa	32(%rdx, %rcx), %ymm1
+	vpcmpeqb %ymm4, %ymm0, %ymm0
+	vpminub	%ymm4, %ymm0, %ymm0
+	vpcmpeqb %ymm5, %ymm1, %ymm1
+	vpminub	%ymm5, %ymm1, %ymm1
+	vpminub	%ymm0, %ymm1, %ymm2
+	vpcmpeqb %ymm7, %ymm2, %ymm2
+	vpmovmskb %ymm2, %esi
+	shl 	$32, %rsi
+	vpcmpeqb %ymm7, %ymm0, %ymm0
+	vpmovmskb %ymm0, %edi
+	or    	%rsi, %rdi
+#else
 	movdqa	(%rdx, %rcx), %xmm0
 	movdqa	16(%rdx, %rcx), %xmm1
 	movdqu	(%rax, %rcx), %xmm2
@@ -174,11 +216,15 @@ L(loop_cross_page):
 	orq	%rcx, %rdi
 	salq	$48, %rsi
 	orq	%rsi, %rdi
+#endif
 	mov	%edx, %ecx
 	mov	$63, %esi
 	shrq	%cl, %rdi
 	test	%rdi, %rdi
 	je	L(back_to_loop)
+#ifdef USE_AVX2
+	vzeroupper
+#endif
 	bsfq	%rdi, %rcx
 	movzbl	(%rax, %rcx), %eax
 	movzbl	(%rdx, %rcx), %edx

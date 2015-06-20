@@ -90,6 +90,12 @@ ENTRY(STRCMP)
 	call	__init_cpu_features
 1:
 #ifdef USE_AS_STRCMP
+# ifdef HAVE_AVX2_SUPPORT
+
+        leaq    __strcmp_avx2(%rip), %rax
+        testl   $bit_AVX_Fast_Unaligned_Load, __cpu_features+FEATURE_OFFSET+index_AVX_Fast_Unaligned_Load(%rip)
+	jnz	3f
+# endif
 	leaq	__strcmp_sse2_unaligned(%rip), %rax
 	testl   $bit_Fast_Unaligned_Load, __cpu_features+FEATURE_OFFSET+index_Fast_Unaligned_Load(%rip)
 	jnz     3f
