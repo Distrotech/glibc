@@ -76,19 +76,17 @@ L(return):
 	subl	%edx, %eax
 	ret
 
-
 L(main_loop_header):
 	leaq	64(%rdi), %rdx
-	movl	$4096, %ecx
 	andq	$-64, %rdx
 	subq	%rdi, %rdx
 	leaq	(%rdi, %rdx), %rax
 	addq	%rsi, %rdx
-	movq	%rdx, %rsi
-	andl	$4095, %esi
-	subq	%rsi, %rcx
-	shrq	$6, %rcx
-	movq	%rcx, %rsi
+	movl	$4096, %esi
+	mov	%edx, %ecx
+	andl	$4095, %ecx
+	sub	%ecx, %esi
+	shr	$6, %esi
 
 	.p2align 4
 L(loop):
@@ -140,10 +138,9 @@ L(back_to_loop):
 
 	.p2align 4
 L(loop_cross_page):
-	xor	%ecx, %ecx
-	movq	%rdx, %r9
-	and	$63, %r9
-	subq	%r9, %rcx
+	mov	%edx, %ecx
+	and	$63, %ecx
+	neg	%rcx
 
 	movdqa	(%rdx, %rcx), %xmm0
 	movdqa	16(%rdx, %rcx), %xmm1
@@ -177,8 +174,8 @@ L(loop_cross_page):
 	orq	%rcx, %rdi
 	salq	$48, %rsi
 	orq	%rsi, %rdi
-	movq	%r9, %rcx
-	movq	$63, %rsi
+	mov	%edx, %ecx
+	mov	$63, %esi
 	shrq	%cl, %rdi
 	test	%rdi, %rdi
 	je	L(back_to_loop)
