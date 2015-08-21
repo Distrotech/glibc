@@ -26,11 +26,16 @@ int
 signalfd (int fd, const sigset_t *mask, int flags)
 {
 #ifdef __NR_signalfd4
-  int res = INLINE_SYSCALL (signalfd4, 4, fd, mask, _NSIG / 8, flags);
 # ifndef __ASSUME_SIGNALFD4
-  if (res != -1 || errno != ENOSYS)
-# endif
+  INTERNAL_SYSCALL_DECL (err);
+  int res = INTERNAL_SYSCALL (signalfd4, err, 4, fd, mask, _NSIG / 8,
+			      flags);
+  if (!__glibc_unlikely (INTERNAL_SYSCALL_ERROR_P (res, err))
+      || INTERNAL_SYSCALL_ERRNO (res, err) != ENOSYS)
     return res;
+# else
+  return INLINE_SYSCALL (signalfd4, 4, fd, mask, _NSIG / 8, flags);
+# endif
 #endif
 
 #ifndef __ASSUME_SIGNALFD4
