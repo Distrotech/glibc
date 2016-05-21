@@ -679,7 +679,7 @@ nis_server_cache_add (const_nis_name name, int search_parent,
 
   /* Choose which entry should be evicted from the cache.  */
   loc = &nis_server_cache[0];
-  if (*loc != NULL)
+  if (*loc != NULL) {
     for (i = 1; i < 16; ++i)
       if (nis_server_cache[i] == NULL)
 	{
@@ -690,6 +690,7 @@ nis_server_cache_add (const_nis_name name, int search_parent,
 	       || ((*loc)->uses == nis_server_cache[i]->uses
 		   && (*loc)->expires > nis_server_cache[i]->expires))
 	loc = &nis_server_cache[i];
+  }
   old = *loc;
   *loc = new;
 
