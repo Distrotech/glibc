@@ -276,7 +276,7 @@ unsetenv (const char *name)
   LOCK;
 
   ep = __environ;
-  if (ep != NULL)
+  if (ep != NULL) {
     while (*ep != NULL)
       if (!strncmp (*ep, name, len) && (*ep)[len] == '=')
 	{
@@ -290,7 +290,7 @@ unsetenv (const char *name)
 	}
       else
 	++ep;
-
+  }
   UNLOCK;
 
   return 0;
